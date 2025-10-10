@@ -22,7 +22,7 @@ class ProcessFactory:
     # Registre des types de procédés disponibles
     PROCESS_TYPES = {
         'ASM1Process': ASM1Process,
-        # Ajoutez ici d'autres procédés :
+        # Ajoutez ici d'autres procédés : TODO
         # 'NOMProcess' : NOMProcess
     }
 
