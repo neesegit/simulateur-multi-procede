@@ -300,7 +300,7 @@ class ASM1Process(ProcessNode):
         Returns:
             float: Concentration (mg COD/L)
         """
-        return self.concentrations[4] + self.concentration[5] # XBH + XBA
+        return self.concentrations[4] + self.concentrations[5] # XBH + XBA
     
     def get_sludge_age(self) -> float:
         """

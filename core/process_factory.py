@@ -178,7 +178,7 @@ class ProcessFactory:
         if not issubclass(process_class, ProcessNode):
             raise TypeError(f"{process_class} doit hériter de ProcessNode")
         
-        ProcessFactory.PROCESS_TYPES[name] = process_class
+        ProcessFactory.PROCESS_TYPES[name] = process_class # pyright: ignore[reportArgumentType]
         logger.info(f"Type de procédé enregistré : {name}")
     
     @staticmethod

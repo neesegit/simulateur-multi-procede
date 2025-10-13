@@ -7,7 +7,7 @@ Le modèle comprend :
 - 8 processus biologiques
 """
 import numpy as np
-from typing import Dict, Tuple
+from typing import Dict, Optional
 import logging
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ class ASM1Model:
         'i_xp': 0.06, # Teneur en N des produits inertes (mg N/mg COD)
     }
 
-    def __init__(self, params: Dict[str, float] = None):
+    def __init__(self, params: Optional[Dict[str, float]] = None):
         """
         Initialise le modèle ASM1
 
@@ -262,7 +262,7 @@ class ASM1Model:
 
         return derivatives
     
-    def step(self, concentrations: np.ndarray, dt: float, so_setpoint: float = None) -> np.ndarray:
+    def step(self, concentrations: np.ndarray, dt: float, so_setpoint: Optional[float] = None) -> np.ndarray:
         """
         Effectue un pas de temps de simulation avec méthode d'Euler
 

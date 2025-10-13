@@ -231,6 +231,13 @@ Exemples d'utilisation :
         help='Niveau de logging (défaut : INFO)'
     )
 
+    parser.add_argument(
+        '--interactive',
+        '-i',
+        action='store_true',
+        help='Mode interactif : configure la simulation via CLI'
+    )
+
     return parser.parse_args()
 
 def main():
@@ -246,6 +253,38 @@ def main():
         # Prépare l'environnement
         setup_directories()
 
+        # Mode création de config
+        if args.interactive:
+            from interfaces.cli_interface import CLIInterface
+
+            print("Mode interactif activé\n")
+            cli = CLIInterface()
+            config_dict = cli.run()
+
+            # Si l'utilisateur ne veut pas lancer maintenant
+            if not config_dict.get('_launch'):
+                print("\nConfiguration terminée")
+                return 0
+            
+            # Sinon, on utilise la config créée
+            logger.info("Utilisation de la configuration interactive")
+
+            # Crée l'orchestrator directemetn avec le dict
+            orchestrator = SimulationOrchestrator(config_dict)
+            processes = ProcessFactory.create_from_config(config_dict)
+            for process in processes:
+                orchestrator.add_process(process)
+
+            orchestrator.initialize()
+            results = orchestrator.run()
+
+            # Exporte
+            exported = export_results(results, with_plots=not args.no_plots)
+            print_summary(results)
+
+            print(f"\nRésultats disponibles dans : {exported['base_directory']}")
+            return 0
+        
         # Mode création de config
         if args.create_config:
             return create_config(args.create_config)

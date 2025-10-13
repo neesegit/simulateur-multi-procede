@@ -9,7 +9,7 @@ Rôle :
 import json
 import pandas as pd
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import datetime
 import logging
 
@@ -137,7 +137,7 @@ class ResultsExporter:
     @staticmethod
     def export_all(results: Dict[str, Any],
                    base_dir: str,
-                   name: str = None) -> Dict[str, Any]:
+                   name: Optional[str] = None) -> Dict[str, Any]:
         """
         Exporte tous les formats à la fois dans un répertoire dédie
 

@@ -323,10 +323,10 @@ class Visualizer:
                 values = [f.get('components', {}).get(metric, 0) for f in flows]
                 ylabel = f'{metric} (mg/L)'
             
-            plt.plot(timestamps, values, linewidth=2, label=label)
+            plt.plot(timestamps, values, linewidth=2, label=label) # pyright: ignore[reportArgumentType]
 
         plt.xlabel('Temps')
-        plt.ylabel(ylabel)
+        plt.ylabel(ylabel) # pyright: ignore[reportPossiblyUnboundVariable]
         plt.title(f'Comparaison - {metric.upper()} - {node_id}')
         plt.legend()
         plt.grid(True, alpha=0.3)
