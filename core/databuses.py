@@ -1,7 +1,7 @@
 """
 DataBus et SimulationFlow pour la gestion des flux de données entre les différents procédés
 """
-from typing import Dict, Any, List, Optional, Set
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 import logging
@@ -33,11 +33,11 @@ class FlowData:
         """
         Récupère une valeur de composant
 
-        Args :
+        Args:
             key : Nom du composant
-            defautl : Valeur par défaut si non trouvé
+            default : Valeur par défaut si non trouvé
 
-        Returns :
+        Returns:
             Valeur du composant
         """
 
@@ -50,7 +50,7 @@ class FlowData:
         """
         Définit une valeur de composant
 
-        Args :
+        Args:
             key : Nom du composant
             value : Valeur à définir
         """

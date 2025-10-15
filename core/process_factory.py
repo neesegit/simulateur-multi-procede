@@ -24,6 +24,7 @@ class ProcessFactory:
         'ASM1Process': ASM1Process,
         # Ajoutez ici d'autres procédés : TODO
         # 'NOMProcess' : NOMProcess
+        
     }
 
     @staticmethod
