@@ -194,7 +194,7 @@ class DataBus:
 
     def write(self, key: str, value: Any) -> None:
         """
-        Ecrit une donée dans le bus
+        Ecrit une donnée dans le bus
 
         Args:
             key (str): Clé d'identification
@@ -205,7 +205,7 @@ class DataBus:
     
     def read(self, key:str, default: Any = None) -> Any:
         """
-        Lit une donée du bus
+        Lit une donnée du bus
 
         Args:
             key (str): Clé d'identification

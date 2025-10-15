@@ -81,13 +81,12 @@ def create_config(output_path: str):
     print(f"\nPour l'utiliser : python main.py {output_path}")
     return 0
 
-def run_simulation(config_path: str, with_plots: bool = True) -> dict:
+def run_simulation(config_path: str) -> dict:
     """
     Exécute une simulation complète
 
     Args:
         config_path (str): Chemin vers le fichier de configuration
-        with_plots (bool, optional): Si True, génère les graphiques
 
     Returns:
         dict: Résultats de la simulation
@@ -306,7 +305,7 @@ def main():
                 return 1
             
         # Lance la simulation
-        results = run_simulation(str(config_path), with_plots=not args.no_plots)
+        results = run_simulation(str(config_path))
 
         # Exporte les résultats
         exported = export_results(results, with_plots=not args.no_plots)

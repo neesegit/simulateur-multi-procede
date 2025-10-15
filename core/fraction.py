@@ -3,7 +3,6 @@ Méthodes de fractionnement pour convertir les paramètres mesurables (DCO, MES,
 Basé sur les méthodologies standards :
 - Henze et al. (2000) - Activated Sludge Models
 - Roeleveld & Van Loosdrecht (2002)
-- Protocols de caractérisation des eaux usées
 """
 from typing import Dict, Optional
 import logging
