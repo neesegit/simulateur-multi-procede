@@ -123,7 +123,6 @@ class ASM1Process(ProcessNode):
             Dict[str, Any]: Données de sortie (concentrations traitées + métriques)
         """
         # Extrait les données d'entrée
-        influent_flow = inputs['flow']
         q_in = inputs['flowrate'] # m^3/h
         temp = inputs['temperature']
         components_in = inputs['components']

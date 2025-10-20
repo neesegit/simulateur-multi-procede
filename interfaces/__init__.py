@@ -10,9 +10,11 @@ Ce module regroupe toutes les fonctionnalités d'interface :
 from .config_loader import ConfigLoader
 from .result_exporter import ResultsExporter
 from .visualizer import Visualizer
+from .cli_interface import CLIInterface
 
 __all__ = [
     'ConfigLoader',
     'ResultsExporter',
-    'Visualizer'
+    'Visualizer',
+    'CLIInterface'
 ]

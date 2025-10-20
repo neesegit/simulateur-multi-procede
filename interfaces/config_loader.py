@@ -15,10 +15,8 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-class ConfigLoader:
-    """
-    Charge et valide les configurations de simulation
-    """
+class ConfigValidator:
+    """Valide la structure et les valeurs d'une configuration"""
 
     # Schéma de validation (valeurs requises)
     REQUIRED_FIELDS = {
@@ -28,49 +26,7 @@ class ConfigLoader:
     }
 
     @staticmethod
-    def load(config_path: str) -> Dict[str, Any]:
-        """
-        Charge une configuration depuis un fichier
-
-        Supporte JSON et YAML
-
-        Args:
-            config_path (str): Chemin vers le fichier de configuration
-
-        Returns:
-            Dict[str, Any]: Dictionnaire de configuration validé
-
-        Raises:
-            FileNotFoundError: Si le fichier n'existe pas
-            ValueError: Si la configuration est invalide
-        """
-        path = Path(config_path)
-
-        if not path.exists():
-            raise FileNotFoundError(f"Fichier de configuration introuvable: {config_path}")
-        
-        # Charge selon l'extention
-        if path.suffix == '.json':
-            with open(path, 'r') as f:
-                config = json.load(f)
-        elif path.suffix in ['.yaml', '.yml']:
-            with open(path, 'r') as f:
-                config = yaml.safe_load(f)
-        else:
-            raise ValueError(f"Format de fichier non supporté: {path.suffix}")
-        
-        logger.info(f"Configuration chargée depuis {config_path}")
-
-        # Valide la configuration
-        ConfigLoader._validate(config)
-
-        # Applique les valeurs par défaut
-        config = ConfigLoader._apply_defaults(config)
-
-        return config
-    
-    @staticmethod
-    def _validate(config: Dict[str, Any]) -> None:
+    def validate(config: Dict[str, Any]) -> None:
         """
         Valide la structure de la configuration
 
@@ -81,7 +37,7 @@ class ConfigLoader:
             ValueError: Si la configuration est invalide
         """
         # Vérifie les sections principales
-        for section, required in ConfigLoader.REQUIRED_FIELDS.items():
+        for section, required in ConfigValidator.REQUIRED_FIELDS.items():
             if section not in config:
                 raise ValueError(f"Section manquante dans la configuration: '{section}'")
             
@@ -90,7 +46,7 @@ class ConfigLoader:
                 if field not in config[section]:
                     raise ValueError(f"Champ manquant dans '{section}': '{field}'")
                 
-        
+
         # Valide les dates
         try:
             start = datetime.fromisoformat(config['simulation']['start_time'])
@@ -102,10 +58,11 @@ class ConfigLoader:
         
         # Valide le timestep
         dt = config['simulation']['timestep_hours']
-        if dt <= 0 or dt > 24:
+        if not(0 < dt <= 24):
             raise ValueError(f"timestep_hours invalide: {dt} (doit être entre 0 et 24)")
         
         # Valide la liste des procédés
+        
         if not isinstance(config['processes'], list):
             raise ValueError("'processes' doit être une liste")
         
@@ -114,14 +71,63 @@ class ConfigLoader:
         
         # Valide chaque procédé
         for i, proc in enumerate(config['processes']):
-            if 'node_id' not in proc:
-                raise ValueError(f"Procédé {i}: 'node_id' manquant")
-            if 'type' not in proc:
-                raise ValueError(f"Procédé {i}: 'type' manquant")
-            if 'name' not in proc:
-                raise ValueError(f"Procédé {i}: 'name' manquant")
+            for key in ["node_id", "type", "name"]:
+                if key not in proc:
+                    raise ValueError(f"Procédé {i}: '{key}' manquant")
             
         logger.info("Configuration validée avec succès")
+
+
+class ConfigLoader:
+    """
+    Charge et valide les configurations de simulation
+    """
+
+
+    @staticmethod
+    def load(path: Path) -> Dict[str, Any]:
+        """
+        Charge une configuration depuis un fichier
+
+        Supporte JSON et YAML
+
+        Args:
+            str(path) (Path): Chemin vers le fichier de configuration
+
+        Returns:
+            Dict[str, Any]: Dictionnaire de configuration validé
+
+        Raises:
+            FileNotFoundError: Si le fichier n'existe pas
+            ValueError: Si la configuration est invalide
+        """
+        
+
+        if not path.exists():
+            raise FileNotFoundError(f"Fichier de configuration introuvable: {str(path)}")
+        
+        # Charge selon l'extention
+        if path.suffix == '.json':
+            with open(path, 'r') as f:
+                config = json.load(f)
+        elif path.suffix in ['.yaml', '.yml']:
+            with open(path, 'r') as f:
+                config = yaml.safe_load(f)
+        else:
+            raise ValueError(f"Format de fichier non supporté: {path.suffix}")
+        
+        logger.info(f"Configuration chargée depuis {str(path)}")
+
+        # Valide la configuration
+        ConfigValidator.validate(config)
+
+        # Applique les valeurs par défaut
+        config = ConfigLoader._apply_defaults(config)
+
+        return config 
+                
+        
+        
         
     @staticmethod
     def _apply_defaults(config: Dict[str, Any]) -> Dict[str, Any]:
@@ -165,16 +171,16 @@ class ConfigLoader:
         Returns:
             Dict[str, Dict[str, Any]]: Dictionnaire {nom_fichier: config}
         """
-        config_path = Path(config_dir)
+        file_path = Path(config_dir)
 
-        if not config_path.exists():
+        if not file_path.exists():
             raise FileNotFoundError(f"Répertoire introuvable : {config_dir}")
         
         configs = {}
 
-        for file_path in config_path.glob(pattern):
+        for file_path in file_path.glob(pattern):
             try:
-                config = ConfigLoader.load(str(file_path))
+                config = ConfigLoader.load(file_path)
                 configs[file_path.stem] = config
                 logger.info(f"Configuration chargée : {file_path.name}")
             except Exception as e:
@@ -211,7 +217,7 @@ class ConfigLoader:
         logger.info(f"Configuration sauvegardée : {output_path}")
 
     @staticmethod
-    def create_default_config(output_path: Optional[str] = None) -> Dict[str, Any]:
+    def create_default_config(output_path: Optional[str] = None) -> None:
         """
         Crée une configuration par défaut
 
@@ -246,7 +252,7 @@ class ConfigLoader:
             },
             "processes": [
                 {
-                    "note_id": "aeration_tank",
+                    "node_id": "aeration_tank",
                     "type": "ASM1Process",
                     "name": "Bassin d'aération",
                     "config": {
@@ -262,5 +268,3 @@ class ConfigLoader:
 
         if output_path:
             ConfigLoader.save(default_config, output_path)
-
-        return default_config
