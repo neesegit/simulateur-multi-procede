@@ -10,7 +10,7 @@ from .decorators import safe_run, timed, step
 from .directory_utils import setup_directories
 from .logging_utils import setup_logging
 from .cli_runner import parse_arguments, cli_config
-from .sim_runner import create_default_config, load_config, run_simulation, export_results, print_summary, run_sim_results
+from .sim_runner import load_config, run_simulation, export_results, print_summary, run_sim_results
 from .input_helpers import ask_number, ask_yes_no
 
 __all__ = [
@@ -21,7 +21,6 @@ __all__ = [
     'setup_logging',
     'parse_arguments',
     'cli_config',
-    'create_default_config',
     'load_config',
     'run_simulation',
     'export_results',

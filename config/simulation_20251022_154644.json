@@ -1,0 +1,82 @@
+{
+  "name": "simulation_20251022_154644",
+  "description": "test",
+  "simulation": {
+    "start_time": "2025-10-22T00:00:00",
+    "end_time": "2025-10-25T00:00:00",
+    "timestep_hours": 0.1
+  },
+  "influent": {
+    "flowrate": 1000.0,
+    "temperature": 20.0,
+    "model_type": "ASM1",
+    "auto_fractionate": true,
+    "composition": {
+      "cod": 500.0,
+      "ss": 250.0,
+      "tkn": 40.0,
+      "nh4": 28.0,
+      "no3": 0.5,
+      "po4": 8.0,
+      "alkalinity": 6.0
+    }
+  },
+  "processes": [
+    {
+      "node_id": "asm1_1",
+      "type": "ASM1Process",
+      "name": "Boues activées (ASM1) #1",
+      "config": {
+        "volume": 5000.0,
+        "dissolved_oxygen_setpoint": 2.0,
+        "depth": 4.0,
+        "recycle_ratio": 1.0,
+        "waste_ratio": 0.01
+      }
+    },
+    {
+      "node_id": "asm1_2",
+      "type": "ASM1Process",
+      "name": "Boues activées (ASM1) #2",
+      "config": {
+        "volume": 5000.0,
+        "dissolved_oxygen_setpoint": 2.0,
+        "depth": 4.0,
+        "recycle_ratio": 1.0,
+        "waste_ratio": 0.01
+      }
+    },
+    {
+      "node_id": "asm1_3",
+      "type": "ASM1Process",
+      "name": "Boues activées (ASM1) #3",
+      "config": {
+        "volume": 5000.0,
+        "dissolved_oxygen_setpoint": 2.0,
+        "depth": 4.0,
+        "recycle_ratio": 1.0,
+        "waste_ratio": 0.01
+      }
+    }
+  ],
+  "connections": [
+    {
+      "source": "influent",
+      "target": "asm1_1",
+      "fraction": 1.0,
+      "is_recycle": false
+    },
+    {
+      "source": "asm1_1",
+      "target": "asm1_2",
+      "fraction": 0.5,
+      "is_recycle": false
+    },
+    {
+      "source": "asm1_1",
+      "target": "asm1_3",
+      "fraction": 0.5,
+      "is_recycle": false
+    }
+  ]
+}

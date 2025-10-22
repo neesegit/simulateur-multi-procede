@@ -1,7 +1,8 @@
 from typing import Dict, List, Any
-from utils import step, ask_number, ask_yes_no
+from utils.decorators import step
+from utils.input_helpers import ask_number, ask_yes_no
 
-@step("ETAPE 4/7 : Sélection des procédés")
+@step("ETAPE 4/8 : Sélection des procédés")
 def select_processes(AVAILABLE_PROCESSES: Dict[str, Dict[str, str]]) -> List[str]:
     """Permet de sélectionner les procédés à simuler"""
 
@@ -46,7 +47,7 @@ def select_processes(AVAILABLE_PROCESSES: Dict[str, Dict[str, str]]) -> List[str
     return selected
     
 
-@step("ETAPE 5/7 : Configuration des procédés")
+@step("ETAPE 5/8 : Configuration des procédés")
 def configure_processes(selected_keys: List[str],
                         AVAILABLE_PROCESSES: Dict[str, Dict[str, str]],
                         DEFAULT_PARAMS: Dict[str, Dict[str, float]]) -> List[Dict[str, Any]]:

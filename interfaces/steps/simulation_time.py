@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 from typing import Dict
-from utils import step, ask_number
+from utils.decorators import step
+from utils.input_helpers import ask_number
 
-@step("ETAPE 2/7 : Paramètres temporels")
+@step("ETAPE 2/8 : Paramètres temporels")
 def configure_simulation_time(config: Dict) -> None:
     """Configure les paramètres temporels"""
 

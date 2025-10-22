@@ -26,7 +26,6 @@ from utils import (
     safe_run, 
     parse_arguments,
     cli_config,
-    create_default_config,
     load_config,
     run_sim_results
     )
@@ -52,11 +51,6 @@ def main() -> int:
         logger.info("Utilisation de la configuration interactive")
 
         run_sim_results(config_dict, args.no_plots)
-        return 0
-
-    # Mode création de config
-    if args.create_config:
-        create_default_config(args.create_config)
         return 0
     
     # Vérifie que la config existe

@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Dict
-from utils import step
+from utils.decorators import step
 
-@step("ETAPE 1/7 : Informations générales")
+@step("ETAPE 1/8 : Informations générales")
 def configure_general(config: Dict) -> None:
     """Configure les informations générales"""
 

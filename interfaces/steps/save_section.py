@@ -1,9 +1,9 @@
 from typing import Dict, Any
 from pathlib import Path
 from interfaces import ConfigLoader
-from utils import step
+from utils.decorators import step
 
-@step("ETAPE 7/7 — Sauvegarde de la configuration.")
+@step("ETAPE 8/8 — Sauvegarde de la configuration.")
 def save_config(config: Dict[str, Any]) -> None:
 
     default_path = f"config/{config.get('name', 'simulation')}.json"

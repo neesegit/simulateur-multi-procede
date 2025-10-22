@@ -1,7 +1,8 @@
 import argparse
-from typing import Dict, Any
+import sys
 
-from interfaces import CLIInterface
+from typing import Dict, Any
+from interfaces.cli_interface import CLIInterface
 
 def parse_arguments() -> argparse.Namespace:
     """
@@ -26,7 +27,7 @@ Exemples d'utilisation :
         'config',
         nargs='?',
         default='config/example_asm1.json',
-        help='Chemin vers le fichier de configuration (défaut : config/example_asm1.json)'
+        help='Chemin vers le fichier de configuration (ex : config/example.json)'
     )
 
     parser.add_argument(
@@ -48,6 +49,10 @@ Exemples d'utilisation :
         action='store_true',
         help='Mode interactif : configure la simulation via CLI'
     )
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
 
     return parser.parse_args()
 

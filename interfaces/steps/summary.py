@@ -1,8 +1,8 @@
 from typing import Dict, Any
 from datetime import datetime
-from utils import step
+from utils.decorators import step
 
-@step("ETAPE 6/7 : Récapitulatif")
+@step("ETAPE 7/8 : Récapitulatif")
 def print_summary(config: Dict[str, Any]) -> None:
     print(f"\nNom : {config.get('name')}")
     print(f"Description : {config.get('description')}")
@@ -40,3 +40,11 @@ def print_summary(config: Dict[str, Any]) -> None:
         print(f"\t{i}. {p.get('name')} ({p.get('node_id')})")
         print(f"\t\tType : {p.get('type')}")
         print(f"\t\tVolume : {p.get('config', {}).get('volume', 'N/A')} m^3")
+
+    connections = config.get('connections', [])
+    if connections:
+        print(f"\nConnexions ({len(connections)}) :")
+        for conn in connections:
+            recycle_str = " (recycle)" if conn.get('is_recycle') else ""
+            fraction_str = f" [{conn.get('fraction', 1.0)*100:.0f}%]" if conn.get('fraction', 1.0) <= 1.0 else ""
+            print(f"\t{conn['source']} -> {conn['target']}{fraction_str}{recycle_str}")

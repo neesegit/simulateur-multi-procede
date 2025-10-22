@@ -18,10 +18,11 @@ from .steps import (
     simulation_time,
     influent,
     processes,
+    connections,
     summary,
     save_section
 )
-from utils import ask_yes_no
+from utils.input_helpers import ask_yes_no
 
 class CLIInterface:
     """
@@ -99,15 +100,18 @@ class CLIInterface:
         )
         self.config['processes'].extend(procs)
 
-        # Etape 6 : Récapitulatif
+        # Etape 6 : Configuration des connections
+        connections.configure_connections(self.config)
+
+        # Etape 7 : Récapitulatif
         summary.print_summary(self.config)
 
-        # Etape 7 : Sauvegarde
+        # Etape 8 : Sauvegarde
         save = ask_yes_no("\nVoulez-vous sauvegarder cette configuration ?")
         if save:
             save_section.save_config(self.config)
 
-        # Etape 8 : Lancement
+        # Etape 9 : Lancement
         launch = ask_yes_no("\nVoulez vous lancer la simulation maintenant ?")
         self.config['_launch'] = bool(launch)
 

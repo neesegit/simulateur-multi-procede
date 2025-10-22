@@ -1,7 +1,8 @@
 from typing import Dict
-from utils import step, ask_number
+from utils.decorators import step
+from utils.input_helpers import ask_number
 
-@step("ETAPE 3/7 : Caractéristique de l'influent")
+@step("ETAPE 3/8 : Caractéristique de l'influent")
 def configure_influent(config: Dict) -> None:
     """Configure les caractéristiques de l'influent"""
 

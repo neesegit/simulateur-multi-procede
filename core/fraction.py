@@ -38,7 +38,7 @@ class ASM1Fraction:
 
     @classmethod
     def fractionate(cls,
-                    cod_total: float,
+                    cod: float,
                     cod_soluble: Optional[float] = None,
                     ss: float = 0.0,
                     tkn: float = 0.0,
@@ -51,7 +51,7 @@ class ASM1Fraction:
         Fractionne les paramètres mesurés en composants ASM1
 
         Args :
-            cod_total : DCO totale (mg/L)
+            cod : DCO totale (mg/L)
             cod_soluble : DCO soluble (mg/L) - si None, estimée à 40% de la DCO totale
             ss : Solides en suspension (mg/L)
             tkn : Azote Kjeldahl total (mg/L)
@@ -71,20 +71,20 @@ class ASM1Fraction:
 
         # Fractionnement de la DCO
         if cod_soluble is None:
-            cod_soluble = cod_total * (r['f_si_cod'] + r['f_ss_cod'])
+            cod_soluble = cod * (r['f_si_cod'] + r['f_ss_cod'])
 
-        cod_particulate = cod_total - cod_soluble
+        cod_particulate = cod - cod_soluble
 
         # DCO soluble
-        components['si'] = cod_total * r['f_si_cod'] # Inerte soluble
-        components['ss'] = cod_total * r['f_ss_cod'] # Biodégradable soluble
+        components['si'] = cod * r['f_si_cod'] # Inerte soluble
+        components['ss'] = cod * r['f_ss_cod'] # Biodégradable soluble
 
         # DCO particulaire
-        components['xi'] = cod_total * r['f_xi_cod'] # Inerte particulaire
-        components['xs'] = cod_total * r['f_xs_cod'] # Biodégradable particulaire
+        components['xi'] = cod * r['f_xi_cod'] # Inerte particulaire
+        components['xs'] = cod * r['f_xs_cod'] # Biodégradable particulaire
 
         # Biomasse dans l'influent (estimation)
-        cod_biomass = cod_total - (components['si'] + components['ss'] + components['xi'] + components['xs'])
+        cod_biomass = cod - (components['si'] + components['ss'] + components['xi'] + components['xs'])
         components['xbh'] = max(0, cod_biomass*0.9) # 90% hétérotrophes
         components['xba'] = max(0, cod_biomass*0.1) # 10% autotrophes
 
@@ -125,6 +125,6 @@ class ASM1Fraction:
             # typiquement 5-7 mmol/L pour eaux usées domestiques
             components['salk'] = 5.0 + (tkn/14)*0.1 # conversion approximative
         
-        logger.debug(f"Fractionnement ASM1: DCO={cod_total:.1f} -> {len(components)} composants")
+        logger.debug(f"Fractionnement ASM1: DCO={cod:.1f} -> {len(components)} composants")
 
         return components

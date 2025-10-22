@@ -11,7 +11,7 @@ import logging
 
 from core.process_node import ProcessNode
 from processes.asm1_process import ASM1Process
-from connection.connection_manager import ConnectionManager
+from core.connection.connection_manager import ConnectionManager
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +110,11 @@ class ProcessFactory:
         # Crée un mapping node_id -> ProcessNode
         process_map = {p.node_id: p for p in processes}
 
+        if 'connections' not in config or not config['connections']:
+            ProcessFactory._create_sequentiel_chain(processes, conn_manager)
+            logger.info("\n" + conn_manager.visualize_ascii())
+            return conn_manager
+
         for conn_config in config.get('connections', []):
             source = conn_config['source']
             target = conn_config['target']
@@ -134,72 +139,32 @@ class ProcessFactory:
         
         logger.info("\n"+conn_manager.visualize_ascii())
         return conn_manager
-
-
-        # # Pour chauqe procédé
-        # for process, config in zip(processes, configs):
-        #     connections = config.get('connections', {})
-
-        #     # Connexion en amont
-        #     for upstream_id in connections.get('upstream', []):
-        #         if upstream_id in process_map:
-        #             process.connect_upstream(upstream_id)
-        #             process_map[upstream_id].connect_downstream(process.node_id)
-        #             logger.debug(f"Connexion: {upstream_id} -> {process.node_id}")
-        #         elif upstream_id != 'influent':
-        #             logger.warning(f"Procédé upstream introuvable : {upstream_id}")
-            
-        #     # Connexion en aval
-        #     for downstream_id in connections.get('downstream', []):
-        #         if downstream_id in process_map:
-        #             process.connect_downstream(downstream_id)
-        #             process_map[downstream_id].connect_upstream(process.node_id)
-        #             logger.debug(f"Connexion : {process.node_id} -> {downstream_id}")
-        #         else:
-        #             logger.warning(f"Procédé downstream introuvable : {downstream_id}")
-        
-        # # Si aucune connexion n'est définie, on crée une chaîne séquentielle
-        # if all(not p.upstream_nodes and not p.downstream_nodes for p in processes):
-        #     logger.info("Aucune connexion définie, création d'une chaîne séquentielle")
-        #     ProcessFactory._create_sequential_chain(processes)
-
+    
     @staticmethod
-    def _create_sequential_chain(processes: List[ProcessNode]) -> None:
+    def _create_sequentiel_chain(processes: List[ProcessNode],
+                                 conn_manager: ConnectionManager) -> None:
         """
-        Crée une chaîne séquentielle simple : P1 -> P2 -> P3 -> ...
+        Crée une chaîne sequentielle simple
 
         Args:
-            processes (List[ProcessNode]): Liste des ProcessNodes
+            processes (List[ProcessNode]): Liste de ProcessNodes
+            conn_manager (ConnectionManager): Gestion de connexions
         """
-        for i in range(len(processes) -1):
+        if not processes:
+            return
+        first = processes[0]
+        conn_manager.add_connection('influent', first.node_id, 1.0, False)
+        first.connect_upstream('influent')
+
+        for i in range(len(processes) - 1):
             current = processes[i]
             next_proc = processes[i+1]
 
+            conn_manager.add_connection(current.node_id, next_proc.node_id, 1.0, False)
             current.connect_downstream(next_proc.node_id)
             next_proc.connect_upstream(current.node_id)
 
-            logger.debug(f"Chaîne séquentielle : {current.node_id} -> {next_proc.node_id}")
-
-    @staticmethod
-    def register_process_type(name: str, process_class: type) -> None:
-        """
-        Enregistre un nouveau type de ProcessNode
-
-        Permet d'ajouter des procédés personnalisés sans modifier ce fichier
-
-        Args:
-            name (str): Nom du type (ex : 'CustomProcess')
-            process_class (type): Classe héritant de ProcessNode
-
-        Example:
-            >>> ProcessFactory.register_process_type('MyProcess', MyProcess)
-            >>> # Maintenant 'MyProcess' peut être utilisé dans les configs
-        """
-        if not issubclass(process_class, ProcessNode):
-            raise TypeError(f"{process_class} doit hériter de ProcessNode")
-        
-        ProcessFactory.PROCESS_TYPES[name] = process_class # pyright: ignore[reportArgumentType]
-        logger.info(f"Type de procédé enregistré : {name}")
+            logger.debug(f"Chaîne séquentiel : {current.node_id} -> {next_proc.node_id}")
     
     @staticmethod
     def get_available_types() -> List[str]:

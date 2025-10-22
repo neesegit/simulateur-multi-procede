@@ -7,9 +7,11 @@ Ce module regroupe toutes les fonctionnalités clés :
 - Databus
 """
 
-from .databuses import FlowData, DataBus, SimulationFlow
+from .databuses import DataBus
+from core.data.flow_data import FlowData
+from .simulation_flow import SimulationFlow 
 from .fraction import ASM1Fraction
-from .orchestrator import SimulationOrchestrator
+from .orchestrator.simulation_orchestrator import SimulationOrchestrator
 from .process_factory import ProcessFactory
 from .process_node import ProcessNode
 from .connection.connection_manager import ConnectionManager

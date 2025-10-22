@@ -1,22 +1,10 @@
 from typing import Any, Dict
 from pathlib import Path
-from interfaces import ConfigLoader, ResultsExporter, Visualizer
-from core import SimulationOrchestrator, ProcessFactory
+from interfaces.config import ConfigLoader 
+from interfaces import ResultsExporter, Visualizer
+from core.orchestrator.simulation_orchestrator import SimulationOrchestrator 
+from core.process_factory import ProcessFactory
 from .decorators import timed
-
-
-
-def create_default_config(output_path: str) -> None:
-    """
-    Crée une configuration par défaut
-
-    Args:
-        output_path (str): Chemin du fichier de sortie
-    """
-    print("Création d'une configuration par défaut ...")
-    ConfigLoader.create_default_config(output_path)
-    print(f"Configuration créée : {output_path}")
-    print(f"\nPour l'utiliser : python main.py {output_path}")
 
 def load_config(config_path: Path) -> Dict[str, Any]:
     """
