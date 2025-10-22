@@ -12,6 +12,8 @@ from .fraction import ASM1Fraction
 from .orchestrator import SimulationOrchestrator
 from .process_factory import ProcessFactory
 from .process_node import ProcessNode
+from .connection.connection_manager import ConnectionManager
+from .connection.connection import Connection
 
 __all__ = [
     'FlowData',
@@ -20,5 +22,7 @@ __all__ = [
     'ASM1Fraction',
     'SimulationOrchestrator',
     'ProcessFactory',
-    'ProcessNode'
+    'ProcessNode',
+    'Connection',
+    'ConnectionManager'
 ]

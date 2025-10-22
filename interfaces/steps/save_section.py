@@ -15,5 +15,5 @@ def save_config(config: Dict[str, Any]) -> None:
     # Retire les clés internes
     config_to_save = {k: v for k,v in config.items() if not k.startswith('_')}
 
-    ConfigLoader.save(config_to_save, filepath)
+    ConfigLoader.save(config_to_save, Path(filepath))
     print(f"\nConfiguration sauvegardée : {filepath}")

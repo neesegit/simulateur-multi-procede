@@ -7,14 +7,16 @@ Ce module regroupe toutes les fonctionnalités d'interface :
 - Visualisation
 """
 
-from .config_loader import ConfigLoader
+from .config import ConfigLoader
 from .result_exporter import ResultsExporter
 from .visualizer import Visualizer
 from .cli_interface import CLIInterface
+from .schema import ConfigSchema
 
 __all__ = [
     'ConfigLoader',
     'ResultsExporter',
     'Visualizer',
-    'CLIInterface'
+    'CLIInterface',
+    'ConfigSchema'
 ]

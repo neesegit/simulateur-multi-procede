@@ -11,6 +11,7 @@ import logging
 
 from core.process_node import ProcessNode
 from processes.asm1_process import ASM1Process
+from connection.connection_manager import ConnectionManager
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,7 @@ class ProcessFactory:
             processes.append(process)
 
         # Configure les connexions si spécifiées
-        ProcessFactory._setup_connections(processes, processes_config)
+        ProcessFactory._setup_connections(processes, config)
 
         logger.info(f"{len(processes)} procédé(s) crée(s)")
 
@@ -97,52 +98,70 @@ class ProcessFactory:
     
     @staticmethod
     def _setup_connections(processes: List[ProcessNode],
-                           configs: List[Dict[str, Any]]) -> None:
+                           config: Dict[str, Any]) -> ConnectionManager:
         """
         Configure les connexions entre ProcessNodes
-
-        Les connexions peuvent être définies dans la config comme :
-        {
-            "node_id": "aeration",
-            "connections": {
-                "upstream": ["anoxie"],
-                "downstream": ["settler"]
-            }
-        }
 
         Args:
             processes (List[ProcessNode]): Liste des ProcessNodes
             configs (List[Dict[str, Any]]): Configurations correspondantes
         """
+        conn_manager = ConnectionManager()
         # Crée un mapping node_id -> ProcessNode
         process_map = {p.node_id: p for p in processes}
 
-        # Pour chauqe procédé
-        for process, config in zip(processes, configs):
-            connections = config.get('connections', {})
+        for conn_config in config.get('connections', []):
+            source = conn_config['source']
+            target = conn_config['target']
+            fraction = conn_config.get('fraction', 1.0)
+            is_recycle = conn_config.get('is_recycle', False)
 
-            # Connexion en amont
-            for upstream_id in connections.get('upstream', []):
-                if upstream_id in process_map:
-                    process.connect_upstream(upstream_id)
-                    process_map[upstream_id].connect_downstream(process.node_id)
-                    logger.debug(f"Connexion: {upstream_id} -> {process.node_id}")
-                elif upstream_id != 'influent':
-                    logger.warning(f"Procédé upstream introuvable : {upstream_id}")
-            
-            # Connexion en aval
-            for downstream_id in connections.get('downstream', []):
-                if downstream_id in process_map:
-                    process.connect_downstream(downstream_id)
-                    process_map[downstream_id].connect_upstream(process.node_id)
-                    logger.debug(f"Connexion : {process.node_id} -> {downstream_id}")
-                else:
-                    logger.warning(f"Procédé downstream introuvable : {downstream_id}")
+            # Ajouter au ConnectionManager
+            conn_manager.add_connection(source, target, fraction, is_recycle)
+
+            # Configurer les ProcessNodes
+            if target in process_map:
+                process_map[target].connect_upstream(source)
+            if source in process_map:
+                process_map[source].connect_downstream(target)
+
+        # Valider
+        validation = conn_manager.validate()
+        if validation['errors']:
+            for error in validation['errors']:
+                logger.error(error)
+            raise Exception("Erreurs dans le graphe de connexions")
         
-        # Si aucune connexion n'est définie, oncrée une chaîne séquentielle
-        if all(not p.upstream_nodes and not p.downstream_nodes for p in processes):
-            logger.info("Aucune connexion définie, création d'une chaîne séquentielle")
-            ProcessFactory._create_sequential_chain(processes)
+        logger.info("\n"+conn_manager.visualize_ascii())
+        return conn_manager
+
+
+        # # Pour chauqe procédé
+        # for process, config in zip(processes, configs):
+        #     connections = config.get('connections', {})
+
+        #     # Connexion en amont
+        #     for upstream_id in connections.get('upstream', []):
+        #         if upstream_id in process_map:
+        #             process.connect_upstream(upstream_id)
+        #             process_map[upstream_id].connect_downstream(process.node_id)
+        #             logger.debug(f"Connexion: {upstream_id} -> {process.node_id}")
+        #         elif upstream_id != 'influent':
+        #             logger.warning(f"Procédé upstream introuvable : {upstream_id}")
+            
+        #     # Connexion en aval
+        #     for downstream_id in connections.get('downstream', []):
+        #         if downstream_id in process_map:
+        #             process.connect_downstream(downstream_id)
+        #             process_map[downstream_id].connect_upstream(process.node_id)
+        #             logger.debug(f"Connexion : {process.node_id} -> {downstream_id}")
+        #         else:
+        #             logger.warning(f"Procédé downstream introuvable : {downstream_id}")
+        
+        # # Si aucune connexion n'est définie, on crée une chaîne séquentielle
+        # if all(not p.upstream_nodes and not p.downstream_nodes for p in processes):
+        #     logger.info("Aucune connexion définie, création d'une chaîne séquentielle")
+        #     ProcessFactory._create_sequential_chain(processes)
 
     @staticmethod
     def _create_sequential_chain(processes: List[ProcessNode]) -> None:

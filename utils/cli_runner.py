@@ -15,10 +15,9 @@ def parse_arguments() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Exemples d'utilisation :
-    python main.py                                      # Config par défaut
+    python main.py                                      # Menu d'aide
     python main.py config/my_sim.json                   # Config spécifique
     python main.py --no-plots                           # Sans graphiques
-    python main.py --create-config config/new.json      # Crée config
     python main.py --log-level DEBUG                    # Mode debug
 """
     )
@@ -28,12 +27,6 @@ Exemples d'utilisation :
         nargs='?',
         default='config/example_asm1.json',
         help='Chemin vers le fichier de configuration (défaut : config/example_asm1.json)'
-    )
-
-    parser.add_argument(
-        '--create-config',
-        metavar='PATH',
-        help='Crée une configuration par défaut au chemin spécifié'
     )
 
     parser.add_argument(
