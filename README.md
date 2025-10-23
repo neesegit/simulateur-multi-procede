@@ -15,16 +15,16 @@ This project aims to simulate several water treatment processes and evaluate the
 ---
 
 ## Project structure
-.
-├── config/ # Configuration files
-├── core/ # Main logic
-├── data_layer/ # Data management
-├── interfaces/ # CLI interfaces, config loader and more
-├── models/ # Process models
-├── processes/ # Water treatment process implementations
-├── main.py # Simulation entry point
-├── requirements.txt # Dependencies
-└── README.md
+. <br>
+├── config/ # Configuration files <br>
+├── core/ # Main logic <br>
+├── data_layer/ # Data management <br>
+├── interfaces/ # CLI interfaces, config loader and more <br>
+├── models/ # Process models <br>
+├── processes/ # Water treatment process implementations <br>
+├── main.py # Simulation entry point <br> 
+├── requirements.txt # Dependencies <br>
+└── README.md <br>
 
 ---
 
