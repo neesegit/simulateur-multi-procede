@@ -12,8 +12,8 @@ from core.data.flow_data import FlowData
 from .simulation_flow import SimulationFlow 
 from .fraction import ASM1Fraction
 from .orchestrator.simulation_orchestrator import SimulationOrchestrator
-from .process_factory import ProcessFactory
-from .process_node import ProcessNode
+from .process.process_factory import ProcessFactory
+from .process.process_node import ProcessNode
 from .connection.connection_manager import ConnectionManager
 from .connection.connection import Connection
 

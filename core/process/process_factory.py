@@ -9,8 +9,8 @@ Rôle :
 from typing import Dict, Any, List
 import logging
 
-from core.process_node import ProcessNode
-from processes.asm1_process import ASM1Process
+from core.process.process_node import ProcessNode
+from core.process.process_registry import ProcessRegistry
 from core.connection.connection_manager import ConnectionManager
 
 logger = logging.getLogger(__name__)
@@ -19,14 +19,6 @@ class ProcessFactory:
     """
     Factory pour créer et connecter les ProcessNodes
     """
-
-    # Registre des types de procédés disponibles
-    PROCESS_TYPES = {
-        'ASM1Process': ASM1Process,
-        # Ajoutez ici d'autres procédés : TODO
-        # 'NOMProcess' : NOMProcess
-        
-    }
 
     @staticmethod
     def create_process(proc_config: Dict[str, Any]) -> ProcessNode:
@@ -46,26 +38,14 @@ class ProcessFactory:
         Raises:
             ValueError: Si le type de procédé est inconnu
         """
-        proc_type = proc_config['type']
-        node_id = proc_config['node_id']
-        name = proc_config['name']
-        params = proc_config.get('config', {})
+        registry = ProcessRegistry.get_instance()
 
-        # Vérifie que le type est supporté
-        if proc_type not in ProcessFactory.PROCESS_TYPES:
-            available = ', '.join(ProcessFactory.PROCESS_TYPES.keys())
-            raise ValueError(
-                f"Type de procédé inconnu : '{proc_type}'."
-                f"Types disponibles : {available}"
-            )
-        
-        # Instancie la classe appropriée
-        process_class = ProcessFactory.PROCESS_TYPES[proc_type]
-        process = process_class(node_id, name, params)
-
-        logger.info(f"ProcessNode créé : {name} ({proc_type})")
-
-        return process
+        return registry.create_process(
+            process_type=proc_config['type'],
+            node_id=proc_config['node_id'],
+            name=proc_config['name'],
+            config=proc_config.get('config', {})
+        )
     
     @staticmethod
     def create_from_config(config: Dict[str, Any]) -> List[ProcessNode]:
@@ -174,7 +154,8 @@ class ProcessFactory:
         Returns:
             List[str]: Liste des noms de types
         """
-        return list(ProcessFactory.PROCESS_TYPES.keys())
+        registry = ProcessRegistry.get_instance()
+        return registry.get_process_types()
     
 
         

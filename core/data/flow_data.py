@@ -23,7 +23,7 @@ class FlowData:
 
     # Métadonnées
     source_node: Optional[str] = None
-    model_type: Optional[str] = None # 'ASM1', etc
+    model_type: Optional[str] = None
 
     _STANDARD_KEYS = {'ss', 'cod', 'bod', 'tkn'}
 
@@ -57,6 +57,10 @@ class FlowData:
             setattr(self, key, value)
         else:
             self.components[key] = value
+
+    def has_model_components(self) -> bool:
+        """Vérifie si le flux contient des composants de modèles"""
+        return len(self.components) > 0
     
     def get_all_components(self) -> Dict[str, float]:
         """
@@ -66,6 +70,11 @@ class FlowData:
             Dict[str, float]: Dictionnaire complet des composants
         """
         return {**{k: getattr(self, k) for k in self._STANDARD_KEYS}, **self.components}
+    
+    def extract_measured(self, keys: Optional[list[str]] = None) -> Dict[str, float]:
+        if keys is None:
+            keys = ['cod', 'ss', 'tkn', 'nh4', 'no3', 'po4', 'alkalinity']
+        return {k: self.get(k, 0.0) for k in keys}
     
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -86,54 +95,3 @@ class FlowData:
             FlowData: Instance de FlowData
         """
         return FlowData(**asdict(self))
-    
-    @classmethod
-    def create_from_model(cls, 
-                          timestamp: datetime,
-                          flowrate: float,
-                          temperature: float,
-                          model_type: str,
-                          auto_fractionate: bool = True,
-                          **kwargs) -> 'FlowData':
-        """
-        Crée un FlowData pour un modèle spécifique
-
-        Args:
-            timestamp (datetime): Horodatage
-            flowrate (float): Débit (m^3/h)
-            temperature (float): Température (°C)
-            model_type (str): Type de modèle ('ASM1', etc) 
-            auto_fractionate (bool, optional): Si True, fractionne automatiquement les paramètres mesurés
-            **kwargs: Valeurs des composants OU paramètres mesurés (DCO, MES, etc)
-
-        Returns:
-            FlowData: Instance de FlowData configurée
-        """
-
-        flow = cls(timestamp, flowrate, temperature, model_type=model_type)
-
-        # Si fractionnement automatique demandé de DCO fournie
-        if auto_fractionate and 'cod' in kwargs:
-            from core.fraction import ASM1Fraction as fracasm1
-
-            measured = {k: kwargs.pop(k, 0.0) for k in ['cod', 'ss', 'tkn', 'nh4', 'no3', 'po4']}
-
-            for key in ['cod_soluble', 'no2', 'p_total', 'alkalinity', 'vfa_total', 'acetate', 'propionate']:
-                if key in kwargs:
-                    measured[key] = kwargs.pop(key)
-
-            # Fractionne
-            fractionated = fracasm1.fractionate(**measured)
-
-            # Met à jour les composants avec les valeurs fractionnées
-            flow.components.update(fractionated)
-
-            # Garde les paramètres standards
-            for k in ['cod', 'ss', 'tkn']:
-                setattr(flow, k , measured[k])
-
-        # Définit toutes les autres valeurs fournies
-        for key, value in kwargs.items():
-            flow.set(key, value)
-        
-        return flow

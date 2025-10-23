@@ -4,8 +4,7 @@ Chauqe procédé hérite de cette classe et implémente sa logique spécifique
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List
-from datetime import datetime
+from typing import Dict, Any, List
 import logging
 
 class ProcessNode(ABC):
@@ -37,7 +36,7 @@ class ProcessNode(ABC):
         self.downstream_nodes: List[str] = []
 
         # Performance
-        self.metrics: Dict[str, float] = {}
+        self.metrics: Any = {}
 
         self.logger.info(f"ProcessNode '{name}' ({node_id}) initialisé")
 
@@ -101,6 +100,62 @@ class ProcessNode(ABC):
             Liste des noms de paramètres d'entrée nécessaires
         """
         pass
+
+    def needs_fractionation(self, inputs: Dict[str, Any]) -> bool:
+        """
+        Vérifie si l'input nécessite un fractionnement
+
+        Args:
+            inputs (Dict[str, Any]): Données d'entrée
+
+        Returns:
+            bool: True si fractionnement nécessaire
+        """
+        flow = inputs.get('flow')
+        if not flow:
+            return False
+        if flow.has_model_components():
+            return False
+        
+        return flow.cod > 0 or flow.ss > 0 or flow.tkn > 0
+    
+    def fractionate_input(self, inputs: Dict[str, Any], target_model: str = 'ASM1') -> Dict[str, Any]:
+        """
+        Fractionne l'input si nécessaire
+
+        Args:
+            inputs (Dict[str, Any]): Données d'entrée brutes
+            target_model (str, optional): Modèle cible. Defaults to 'ASM1'.
+
+        Returns:
+            Dict[str, Any]: Inputs avec composants fractionnés
+        """
+        if not self.needs_fractionation(inputs):
+            self.logger.debug("Fractionnement on nécessaire")
+            return inputs
+        
+        flow = inputs['flow']
+
+        self.logger.info(f"Fractionnement en cours vers {target_model}...")
+        if target_model == 'ASM1':
+            from core.fraction import ASM1Fraction
+
+            measured = flow.extract_measured()
+            try:
+                fractionated = ASM1Fraction.fractionate(**measured)
+                fractionated_flow = flow.copy()
+                fractionated_flow.components.update(fractionated)
+
+                inputs['flow'] = fractionated_flow
+                inputs['components'] = fractionated_flow.components
+
+                self.logger.info(f"Fractionnement réussi : {len(fractionated)} composants")
+            except Exception as e:
+                self.logger.error(f"Erreur de fractionnement : {e}")
+                raise
+        else:
+            raise ValueError(f"Modèle non supporté : {target_model}")
+        return inputs
 
     def get_outputs(self) -> Dict[str, Any]:
         """

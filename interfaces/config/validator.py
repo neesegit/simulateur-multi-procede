@@ -72,8 +72,7 @@ class ConfigValidator:
 
         rules = {
             'flowrate': lambda v: ConfigValidator._check_range(v, 'flowrate'),
-            'temperature': lambda v: ConfigValidator._check_range(v, 'temperature'),
-            'model_type': lambda v: ConfigValidator._check_enum(v, ConfigSchema.SUPPORTED_MODEL_TYPES, 'model_type')
+            'temperature': lambda v: ConfigValidator._check_range(v, 'temperature')
         }
 
         ConfigValidator._apply_rules(influent, rules)
@@ -101,7 +100,7 @@ class ConfigValidator:
         if not ConfigSchema.is_valid_process_type(proc['type']):
             logger.warning(
                 f"Procédé {index}: Type non reconnu : '{proc['type']}'. "
-                f"Types connus : {ConfigSchema.SUPPORTED_PROCESS_TYPES}"
+                f"Types connus : {ConfigSchema.get_supported_process_types()}"
             )
         if "config" in proc:
             ConfigValidator._validate_process_config(proc['config'], index)

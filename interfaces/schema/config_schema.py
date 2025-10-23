@@ -4,6 +4,7 @@ Schémas de validation pour les configurations
 Ce module définit les structures attendues pour les fichiers de configuration
 """
 from typing import Dict, List, Any
+from core.process.process_registry import ProcessRegistry
 
 class ConfigSchema:
     """
@@ -12,7 +13,7 @@ class ConfigSchema:
 
     REQUIRED_FIELDS: Dict[str, List[str]] = {
         'simulation': ['start_time', 'end_time', 'timestep_hours'],
-        'influent': ['flowrate', 'temperature', 'model_type'],
+        'influent': ['flowrate', 'temperature'],
         'processes': []
     }
 
@@ -32,18 +33,6 @@ class ConfigSchema:
         'depth': (0.1, 20.0),
         'area': (1.0, 1e6)
     }
-
-    SUPPORTED_MODEL_TYPES: List[str] = [
-        'ASM1',
-        'ASM2d',
-        'ASM3',
-        'ML'
-    ]
-
-    SUPPORTED_PROCESS_TYPES: List[str] = [
-        'ActivatedSludgeProcess',
-        'ASM1Process' # Redirige vers ActivatedSludgeProcess
-    ]
 
     @staticmethod
     def get_required_fields_for_section(section: str) -> List[str]:
@@ -70,17 +59,29 @@ class ConfigSchema:
             tuple: Tuple(min, max) ou None si pas de contrainte
         """
         return ConfigSchema.VALUE_RANGES.get(field, (None, None))
+
+    @staticmethod
+    def get_supported_process_types() -> List[str]:
+        """Retourne dynamiquement les types de procédés disponibles"""
+        registry = ProcessRegistry.get_instance()
+        return registry.get_process_types()
+    
+    @staticmethod
+    def get_supported_model_types() -> List[str]:
+        """Retourne dynamiquement les modèles disponibles dans le registre"""
+        registry = ProcessRegistry.get_instance()
+        return  list({definition.model for definition in registry.processes.values()})
     
     @staticmethod
     def is_valid_model_type(model_type: str) -> bool:
         """
         Vérifie si le type de modèle est supporté
         """
-        return model_type.upper() in [m.upper() for m in ConfigSchema.SUPPORTED_MODEL_TYPES]
+        return model_type.upper() in [m.upper() for m in ConfigSchema.get_supported_model_types()]
     
     @staticmethod
     def is_valid_process_type(process_type: str) -> bool:
         """
         Vérifie si le type de procédé est supporté
         """
-        return process_type in ConfigSchema.SUPPORTED_PROCESS_TYPES
+        return process_type in ConfigSchema.get_supported_process_types()

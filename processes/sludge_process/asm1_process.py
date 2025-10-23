@@ -16,7 +16,7 @@ from typing import Dict, Any, List
 import numpy as np
 import logging
 
-from core.process_node import ProcessNode
+from core.process.process_node import ProcessNode
 from models.asm1_model import ASM1Model
 
 logger = logging.getLogger(__name__)
@@ -75,7 +75,7 @@ class ASM1Process(ProcessNode):
             'ss': 5.0,                  # Substrat biodégradable (faible, déjà traité)
             'xi': 25.0,                 # Particulaire inerte
             'xs': 100.0,                # Substrat lentement biodégradable
-            'xbh': 2500.0,              # Biomasse hétérotrophe (concentration élevée)
+            'xbh': 250.0,              # Biomasse hétérotrophe (concentration élevée)
             'xba': 150.0,               # Biomasse autotrophe
             'xp': 450.0,                # Produits inertes
             'so': self.do_setpoint,     # Oxygène à la consigne
@@ -101,7 +101,7 @@ class ASM1Process(ProcessNode):
         Returns:
             List[str]: Liste des clés nécessaires
         """
-        return ['flow', 'flowrate', 'temperature', 'components']
+        return ['flow', 'flowrate', 'temperature']
     
     def process(self, inputs: Dict[str, Any], dt: float) -> Dict[str, Any]:
         """
@@ -122,6 +122,9 @@ class ASM1Process(ProcessNode):
         Returns:
             Dict[str, Any]: Données de sortie (concentrations traitées + métriques)
         """
+
+        inputs = self.fractionate_input(inputs, target_model='ASM1')
+
         # Extrait les données d'entrée
         q_in = inputs['flowrate'] # m^3/h
         temp = inputs['temperature']

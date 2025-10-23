@@ -1,9 +1,10 @@
 from typing import Any, Dict
 from pathlib import Path
+
 from interfaces.config import ConfigLoader 
 from interfaces import ResultsExporter, Visualizer
 from core.orchestrator.simulation_orchestrator import SimulationOrchestrator 
-from core.process_factory import ProcessFactory
+from core.process.process_factory import ProcessFactory
 from .decorators import timed
 
 def load_config(config_path: Path) -> Dict[str, Any]:
@@ -70,7 +71,7 @@ def export_results(results: Dict[str, Any], with_plots: bool = True) -> Dict[str
         Dict[str, Any]: Informations sur les fichiers exportés
     """
     print("\nExport des résultats ...")
-    sim_name = results['metadata'].get('config',{}).get('name','simulation')
+    sim_name = results['metadata'].get('sim_name','simulation')
 
     exported = ResultsExporter.export_all(
         results,

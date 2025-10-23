@@ -23,37 +23,20 @@ from .steps import (
     save_section
 )
 from utils.input_helpers import ask_yes_no
+from core.process.process_registry import ProcessRegistry
 
 class CLIInterface:
     """
     Interface en ligne de commande interactive pour le simulateur
     """
 
-    # Catalogue des procédés disponibles
-    AVAILABLE_PROCESSES = {
-        '1': {
-            'type': 'ASM1Process',
-            'name': 'Boues activées (ASM1)',
-            'description': 'Traitement biologique par boues activées',
-            'required_params': ['volume', 'dissolved_oxygen_setpoint'],
-            'optional_params': ['depth', 'recycle_ratio', 'waste_ratio']
-        },
-        # Ajoutez ici d'autre procédés plus tard : TODO
-    }
-
-    # Paramètres par défaut pour chaque type de procédé
-    DEFAULT_PARAMS = {
-        'ASM1Process': {
-            'volume': 5000.0,
-            'depth': 4.0,
-            'dissolved_oxygen_setpoint': 2.0,
-            'recycle_ratio': 1.0,
-            'waste_ratio': 0.01
-        }
-    }
-
     def __init__(self):
         """Initialise l'interface CLI"""
+        registry = ProcessRegistry.get_instance()
+
+        self.AVAILABLE_PROCESSES = registry.to_cli_format()
+        self.DEFAULT_PARAMS = registry.to_default_params()
+        
         self.config = {
             'name': '',
             'description': '',

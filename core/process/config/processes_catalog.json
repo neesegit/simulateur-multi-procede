@@ -1,0 +1,73 @@
+{
+  "processes": [
+    {
+      "id": "asm1",
+      "type": "ASM1Process",
+      "name": "Boues activées (ASM1)",
+      "description": "Traitement biologique par boues activées selon le modèle ASM1",
+      "category": "biological",
+      "model": "ASM1",
+      "required_params": [
+        {
+          "name": "volume",
+          "label": "Volume du bassin",
+          "unit": "m³",
+          "default": 5000.0,
+          "min": 1.0,
+          "max": 100000.0
+        },
+        {
+          "name": "dissolved_oxygen_setpoint",
+          "label": "Consigne d'oxygène dissous",
+          "unit": "mg/L",
+          "default": 2.0,
+          "min": 0.5,
+          "max": 5.0
+        }
+      ],
+      "optional_params": [
+        {
+          "name": "depth",
+          "label": "Profondeur",
+          "unit": "m",
+          "default": 4.0,
+          "min": 1.0,
+          "max": 10.0
+        },
+        {
+          "name": "recycle_ratio",
+          "label": "Ratio de recyclage",
+          "unit": "Qr/Qin",
+          "default": 1.0,
+          "min": 0.0,
+          "max": 5.0
+        },
+        {
+          "name": "waste_ratio",
+          "label": "Ratio de purge",
+          "unit": "Qw/Qin",
+          "default": 0.01,
+          "min": 0.001,
+          "max": 0.1
+        }
+      ],
+      "module": "processes.asm1_process",
+      "class": "ASM1Process"
+    }
+  ],
+  
+  "categories": {
+    "biological": {
+      "name": "Traitement biologique",
+      "description": "Procédés utilisant des micro-organismes"
+    },
+    "physical": {
+      "name": "Traitement physique",
+      "description": "Procédés de séparation physique"
+    },
+    "chemical": {
+      "name": "Traitement chimique",
+      "description": "Procédés de traitement chimique"
+    }
+  }
+}

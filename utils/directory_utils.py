@@ -8,7 +8,6 @@ def setup_directories() -> None:
     directories: list[str] = [
         'output/results',
         'output/logs',
-        'output/figures',
         'config',
         'data/raw',
         'data/processed'

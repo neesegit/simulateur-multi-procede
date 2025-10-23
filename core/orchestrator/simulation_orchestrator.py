@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional
 from core.databuses import DataBus
 from core.simulation_flow import SimulationFlow
-from core.process_node import ProcessNode
+from core.process.process_node import ProcessNode
 from core.orchestrator.orchestrator_state import OrchestratorState
 from core.orchestrator.result_manager import ResultManager
 from core.orchestrator.influent_initializer import InfluentInitializer
@@ -73,6 +73,7 @@ class SimulationOrchestrator:
                 self.logger.info(f"{self.state.progress_percent():.1f}% complété")
         self.is_running = False
         metadata = {
+            'sim_name': self.config.get('name', 'simulation'),
             'start_time': str(self.state.start_time),
             'end_time': str(self.state.end_time),
             'timestep': self.state.timestep,

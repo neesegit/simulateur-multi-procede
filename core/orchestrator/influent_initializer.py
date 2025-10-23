@@ -9,11 +9,19 @@ class InfluentInitializer:
         Crée le FlowData initial de l'influent à partir de la config
         """
         influent_config = config.get('influent', {})
-        return FlowData.create_from_model(
+        composition = influent_config.get('composition', {})
+
+        flow = FlowData(
             timestamp=current_time,
             flowrate=influent_config.get('flowrate', 1000.0),
             temperature=influent_config.get('temperature', 20.0),
-            model_type=influent_config.get('model_type', 'ASM1'),
-            auto_fractionate=influent_config.get('auto_fractionate', True),
-            **influent_config.get('composition', {})
+            source_node='influent'
         )
+
+        for attr in ('cod', 'ss', 'tkn', 'bod'):
+            setattr(flow, attr, composition.get(attr, 0.0))
+        for key in ['nh4', 'no3', 'po4', 'alkalinity']:
+            if key in composition:
+                flow.components[key] = composition[key]
+
+        return flow
