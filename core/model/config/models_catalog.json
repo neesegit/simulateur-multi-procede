@@ -1,0 +1,120 @@
+{
+    "models": [
+        {
+            "id": "asm1",
+            "type": "ASM1Model",
+            "name": "ASM1 (Activated Sludge Model 1)",
+            "description": "Modèle de boues activées",
+            "category": "biological",
+            "components_count": 13,
+            "processes_count": 8,
+            "default_temperature": 20.0,
+            "parameters": [
+                {
+                    "id": "mu_h",
+                    "label": "Taux de croissance max. hétérotrophes", 
+                    "unit": "1/j", 
+                    "default": 6.0
+                },
+                {
+                    "id": "mu_a",
+                    "label": "Taux de croissance max. autotrophes", 
+                    "unit": "1/j", 
+                    "default": 0.8
+                },
+                {
+                    "id": "k_s", 
+                    "label": "Constante de demi-saturation substrat", 
+                    "unit": "mg COD/L", 
+                    "default": 20.0
+                },
+                {
+                    "id": "k_oh", 
+                    "label": "Constante de demi-saturation O2 hétérotrophes", 
+                    "unit": "mg O2/L", 
+                    "default": 0.2
+                },
+                {
+                    "id": "k_no", 
+                    "label": "Constante de demi-saturation nitrates", 
+                    "unit": "mg N/L", 
+                    "default": 0.5
+                },
+                {
+                    "id": "b_h", 
+                    "label": "Taux de décès hétérotrophes", 
+                    "unit": "1/j", 
+                    "default": 0.62
+                },
+                {
+                    "id": "b_a", 
+                    "label": "Taux de décès autotrophes", 
+                    "unit": "1/j", 
+                    "default": 0.2
+                },
+                {
+                    "id": "y_h", 
+                    "label": "Rendement hétérotrophes", 
+                    "unit": "-", 
+                    "default": 0.67
+                },
+                {
+                    "id": "y_a", 
+                    "label": "Rendement autotrophes", 
+                    "unit": "-", 
+                    "default": 0.24
+                },
+                {
+                    "id": "eta_g", 
+                    "label": "Facteur de correction pour croissance anoxie", 
+                    "unit": "-", 
+                    "default": 0.8
+                },
+                {
+                    "id": "eta_h", 
+                    "label": "Facteur de correction pour hydrolise anoxie", 
+                    "unit": "-", 
+                    "default": 0.03
+                },
+                {
+                    "id": "f_p", 
+                    "label": "Fraction de biomasse donnant produit inertes", 
+                    "unit": "-", 
+                    "default": 0.08
+                }
+            ],
+            "components": [
+                {"id": "si", "name": "Substrat inert soluble", "unit": "mg COD/L"},
+                {"id": "ss", "name": "Substrat biodégradable rapide", "unit": "mg COD/L"},
+                {"id": "xi", "name": "Substrat inerte particulaire", "unit": "mg COD/L"},
+                {"id": "xs", "name": "Substrat lentement biodégradable", "unit": "mg COD/L"},
+                {"id": "xbh", "name": "Biomasse hétérotrophe active", "unit": "mg COD/L"},
+                {"id": "xba", "name": "Biomasse autotrophe active", "unit": "mg COD/L"},
+                {"id": "xp", "name": "Produits inertes particulaires", "unit": "mg COD/L"},
+                {"id": "so", "name": "Oxygène dissous", "unit": "mg O2/L"},
+                {"id": "sno", "name": "Nitrates et nitrites", "unit": "mg N/L"},
+                {"id": "snh", "name": "Ammonium", "unit": "mg N/L"},
+                {"id": "snd", "name": "Azote organique soluble", "unit": "mg N/L"},
+                {"id": "xnd", "name": "Azote organique particulaire", "unit": "mg N/L"},
+                {"id": "salk", "name": "Alcalinité", "unit": "mmol/L"}
+            ],
+            "module": "models.asm1_model",
+            "class": "ASM1Model"
+        }
+    ],
+
+    "categories": {
+        "biological": {
+            "name": "Modèles biologiques",
+            "description": "Modèles de simulation basés sur les processus microbiologiques"
+        },
+        "chemical": {
+            "name": "Modèles chimiques",
+            "description": "Modèles de réactions chimiques pour les procédés de traitement de l'eau"
+        },
+        "physical": {
+            "name": "Modèles physiques",
+            "description": "Modèles basés sur des lois de transport ou des équilibres physiques"
+        }
+    }
+}

@@ -42,7 +42,8 @@ class CLIInterface:
             'description': '',
             'simulation': {},
             'influent': {},
-            'processes': []
+            'processes': [],
+            'connections': []
         }
 
     def print_welcome(self):

@@ -41,7 +41,7 @@ class ProcessRegistry:
         with open(self.catalog_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        self.catagories = data.get('categories', {})
+        self.categories = data.get('categories', {})
 
         for proc_data in data.get('processes', []):
             definition = ProcessDefinition.from_dict(proc_data)
@@ -136,7 +136,8 @@ class ProcessRegistry:
                 'name': definition.name,
                 'description': f"{definition.description}",
                 'required_params': [p.name for p in definition.required_params],
-                'optional_params': [p.name for p in definition.optional_params]
+                'optional_params': [p.name for p in definition.optional_params],
+                'has_model_choice': definition.has_model_choice
             }
         return cli_format
     

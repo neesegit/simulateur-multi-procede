@@ -7,6 +7,7 @@ from typing import Dict, Any, Optional
 from models.asm1_model import ASM1Model
 
 class SludgeModelAdapter:
+    # TODO -> Registry des models comme pour les processes
     AVAILABLE = {
         'ASM1': ASM1Model,
 

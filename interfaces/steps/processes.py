@@ -77,6 +77,8 @@ def configure_processes(selected_keys: List[str],
         config_params: Dict[str, float] = {}
         defaults = DEFAULT_PARAMS.get(proc_type, {})
 
+        # if proc_info.get('') TODO
+
         # Paramètres requis
         for param in proc_info['required_params']:
             default_val = float(defaults.get(param, 0.0))

@@ -25,6 +25,7 @@ class ConfigSchema:
 
     PROCESS_REQUIRED_FIELDS: List[str] = ['node_id', 'type', 'name']
 
+    # TODO Utiliser le fichier de config pour les processes ?
     VALUE_RANGES: Dict[str, tuple] = {
         'timestep_hours': (0.001, 24.0),
         'flowrate': (0.1, 1e6),

@@ -16,8 +16,7 @@ class SludgeMetrics:
             c_in: np.ndarray,
             q_in: float,
             dt: float,
-            volume: float,
-            do_setpoint: float
+            volume: float
     ) -> Dict[str, Any]:
         cod_out = self._cod(comp_out)
         tkn_out = self._tkn(comp_out)

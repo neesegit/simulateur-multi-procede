@@ -11,13 +11,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ProcessDefinition:
-    """Définition coplète d'un type de procédé"""
+    """Définition complète d'un type de procédé"""
     id: str
     type: str
     name: str
     description: str
     category: str
     model: str
+    has_model_choice: bool
     required_params: List[ProcessParameter]
     optional_params: List[ProcessParameter]
     module: str
@@ -35,6 +36,7 @@ class ProcessDefinition:
             description=data['description'],
             category=data['category'],
             model=data['model'],
+            has_model_choice=data['has_model_choice'],
             required_params=[ProcessParameter.from_dict(p) for p in data['required_params']],
             optional_params=[ProcessParameter.from_dict(p) for p in data['optional_params']],
             module=data['module'],

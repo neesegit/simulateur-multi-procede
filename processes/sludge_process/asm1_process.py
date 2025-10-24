@@ -75,7 +75,7 @@ class ASM1Process(ProcessNode):
             'ss': 5.0,                  # Substrat biodégradable (faible, déjà traité)
             'xi': 25.0,                 # Particulaire inerte
             'xs': 100.0,                # Substrat lentement biodégradable
-            'xbh': 250.0,              # Biomasse hétérotrophe (concentration élevée)
+            'xbh': 2500.0,              # Biomasse hétérotrophe (concentration élevée)
             'xba': 150.0,               # Biomasse autotrophe
             'xp': 450.0,                # Produits inertes
             'so': self.do_setpoint,     # Oxygène à la consigne
