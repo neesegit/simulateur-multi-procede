@@ -17,7 +17,7 @@ import numpy as np
 import logging
 
 from core.process.process_node import ProcessNode
-from models.asm1_model import ASM1Model
+from models.asm1.model import ASM1Model
 
 logger = logging.getLogger(__name__)
 

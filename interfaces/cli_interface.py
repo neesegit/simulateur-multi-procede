@@ -24,6 +24,7 @@ from .steps import (
 )
 from utils.input_helpers import ask_yes_no
 from core.process.process_registry import ProcessRegistry
+from core.model.model_registry import ModelRegistry
 
 class CLIInterface:
     """
@@ -32,10 +33,12 @@ class CLIInterface:
 
     def __init__(self):
         """Initialise l'interface CLI"""
-        registry = ProcessRegistry.get_instance()
+        self.process_registry = ProcessRegistry.get_instance()
+        self.model_registry = ModelRegistry.get_instance()
 
-        self.AVAILABLE_PROCESSES = registry.to_cli_format()
-        self.DEFAULT_PARAMS = registry.to_default_params()
+        self.AVAILABLE_PROCESSES = self.process_registry.to_cli_format()
+        self.DEFAULT_PARAMS = self.process_registry.to_default_params()
+        self.AVAILABLE_MODELS = self.model_registry.to_cli_format()
         
         self.config = {
             'name': '',
@@ -80,6 +83,7 @@ class CLIInterface:
         procs = processes.configure_processes(
             AVAILABLE_PROCESSES=self.AVAILABLE_PROCESSES,
             DEFAULT_PARAMS=self.DEFAULT_PARAMS,
+            AVAILABLE_MODELS=self.AVAILABLE_MODELS,
             selected_keys=self.selected_process_keys
         )
         self.config['processes'].extend(procs)

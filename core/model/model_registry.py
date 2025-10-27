@@ -52,7 +52,7 @@ class ModelRegistry:
             cls._instance = cls(catalog_path)
         return cls._instance
     
-    def get_process_definition(self, model_type: str) -> ModelDefinition:
+    def get_model_definition(self, model_type: str) -> ModelDefinition:
         """Récupère la définition d'un modèle"""
         if model_type not in self.models:
             available = ', '.join(self.models.keys())
@@ -66,8 +66,18 @@ class ModelRegistry:
             self,
             model_type: str,
             **kwargs
-    ) -> Type[Any]:
-        definition = self.get_process_definition(model_type)
+    ) -> Any:
+        """
+        Crée une instance de modèle
+
+        Args:
+            model_type (str): Type du modèle
+            **kwargs: Arguments à passer au constructeur du modèle
+
+        Returns:
+            Instance du modèle
+        """
+        definition = self.get_model_definition(model_type)
         model_class = definition.get_class()
 
         default_params = definition.get_default_params()
@@ -82,7 +92,38 @@ class ModelRegistry:
         logger.info(f"Modèle instancié : {definition.name} ({model_type})")
         return instance
     
-    def list_model(self) -> List[ModelDefinition]:
+    def list_models(self) -> List[ModelDefinition]:
         models = list(self.models.values())
         return sorted(models, key=lambda m: m.name)
+    
+    def get_model_types(self) -> List[str]:
+        """Retourne la lsite des types de modèles disponibles"""
+        return list(self.models.keys())
+    
+    def to_cli_format(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Convertit le registre au format attendu par CLIInterface
+
+        Returns:
+            Dict[str, Dict[str, Any]]: Dict compabile avec l'affichage CLI
+        """
+        cli_format = {}
+
+        for i, (model_type, definition) in enumerate(self.models.items(), 1):
+            cli_format[str(i)] = {
+                'type': definition.type,
+                'name': definition.name,
+                'description': definition.description,
+                'parameters': [
+                    {
+                        'id': p.id,
+                        'label': p.label,
+                        'unit': p.unit,
+                        'default': p.default
+                    }
+                    for p in definition.parameters
+                ],
+                'components': definition.components
+            }
+        return cli_format
     

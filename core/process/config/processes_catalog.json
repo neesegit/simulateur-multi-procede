@@ -6,6 +6,7 @@
       "name": "Boues activées",
       "description": "Traitement biologique par boues activées",
       "category": "biological",
+      "model": "",
       "has_model_choice": true,
       "required_params": [
         {
@@ -61,16 +62,6 @@
       ],
       "module": "processes.sludge_process.activated_sludge_process",
       "class": "ActivatedSludgeProcess"
-    },
-    {
-      "id": "asm1_legacy",
-      "type": "ASM1Process",
-      "name": "Boues activées (ASM1)",
-      "description": "Déprécié - Utilisez ActivatedSludgeProcess avec model='ASM1'",
-      "category": "biological",
-      "model": "ASM1",
-      "deprecated": true,
-      "redirected_to": "ActivatedSludgeProcess"
     }
   ],
   

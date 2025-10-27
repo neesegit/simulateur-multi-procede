@@ -9,6 +9,7 @@ from typing import Dict, Any, List
 from core.process.process_node import ProcessNode
 from processes.sludge_process.sludge_metrics import SludgeMetrics
 from processes.sludge_process.sludge_model_adapter import SludgeModelAdapter
+from core.model.model_registry import ModelRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +43,28 @@ class ActivatedSludgeProcess(ProcessNode):
         self.recycle_ratio = config.get('recycle_ratio', 1.0)
         self.waste_ratio = config.get('waste_ratio', 0.01)
 
-        model_name = config.get('model', 'ASM1').upper()
-        self.model_adapter = SludgeModelAdapter(model_name, config.get('model_parameters'))
+        model_type = config.get('model', 'ASM1')
+        model_param = config.get('model_parameters', {})
+
+        registry = ModelRegistry.get_instance()
+
+        try:
+            model_instance = registry.create_model(
+                model_type=model_type,
+                params=model_param
+            )
+            self.model_type = model_type
+            self.logger.info(f"Modèle chargé : {model_type}")
+        except ValueError as e:
+            self.logger.error(f"Erreur de chargement du modèle : {e}")
+            raise
+
+        model_name = model_type.replace('Model', '').upper()
+        self.model_adapter = SludgeModelAdapter(model_instance, model_name)
         
         self.concentrations = np.zeros(self.model_adapter.size)
         self.sludge_metrics = SludgeMetrics(model_name)
-        self.logger.info(f"{self} initialisé")
+        self.logger.info(f"{self} initialisé avec modèle {model_type}")
     
     def initialize(self) -> None:
         """Initialise l'état du bassin"""
@@ -97,7 +114,7 @@ class ActivatedSludgeProcess(ProcessNode):
     
     def update_state(self, outputs: Dict[str, Any]) -> None:
         """Met à jour l'état interne"""
-        self.state = outputs['components'].copy()
+        self.state = outputs.copy()
         self.outputs = outputs
     
     def __repr__(self):

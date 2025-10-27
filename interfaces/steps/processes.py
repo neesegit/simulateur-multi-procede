@@ -50,7 +50,8 @@ def select_processes(AVAILABLE_PROCESSES: Dict[str, Dict[str, str]]) -> List[str
 @step("ETAPE 5/8 : Configuration des procédés")
 def configure_processes(selected_keys: List[str],
                         AVAILABLE_PROCESSES: Dict[str, Dict[str, str]],
-                        DEFAULT_PARAMS: Dict[str, Dict[str, float]]) -> List[Dict[str, Any]]:
+                        DEFAULT_PARAMS: Dict[str, Dict[str, float]],
+                        AVAILABLE_MODELS: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Configure chaque procédé sélectionné"""
 
     configured: List[Dict[str, Any]] = []
@@ -74,13 +75,22 @@ def configure_processes(selected_keys: List[str],
 
         # Paramètres
         print("\nParamètres du procédé :")
-        config_params: Dict[str, float] = {}
+        config_params: Dict[str, Any] = {}
         defaults = DEFAULT_PARAMS.get(proc_type, {})
 
-        # if proc_info.get('') TODO
+        # Choix du modèle si applicable
+        selected_model = None
+        if proc_info.get('has_model_choice'):
+            selected_model = _select_model(AVAILABLE_MODELS)
+            config_params['model'] = selected_model
+            if ask_yes_no("\nConfigurer les paramètres du modèle ?", default=False):
+                model_params = _configure_model_parameters(AVAILABLE_PROCESSES[selected_model])
+                config_params['model_parameters'] = model_params
 
         # Paramètres requis
         for param in proc_info['required_params']:
+            if param == 'model':
+                continue
             default_val = float(defaults.get(param, 0.0))
             value = ask_number(
                 f"\t{param.replace('_',' ').title()}",
@@ -118,3 +128,56 @@ def configure_processes(selected_keys: List[str],
         print(f"\n{name} configuré")
     
     return configured
+
+def _select_model(AVAILABLE_MODELS: Dict[str, Dict[str, Any]]) -> str:
+    """
+    Permet de sélectionner un modèle
+
+    Args:
+        AVAILABLE_MODELS (Dict[str, Dict[str, Any]]): Dictionnaire des modèles disponibles
+
+    Returns:
+        str: Clé du modèle sélectionné
+    """
+    print("\nModèles disponibles :")
+    for key, model in AVAILABLE_MODELS.items():
+        print(f"\t[{key}] {model['name']}")
+        print(f"\t\t{model['description']}")
+
+    while True:
+        choice = input("\nChoisissez un modèle [1] : ").strip() or "1"
+        if choice in AVAILABLE_MODELS:
+            selected = AVAILABLE_MODELS[choice]
+            print(f"\nModèle sélectionné : {selected['name']}")
+            return choice
+        else:
+            print("Choix invalide")
+
+def _configure_model_parameters(model_info: Dict[str, Any]) -> Dict[str, float]:
+    """
+    Configure les paramètres d'un modèle
+
+    Args:
+        model_info (Dict[str, Any]): Informations sur le modèle
+
+    Returns:
+        Dict[str, float]: Dictionnaire des paramètres configurés
+    """
+    params = {}
+    
+    print(f"\nConfiguration des paramètres du modèle {model_info['name']}")
+    print("(Laissez vide pour utiliser les valeurs par défaut)")
+
+    for param in model_info.get('parameters', []):
+        print(f"\n{param['label']} ({param['unit']})")
+        print(f"\tValeur par défaut : {param['default']}")
+
+        value = ask_number(
+            f"\tNouvelle valeur",
+            default=param['default'],
+            min_val=0
+        )
+
+        params[param['id']] = value
+
+    return params

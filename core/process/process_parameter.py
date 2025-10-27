@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Dict, Any
+from dataclasses import dataclass, field
+from typing import Dict, Any, Optional, List
 
 @dataclass
 class ProcessParameter:
@@ -8,8 +8,12 @@ class ProcessParameter:
     label: str
     unit: str
     default: float
-    min: float
-    max: float
+    min: Optional[float] = 0
+    max: Optional[float] = 0
+
+    type: Optional[str] = ""
+    choices: Optional[List[str]] = field(default_factory=list)
+
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ProcessParameter':

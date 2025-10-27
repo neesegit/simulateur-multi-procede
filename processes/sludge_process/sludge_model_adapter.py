@@ -2,23 +2,23 @@
 Module qui permet d'adapter les différents modèles à une interface commune
 """
 import numpy as np
+import logging
 
 from typing import Dict, Any, Optional
-from models.asm1_model import ASM1Model
+
+logger = logging.getLogger(__name__)
 
 class SludgeModelAdapter:
-    # TODO -> Registry des models comme pour les processes
-    AVAILABLE = {
-        'ASM1': ASM1Model,
+    """
+    Adaptateur pour fournir une interface uniforme aux modèles biologiques
+    """
 
-    }
-
-    def __init__(self, model_name: str, params: Optional[Dict[str, Any]] = None) -> None:
-        if model_name not in self.AVAILABLE:
-            raise ValueError(f"Modèle inconnu : {model_name}")
+    def __init__(self, model_instance: Any, model_name: str) -> None:
         self.name = model_name.upper()
-        self.model = self.AVAILABLE[model_name](params=params or {})
+        self.model = model_instance
+
         self.size = len(self.model.COMPONENT_INDICES)
+        logger.debug(f"Adaptateur initialisé pour {self.name} ({self.size} composants)")
 
     def dict_to_vector(self, data: Dict[str, float]) -> np.ndarray:
         return self.model.dict_to_concentrations(data)
@@ -52,3 +52,7 @@ class SludgeModelAdapter:
                 'salk': 7.0
             }
         return {}
+    
+    def get_component_names(self) -> list:
+        """Retourne la liste des noms de composants"""
+        return self.model.get_component_names()

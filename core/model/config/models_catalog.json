@@ -17,12 +17,6 @@
                     "default": 6.0
                 },
                 {
-                    "id": "mu_a",
-                    "label": "Taux de croissance max. autotrophes", 
-                    "unit": "1/j", 
-                    "default": 0.8
-                },
-                {
                     "id": "k_s", 
                     "label": "Constante de demi-saturation substrat", 
                     "unit": "mg COD/L", 
@@ -47,22 +41,28 @@
                     "default": 0.62
                 },
                 {
+                    "id": "mu_a",
+                    "label": "Taux de croissance max. autotrophes", 
+                    "unit": "1/j", 
+                    "default": 0.8
+                },
+                {
+                    "id": "k_nh",
+                    "label": "Constante de demi-saturation ammonium",
+                    "unit": "mg N/L",
+                    "default": 1.0
+                },
+                {
+                    "id": "k_oa",
+                    "label": "Constante de demi-saturation O2 autotrophes",
+                    "unit": "mg O2/L",
+                    "default": 0.4
+                },
+                {
                     "id": "b_a", 
                     "label": "Taux de décès autotrophes", 
                     "unit": "1/j", 
                     "default": 0.2
-                },
-                {
-                    "id": "y_h", 
-                    "label": "Rendement hétérotrophes", 
-                    "unit": "-", 
-                    "default": 0.67
-                },
-                {
-                    "id": "y_a", 
-                    "label": "Rendement autotrophes", 
-                    "unit": "-", 
-                    "default": 0.24
                 },
                 {
                     "id": "eta_g", 
@@ -77,10 +77,52 @@
                     "default": 0.03
                 },
                 {
+                    "id": "k_h",
+                    "label": "Taux d'hydrolyse max",
+                    "unit": "1/j",
+                    "default": 3.0
+                },
+                {
+                    "id": "k_x",
+                    "label": "Constante de demi-saturation pour hydrolyse",
+                    "unit": "-",
+                    "default": 0.03
+                },
+                {
+                    "id": "k_a",
+                    "label": "Taux d'ammonification",
+                    "unit": "L/mg COD/j",
+                    "default": 0.08
+                },
+                {
+                    "id": "y_h", 
+                    "label": "Rendement hétérotrophes", 
+                    "unit": "-", 
+                    "default": 0.67
+                },
+                {
+                    "id": "y_a", 
+                    "label": "Rendement autotrophes", 
+                    "unit": "-", 
+                    "default": 0.24
+                },
+                {
                     "id": "f_p", 
                     "label": "Fraction de biomasse donnant produit inertes", 
                     "unit": "-", 
                     "default": 0.08
+                },
+                {
+                    "id": "i_xb",
+                    "label": "Teneur en N de la biomasse",
+                    "unit": "mg N/mg COD",
+                    "default": 0.08
+                },
+                {
+                    "id": "i_xp",
+                    "label": "Teneur en N des produits inertes",
+                    "unit": "mg N/mg COD",
+                    "default": 0.06
                 }
             ],
             "components": [
@@ -98,7 +140,7 @@
                 {"id": "xnd", "name": "Azote organique particulaire", "unit": "mg N/L"},
                 {"id": "salk", "name": "Alcalinité", "unit": "mmol/L"}
             ],
-            "module": "models.asm1_model",
+            "module": "models.asm1.model",
             "class": "ASM1Model"
         }
     ],
