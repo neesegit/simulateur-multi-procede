@@ -359,6 +359,8 @@ class Visualizer:
         history = results.get('history', {})
 
         for node_id in history.keys():
+            if node_id == 'influent':
+                continue
             plot_path = Visualizer.plot_process_results(
                 results,
                 node_id,

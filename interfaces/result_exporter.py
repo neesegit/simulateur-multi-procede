@@ -39,6 +39,8 @@ class ResultsExporter:
         exported_files = {}
 
         for node_id, flows in history.items():
+            if node_id == 'influent':
+                continue
             if not flows:
                 logger.warning(f"Aucune donnée pour {node_id}, export CSV ignoré")
                 continue
@@ -127,7 +129,9 @@ class ResultsExporter:
                 f.write(f"{node_id} : \n")
                 f.write(f"\t- Débit moyen : {node_stats.get('avg_flowrate', 0):.1f} m^3/h\n")
                 f.write(f"\t- DCO moyenne : {node_stats.get('avg_cod', 0):.1f} mg/L\n")
-                f.write(f"\t- Echantillons : {node_stats.get('num_samples', 0)}\n\n")
+                if node_id != 'influent':
+                    f.write(f"\t- Echantillons : {node_stats.get('num_samples', 0)}\n\n")
+                else: f.write("\n\n")
 
             f.write("="*70+"\n")
         

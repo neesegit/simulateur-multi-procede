@@ -16,7 +16,8 @@ class SludgeMetrics:
             c_in: np.ndarray,
             q_in: float,
             dt: float,
-            volume: float
+            volume: float,
+            temperature: float = 20.0
     ) -> Dict[str, Any]:
         cod_out = self._cod(comp_out)
         tkn_out = self._tkn(comp_out)
@@ -28,16 +29,22 @@ class SludgeMetrics:
         energy = oxygen_consumed * 2.0
 
         return {
+            'flowrate': q_in,
+            'temperature': temperature,
+            'model_type': self.model_name,
+            'components': comp_out,
+
             'cod': cod_out,
             'tkn': tkn_out,
             'ss': ss_out,
             'bod': cod_out * 0.6,
             'cod_removal_rate': cod_removal,
             'hrt_hours': volume / q_in,
+            'biomass_concentration': self._biomass(comp_out),
+
             'oxygen_consumed_kg': oxygen_consumed,
             'aeration_energy_kwh': energy,
-            'energy_per_m^3': energy / (q_in * dt) if q_in > 0 else 0,
-            'biomass_concentration': self._biomass(comp_out)
+            'energy_per_m^3': energy / (q_in * dt) if q_in > 0 else 0
         }
 
     def _cod(self, c: Dict[str, float]) -> float:

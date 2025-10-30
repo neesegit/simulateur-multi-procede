@@ -120,8 +120,9 @@ def print_summary(results: Dict[str, Any]) -> None:
         for node_id, node_stats in stats.items():
             print(f"\n\t{node_id} :")
             print(f"\t\tDebit moyen : {node_stats.get('avg_flowrate', 0):>8.1f} m^3/h")
-            print(f"\t\tDCO moyenne:  {node_stats.get('avg_cod', 0):>8.1f} mg/L")
-            print(f"\t\tÉchantillons: {node_stats.get('num_samples', 0):>8d}")
+            print(f"\t\tDCO moyenne :  {node_stats.get('avg_cod', 0):>8.1f} mg/L")
+            if node_id != 'influent':
+                print(f"\t\tÉchantillons : {node_stats.get('num_samples', 0):>8d}")
 
     print("\n"+"="*60)
 

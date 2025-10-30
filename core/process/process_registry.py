@@ -48,7 +48,7 @@ class ProcessRegistry:
             self.processes[definition.type] = definition
             logger.debug(f"Procédé chargé : {definition.type} - {definition.name}")
 
-        logger.info(f"Catalogue chargé : {len(self.processes)} procédé(s)")
+        logger.debug(f"Catalogue chargé : {len(self.processes)} procédé(s)")
 
     @classmethod
     def get_instance(cls, catalog_path: Optional[Path] = None) -> 'ProcessRegistry':

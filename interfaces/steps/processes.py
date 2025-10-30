@@ -81,10 +81,11 @@ def configure_processes(selected_keys: List[str],
         # Choix du modèle si applicable
         selected_model = None
         if proc_info.get('has_model_choice'):
-            selected_model = _select_model(AVAILABLE_MODELS)
-            config_params['model'] = selected_model
+            selected_model_key = _select_model(AVAILABLE_MODELS)
+            selected_model_type = AVAILABLE_MODELS[selected_model_key]['type']
+            config_params['model'] = selected_model_type
             if ask_yes_no("\nConfigurer les paramètres du modèle ?", default=False):
-                model_params = _configure_model_parameters(AVAILABLE_PROCESSES[selected_model])
+                model_params = _configure_model_parameters(AVAILABLE_PROCESSES[selected_model_key])
                 config_params['model_parameters'] = model_params
 
         # Paramètres requis

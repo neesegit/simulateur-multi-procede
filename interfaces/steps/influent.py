@@ -35,7 +35,6 @@ def configure_influent(config: Dict) -> None:
         'influent': {
             'flowrate': flowrate,
             'temperature': temperature,
-            'model_type': 'ASM1', # Pour l'instant fixé à ASM1
             'auto_fractionate': True,
             'composition': {
                 'cod': cod,

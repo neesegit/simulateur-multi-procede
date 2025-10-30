@@ -138,11 +138,27 @@ class ProcessNode(ABC):
 
         self.logger.info(f"Fractionnement en cours vers {target_model}...")
         if target_model == 'ASM1':
-            from core.fraction import ASM1Fraction
+            from models.asm1.fraction import ASM1Fraction
 
             measured = flow.extract_measured()
             try:
                 fractionated = ASM1Fraction.fractionate(**measured)
+                fractionated_flow = flow.copy()
+                fractionated_flow.components.update(fractionated)
+
+                inputs['flow'] = fractionated_flow
+                inputs['components'] = fractionated_flow.components
+
+                self.logger.info(f"Fractionnement réussi : {len(fractionated)} composants")
+            except Exception as e:
+                self.logger.error(f"Erreur de fractionnement : {e}")
+                raise
+        elif target_model.upper() == 'ASM2D':
+            from models.asm2d.fraction import ASM2dFraction
+
+            measured = flow.extract_measured()
+            try:
+                fractionated = ASM2dFraction.fractionate(**measured)
                 fractionated_flow = flow.copy()
                 fractionated_flow.components.update(fractionated)
 

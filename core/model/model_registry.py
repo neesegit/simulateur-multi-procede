@@ -43,7 +43,7 @@ class ModelRegistry:
             self.models[definition.type] = definition
             logger.debug(f"Modèle chargé : {definition.type} - {definition.name}")
 
-        logger.info(f"Catalogue chargé : {len(self.models)} modèle(s)")
+        logger.debug(f"Catalogue chargé : {len(self.models)} modèle(s)")
 
     @classmethod
     def get_instance(cls, catalog_path: Optional[Path] = None) -> 'ModelRegistry':

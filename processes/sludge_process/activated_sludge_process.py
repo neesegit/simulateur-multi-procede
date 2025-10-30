@@ -80,12 +80,13 @@ class ActivatedSludgeProcess(ProcessNode):
         inputs = self.fractionate_input(inputs, target_model=self.model_adapter.name)
 
         q_in = inputs['flowrate']
+        temperature = inputs['temperature']
         inflow_components = self.model_adapter.dict_to_vector(inputs['components'])
 
         c_out = self._simulate_reactor(inflow_components, q_in, dt)
 
         comp_out = self.model_adapter.vector_to_dict(c_out)
-        results = self.sludge_metrics.compute(comp_out, inflow_components, q_in, dt, self.volume)
+        results = self.sludge_metrics.compute(comp_out, inflow_components, q_in, dt, self.volume, temperature)
 
         self.metrics = {
             'cod_removal': results['cod_removal_rate'],
@@ -114,7 +115,7 @@ class ActivatedSludgeProcess(ProcessNode):
     
     def update_state(self, outputs: Dict[str, Any]) -> None:
         """Met à jour l'état interne"""
-        self.state = outputs.copy()
+        self.state = outputs['components'].copy()
         self.outputs = outputs
     
     def __repr__(self):

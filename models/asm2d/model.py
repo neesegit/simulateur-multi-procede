@@ -1,0 +1,101 @@
+"""
+Implémentation complète du modèle ASM2d
+
+Le modèle comprend :
+- 19 composants
+- 21 processus biologiques
+- 45 paramètres cinétiques et stoechiométriques
+"""
+import numpy as np
+import logging
+
+from typing import Dict, Optional
+from core.model.model_registry import ModelRegistry
+from models.asm2d.kinetics import calculate_process_rates
+from models.asm2d.stoichiometry import build_stoichiometric_matrix
+
+logger = logging.getLogger(__name__)
+
+class ASM2dModel:
+    """
+    Modèle ASM2d pour la simulation des boues activées avec déphosphatation biologique
+    """
+
+    def __init__(self, params: Optional[Dict[str, float]] = None) -> None:
+        registry = ModelRegistry.get_instance()
+        model_definition = registry.get_model_definition('ASM2dModel')
+        self.DEFAULT_PARAMS = model_definition.get_default_params()
+        self.COMPONENT_INDICES = {
+            model_definition.get_components_names()[i]: i
+            for i in range(len(model_definition.get_components_names()))
+        }
+
+        self.params = self.DEFAULT_PARAMS.copy()
+        if params:
+            self.params.update(params)
+
+        self.stoichiometric_matrix = build_stoichiometric_matrix(self.params)
+
+    def compute_derivatives(self, c: np.ndarray) -> np.ndarray:
+        rho = calculate_process_rates(c, self.params)
+        derivatives = self.stoichiometric_matrix.T @ rho
+        return derivatives
+    
+    def step(self, c: np.ndarray, dt: float, so_setpoint: Optional[float] = None) -> np.ndarray:
+        """
+        Effectue un pas de temps de simulation avec méthode d'Euler
+
+        Args:
+            c (np.ndarray): Concentrations au temps t
+            dt (float): Pas de temps
+            so_setpoint (Optional[float], optional): Consigne d'oxyg-ne dissosu. Defaults to None.
+
+        Returns:
+            np.ndarray: _description_
+        """
+        
+        derivatives = self.compute_derivatives(c)
+        c_next = c + derivatives*dt
+        c_next = np.maximum(c_next, 1e-10)
+
+        if so_setpoint is not None:
+            c_next[0] = so_setpoint
+        
+        return c_next
+    
+    def get_component_names(self) -> list:
+        """
+        Retourne les noms des composants dans l'ordre
+
+        Returns:
+            list
+        """
+        return list(self.COMPONENT_INDICES.keys())
+    
+    def concentrations_to_dict(self, c: np.ndarray) -> Dict[str, float]:
+        """Convertit un vecteur de concentrations en dictionnaire
+
+        Args:
+            c (np.ndarray): Concentration, vecteur numpy
+
+        Returns:
+            Dict[str, float]: Dictionnaire {nom_composant: valeur}
+        """
+        return {name: c[idx] for name, idx in self.COMPONENT_INDICES.items()}
+    
+    def dict_to_concentrations(self, c_dict: Dict[str, float]) -> np.ndarray:
+        """
+        Convertit un dictionnaire de concentrations en vecteur numpy
+
+        Args:
+            c_dict (Dict[str, float]): Dictionnaire {nim_composant: valeur}
+
+        Returns:
+            np.ndarray: Vecteur numpy
+        """
+        concentration = np.zeros(19)
+        for name, value in c_dict.items():
+            if name in self.COMPONENT_INDICES:
+                concentration[self.COMPONENT_INDICES[name]] = value
+        return concentration
+        
