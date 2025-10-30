@@ -73,7 +73,7 @@ def calculate_process_rates(c: np.ndarray, p: dict) -> np.ndarray:
     #4 Aerobic growth of XH on SF
     rho[3] = mu_h*(so2/(k_o2+so2))*(sf/(k_f+sf))*(sf/(sf+sa))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/(k_alk+salk))*xh
     #5 Aerobic growth of XH on SA
-    rho[4] = mu_h*(so2/(k_o2+so2))*(sa/(k_a+sa))*(sa/(sf+sa))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/(k_alk*salk))*xh
+    rho[4] = mu_h*(so2/(k_o2+so2))*(sa/(k_a+sa))*(sa/(sf+sa))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/(k_alk+salk))*xh
     #6 Anoxic growth of XH on SF
     rho[5] = mu_h*eta_no3_h*(k_o2/(k_o2+so2))*(k_no3/(k_no3+sno3))*(sf/(k_f+sf))*(sf/(sf+sa))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/(k_alk+salk))*xh
     #7 Anoxic growth of XH on SA

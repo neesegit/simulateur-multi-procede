@@ -87,6 +87,7 @@ class ActivatedSludgeProcess(ProcessNode):
 
         comp_out = self.model_adapter.vector_to_dict(c_out)
         results = self.sludge_metrics.compute(comp_out, inflow_components, q_in, dt, self.volume, temperature)
+        print("="*100+"\nRESULSTS"+f"\n{results}\n"+"="*100)
 
         self.metrics = {
             'cod_removal': results['cod_removal_rate'],
@@ -107,10 +108,11 @@ class ActivatedSludgeProcess(ProcessNode):
         dt_day = dt / 24.0
 
         for _ in range(max(1, int(dt_day / 0.01))):
+            self.model_adapter.enforce_oxygen_setpoint(c, self.do_setpoint)
             dc_dt = dilution * (c_in - c) + self.model_adapter.reactions(c)
             c += dc_dt * (dt_day / max(1, int(dt_day / 0.01)))
             c = np.maximum(c, 1e-10)
-            self.model_adapter.enforce_oxygen_setpoint(c, self.do_setpoint)
+        self.model_adapter.enforce_oxygen_setpoint(c, self.do_setpoint)
         return c
     
     def update_state(self, outputs: Dict[str, Any]) -> None:

@@ -73,8 +73,6 @@ class ASM1Fraction:
         if cod_soluble is None:
             cod_soluble = cod * (r['f_si_cod'] + r['f_ss_cod'])
 
-        cod_particulate = cod - cod_soluble
-
         # DCO soluble
         components['si'] = cod * r['f_si_cod'] # Inerte soluble
         components['ss'] = cod * r['f_ss_cod'] # Biodégradable soluble
@@ -115,7 +113,7 @@ class ASM1Fraction:
 
         # Oxygène dissous
         # Dans L'influent, généralement très faible
-        components['so'] = 0.0
+        # components['so'] = 0.0
 
         # Alcalinité
         if alkalinity is not None:

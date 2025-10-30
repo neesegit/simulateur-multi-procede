@@ -15,38 +15,39 @@ class ASM2dFraction:
     DEFAULT_RATIOS = {
         # DCO
         'f_si_cod': 0.05,
-        'f_sf_cod': 0.15, # DCO fermentescible (sucres)
-        'f_sa_cod': 0.05, # DCO sous forme acétate (soluble biodégradable)
-        'f_xs_cod': 0.40,
+        'f_sf_cod': 0.10, # DCO fermentescible (sucres)
+        'f_sa_cod': 0.03, # DCO sous forme acétate (soluble biodégradable)
+        'f_xs_cod': 0.45,
         'f_xi_cod': 0.10,
-        'f_xh_cod': 0.20,
-        'f_xpao_cod': 0.04, # Biomasse PAO
-        'f_xaut_cod': 0.01, # Biomasse autotrophe
+        'f_xh_cod': 0.22,
+        'f_xpao_cod': 0.03, # Biomasse PAO
+        'f_xaut_cod': 0.02, # Biomasse autotrophe
 
         # Azote
         'f_snh4_tkn': 0.70,
-        'f_sno3_tn': 0.02, # Nitrates dans influent
+        'f_sno3_tn': 0.01, # Nitrates dans influent
         'i_n_si': 0.01, # Teneur N de SI
         'i_n_sf': 0.03, # Teneur N de SF
         'i_n_xs': 0.04, # Teneur N de XS
+        'i_n_bm': 0.07, # Teneur N biomasse
+        'i_n_xi': 0.02, # Teneur N inertes
 
         # Phosphore total
-        'f_spo4_tp': 0.60, # fraction soluble inorganique
-        'f_xpp_xpao': 0.30, # Polyphosphates stockés
+        'f_spo4_tp': 0.50, # fraction soluble inorganique
+        'f_xpp_xpao': 0.25, # Polyphosphates stockés
         'i_p_si': 0.00, # Teneur P de SI
         'i_p_sf': 0.01, # Teneur P de SF
         'i_p_xs': 0.01, # Teneur P de XI
+        'i_p_xi': 0.01,
         'i_p_bm': 0.02, # Teneur P biomasse
 
-        # Biomasse
-        'i_n_bm': 0.07, # Teneur N biomasse
-        'i_n_xi': 0.02, # Teneur N inertes
+        # TSS
         'i_tss_xi': 0.75, # TSS/COD pour XI
         'i_tss_xs': 0.75, # TSS/COD pour XS
         'i_tss_bm': 0.90, # TSS/COD pour biomasse
 
         # Alcalinité
-        'alk_cod_ratio': 0.005 # Alcalinité / COD
+        'alk_cod_ratio': 0.01 # Alcalinité / COD
     }
 
     @classmethod
@@ -90,7 +91,6 @@ class ASM2dFraction:
 
         if cod_soluble is None:
             cod_soluble = cod * (r['f_si_cod'] + r['f_sf_cod'] + r['f_sa_cod'])
-        cod_particulate = cod - cod_soluble
 
         # DCO soluble
         c['si'] = cod * r['f_si_cod']

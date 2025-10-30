@@ -30,9 +30,16 @@ class SludgeModelAdapter:
         return self.model.compute_derivatives(c)
     
     def enforce_oxygen_setpoint(self, c: np.ndarray, do_setpoint: float) -> None:
-        idx = self.model.COMPONENT_INDICES.get('so')
+        if self.name == 'ASM1':
+            idx = self.model.COMPONENT_INDICES.get('so')
+        elif self.name == 'ASM2D':
+            idx = self.model.COMPONENT_INDICES.get('so2')
+        else:
+            idx = None
+
         if idx is not None:
             c[idx] = do_setpoint
+            logger.debug(f"Oxygène dissous fixé : do_setpoint={do_setpoint} ({idx})")
 
     def initial_state(self, do_setpoint: float) -> Dict[str, float]:
         if self.name == 'ASM1':
@@ -64,13 +71,13 @@ class SludgeModelAdapter:
                 'sn2': 0.0,
                 'xi': 25.0,
                 'xs': 100.0,
-                'xh': 2000.0,
-                'xpao': 300.0,
-                'xpp': 90.0,
-                'xpha': 20.0,
-                'xaut': 100.0,
-                'xtss': 2500.0,
-                'xmeoh': 100.0,
+                'xh': 1500.0,
+                'xpao': 200.0,
+                'xpp': 50.0,
+                'xpha': 10.0,
+                'xaut': 80.0,
+                'xtss': 2000.0,
+                'xmeoh': 50.0,
                 'xmep': 0.0
             }
         logger.warning(f"Pas d'état initial défini pour {self.name}")

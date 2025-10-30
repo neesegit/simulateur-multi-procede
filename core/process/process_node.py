@@ -131,7 +131,7 @@ class ProcessNode(ABC):
             Dict[str, Any]: Inputs avec composants fractionnés
         """
         if not self.needs_fractionation(inputs):
-            self.logger.debug("Fractionnement on nécessaire")
+            self.logger.debug("Fractionnement non nécessaire")
             return inputs
         
         flow = inputs['flow']
@@ -141,8 +141,18 @@ class ProcessNode(ABC):
             from models.asm1.fraction import ASM1Fraction
 
             measured = flow.extract_measured()
+            print(measured)
             try:
-                fractionated = ASM1Fraction.fractionate(**measured)
+                fractionated = ASM1Fraction.fractionate(
+                    cod=measured.get('cod', 0.0),
+                    ss=measured.get('ss', 0.0),
+                    tkn=measured.get('tkn', 0.0),
+                    nh4=measured.get('nh4', 0.0),
+                    no3=measured.get('no3', 0.0),
+                    po4=measured.get('po4', 0.0),
+                    alkalinity=measured.get('alkalinity')
+                    # TODO ratio perso
+                )
                 fractionated_flow = flow.copy()
                 fractionated_flow.components.update(fractionated)
 
@@ -158,7 +168,16 @@ class ProcessNode(ABC):
 
             measured = flow.extract_measured()
             try:
-                fractionated = ASM2dFraction.fractionate(**measured)
+                fractionated = ASM2dFraction.fractionate(
+                    cod=measured.get('cod', 0.0),
+                    ss=measured.get('ss', 0.0),
+                    tkn=measured.get('tkn', 0.0),
+                    nh4=measured.get('nh4', 0.0),
+                    no3=measured.get('no3', 0.0),
+                    po4=measured.get('po4', 0.0),
+                    alkalinity=measured.get('alkalinity')
+                    # TODO ratio perso
+                )
                 fractionated_flow = flow.copy()
                 fractionated_flow.components.update(fractionated)
 

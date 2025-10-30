@@ -17,6 +17,9 @@ class FlowData:
     cod: float = 0.0 # DCO (mg/L)
     bod: float = 0.0 # DBO5 (mg/L)
     tkn: float = 0.0 # Azote Kjeldahl total (mg/L)
+    nh4: float = 0.0
+    no3: float = 0.0
+    po4: float = 0.0
 
     # Tous les autres paramètres sont stockés dans un dict flexible
     components: Dict[str, float] = field(default_factory=dict)
@@ -25,7 +28,7 @@ class FlowData:
     source_node: Optional[str] = None
     model_type: Optional[str] = None
 
-    _STANDARD_KEYS = {'ss', 'cod', 'bod', 'tkn'}
+    _STANDARD_KEYS = {'ss', 'cod', 'bod', 'tkn', 'nh4', 'no3', 'po4', 'alkalinity'}
 
     def get(self, key: str, default: float = 0.0) -> float:
         """
@@ -73,7 +76,7 @@ class FlowData:
     
     def extract_measured(self, keys: Optional[list[str]] = None) -> Dict[str, float]:
         if keys is None:
-            keys = ['cod', 'ss', 'tkn', 'nh4', 'no3', 'po4', 'alkalinity']
+            keys = ['ss', 'cod', 'bod', 'tkn', 'nh4', 'no3', 'po4', 'alkalinity']
         return {k: self.get(k, 0.0) for k in keys}
     
     def to_dict(self) -> Dict[str, Any]:
