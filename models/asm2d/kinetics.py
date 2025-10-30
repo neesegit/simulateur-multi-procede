@@ -4,24 +4,24 @@ def calculate_process_rates(c: np.ndarray, p: dict) -> np.ndarray:
 
     rho = np.zeros(21)
 
-    so2 = c[0]
-    sf = c[1]
-    sa = c[2]
-    snh4 = c[3]
-    sno3 = c[4]
-    spo4 = c[5]
+    so2 = max(c[0], 1e-10)
+    sf = max(c[1], 1e-10)
+    sa = max(c[2], 1e-10)
+    snh4 = max(c[3], 1e-10)
+    sno3 = max(c[4], 1e-10)
+    spo4 = max(c[5], 1e-10)
     si = c[6]
-    salk = c[7]
+    salk = max(c[7], 1e-10)
     sn2 = c[8]
     xi = c[9]
-    xs = c[10]
-    xh = c[11]
-    xpao = c[12]
-    xpp = c[13]
-    xpha = c[14]
-    xaut = c[15]
+    xs = max(c[10], 1e-10)
+    xh = max(c[11], 1e-10)
+    xpao = max(c[12], 1e-10)
+    xpp = max(c[13], 1e-10)
+    xpha = max(c[14], 1e-10)
+    xaut = max(c[15], 1e-10)
     xtss = c[16]
-    xmeoh = c[17]
+    xmeoh = max(c[17], 1e-10)
     xmep = c[18]
 
     k_o2 = p['k_o2']
@@ -71,7 +71,7 @@ def calculate_process_rates(c: np.ndarray, p: dict) -> np.ndarray:
     #3 Anaerobic hydrolysis
     rho[2] = k_h*eta_fe*(k_o2/(k_o2+so2))*(k_no3/(k_no3+sno3))*((xs/xh)/(k_x+xs/xh))*xh
     #4 Aerobic growth of XH on SF
-    rho[3] = mu_h*(so2/(k_o2+so2))*(sf/(k_f+sf))*(sf/(sf+sa))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/k_alk+salk)*xh
+    rho[3] = mu_h*(so2/(k_o2+so2))*(sf/(k_f+sf))*(sf/(sf+sa))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/(k_alk+salk))*xh
     #5 Aerobic growth of XH on SA
     rho[4] = mu_h*(so2/(k_o2+so2))*(sa/(k_a+sa))*(sa/(sf+sa))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/(k_alk*salk))*xh
     #6 Anoxic growth of XH on SF
@@ -105,6 +105,6 @@ def calculate_process_rates(c: np.ndarray, p: dict) -> np.ndarray:
     #20 Precipitation
     rho[19] = k_pre*spo4*xmeoh
     #21 Redissolution
-    rho[20] = k_red*xmep*(salk/k_alk_aut+salk)
+    rho[20] = k_red*xmep*(salk/(k_alk_aut+salk))
 
     return rho

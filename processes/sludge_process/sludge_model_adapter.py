@@ -51,6 +51,29 @@ class SludgeModelAdapter:
                 'xnd': 5.0, 
                 'salk': 7.0
             }
+        elif self.name == 'ASM2D':
+            return {
+                'so2': do_setpoint,
+                'sf': 10.0,
+                'sa': 5.0,
+                'snh4': 2.0,
+                'sno3': 5.0,
+                'spo4': 1.0,
+                'si': 30.0,
+                'salk': 5.0,
+                'sn2': 0.0,
+                'xi': 25.0,
+                'xs': 100.0,
+                'xh': 2000.0,
+                'xpao': 300.0,
+                'xpp': 90.0,
+                'xpha': 20.0,
+                'xaut': 100.0,
+                'xtss': 2500.0,
+                'xmeoh': 100.0,
+                'xmep': 0.0
+            }
+        logger.warning(f"Pas d'état initial défini pour {self.name}")
         return {}
     
     def get_component_names(self) -> list:
