@@ -141,7 +141,6 @@ class ProcessNode(ABC):
             from models.asm1.fraction import ASM1Fraction
 
             measured = flow.extract_measured()
-            print(measured)
             try:
                 fractionated = ASM1Fraction.fractionate(
                     cod=measured.get('cod', 0.0),

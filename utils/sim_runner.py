@@ -3,6 +3,7 @@ from pathlib import Path
 
 from interfaces.config import ConfigLoader 
 from interfaces import ResultsExporter, Visualizer
+from interfaces.metrics_exporter import MetricsExporter
 from core.orchestrator.simulation_orchestrator import SimulationOrchestrator 
 from core.process.process_factory import ProcessFactory
 from .decorators import timed
@@ -78,6 +79,28 @@ def export_results(results: Dict[str, Any], with_plots: bool = True) -> Dict[str
         base_dir='output/results',
         name=sim_name
     )
+    print("\nExport des métriques de performance ...")
+    metrics_json = MetricsExporter.export_performance_metrics(
+        results,
+        output_dir=f"{exported['base_directory']}/metrics"
+    )
+    print(f"\t- Métriques JSON : {metrics_json.name}")
+
+    metrics_csv = MetricsExporter.export_performance_csv(
+        results,
+        output_dir=f"{exported['base_directory']}/metrics"
+    )
+    print(f"\t- Métriques CSV : {len(metrics_csv)} fichier(s)")
+
+    report_path = MetricsExporter.create_performance_report(
+        results,
+        output_path=f"{exported['base_directory']}/performance_report.txt"
+    )
+    print(f"\t- Rapport : {report_path.name}")
+
+    exported['files']['metrics_json'] = str(metrics_json)
+    exported['files']['metrics_csv'] = {k: str(v) for k, v in metrics_csv.items()}
+    exported['files']['performance_report'] = str(report_path)
 
     print(f"\t- Répertoire : {exported['base_directory']}")
     print(f"\t- CSV : {len(exported['files']['csv'])} fichier(s)")

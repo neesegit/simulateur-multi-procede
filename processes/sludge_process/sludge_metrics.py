@@ -25,8 +25,31 @@ class SludgeMetrics:
         nh4_out = self._nh4(comp_out)
         no3_out = self._no3(comp_out)
         po4_out = self._po4(comp_out)
+        cod_soluble = self._soluble_cod(comp_out)
+        cod_particulate = cod_out - cod_soluble
+
 
         cod_in = self._cod({k: float(v) for k, v in zip(comp_out.keys(), c_in)})
+        cod_soluble_in = self._soluble_cod({k: float(v) for k, v in zip(comp_out.keys(), c_in)})
+
+        if cod_soluble_in > 0:
+            soluble_cod_removal = (
+                (cod_soluble_in - cod_soluble) / cod_soluble_in * 100
+            )
+        else:
+            soluble_cod_removal = 0.0
+
+        mlss = ss_out
+        waste_flow = q_in*0.01
+        if waste_flow > 0:
+            total_solids_kg = mlss * volume / 1000
+            wasted_solids_kg_per_day = waste_flow*mlss*24/1000
+            srt_days = total_solids_kg / wasted_solids_kg_per_day if wasted_solids_kg_per_day > 0 else 0
+        else :
+            srt_days = float('inf')
+
+        svi = (volume / mlss)*1000 if mlss > 100 else 0
+
         cod_removal = ((cod_in - cod_out) / cod_in*100) if cod_in > 0 else 0
         oxygen_consumed = (cod_in - cod_out) * q_in * dt / 1000.0
         energy = oxygen_consumed * 2.0
@@ -44,14 +67,20 @@ class SludgeMetrics:
             'nh4': nh4_out,
             'no3': no3_out,
             'po4': po4_out,
+            'cod_soluble': cod_soluble,
+            'cod_particulate': cod_particulate,
+
 
             'cod_removal_rate': cod_removal,
+            'soluble_cod_removal': soluble_cod_removal,
             'hrt_hours': volume / q_in,
+            'srt_days': srt_days,
+            'svi': svi,
             'biomass_concentration': self._biomass(comp_out),
 
             'oxygen_consumed_kg': oxygen_consumed,
             'aeration_energy_kwh': energy,
-            'energy_per_m^3': energy / (q_in * dt) if q_in > 0 else 0
+            'energy_per_m3': energy / (q_in * dt) if q_in > 0 else 0
         }
 
     def _cod(self, c: Dict[str, float]) -> float:
@@ -109,4 +138,11 @@ class SludgeMetrics:
             return 0.0
         elif self.model_name == 'ASM2D':
             return float(c.get('spo4', 0.0))
+        return 0.0
+    
+    def _soluble_cod(self, c: Dict[str, float]) -> float:
+        if self.model_name == 'ASM1':
+            return float(c.get('ss', 0))
+        elif self.model_name == 'ASM2D':
+            return float(c.get('sf', 0) + c.get('sa', 0))
         return 0.0

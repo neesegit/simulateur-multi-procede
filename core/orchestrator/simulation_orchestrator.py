@@ -134,7 +134,7 @@ class SimulationOrchestrator:
             source_node=process.node_id
         )
         flow.components = outputs.get('components', {}).copy()
-        for key in ['cod', 'ss', 'bod', 'tkn']:
+        for key in ['cod', 'ss', 'bod', 'tkn', 'nh4', 'no3', 'po4']:
             if key in outputs:
                 setattr(flow, key, outputs[key])
         return flow
