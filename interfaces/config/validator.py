@@ -7,7 +7,7 @@ from typing import Dict, Any, Callable, List
 import logging
 from datetime import datetime
 
-from interfaces.schema.config_schema import ConfigSchema
+from .schema.config_schema import ConfigSchema
 
 logger = logging.getLogger(__name__)
 

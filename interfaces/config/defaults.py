@@ -32,13 +32,6 @@ class ConfigDefaults:
             'recycle_ratio': 1.0,
             'waste_ratio': 0.01
         },
-        'ASM1Process': {  # Legacy
-            'volume': 5000.0,
-            'depth': 4.0,
-            'dissolved_oxygen_setpoint': 2.0,
-            'recycle_ratio': 1.0,
-            'waste_ratio': 0.01
-        }
     }
 
     @staticmethod

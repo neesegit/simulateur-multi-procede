@@ -76,6 +76,7 @@ class SimulationOrchestrator:
             'sim_name': self.config.get('name', 'simulation'),
             'start_time': str(self.state.start_time),
             'end_time': str(self.state.end_time),
+            'total_hours': (self.state.end_time - self.state.start_time).total_seconds()/3600,
             'timestep': self.state.timestep,
             'steps_completed': self.state.current_step
         }
@@ -133,8 +134,25 @@ class SimulationOrchestrator:
             model_type=outputs.get('model_type'),
             source_node=process.node_id
         )
+
         flow.components = outputs.get('components', {}).copy()
+
+        metrics_to_store = [
+            'cod_soluble', 'cod_particulate', 'soluble_cod_removal',
+            'cod_removal_rate', 'hrt_hours', 'srt_days', 'svi',
+            'biomass_concentration', 'oxygen_consumed_kg',
+            'aeration_energy_kwh', 'energy_per_m3'
+        ]
+
+        for metric in metrics_to_store:
+            if metric in outputs:
+                flow.components[metric] = outputs[metric]
+
+
         for key in ['cod', 'ss', 'bod', 'tkn', 'nh4', 'no3', 'po4']:
             if key in outputs:
-                setattr(flow, key, outputs[key])
+                value = outputs[key]
+                setattr(flow, key, value)
+                if key not in flow.components:
+                    flow.components[key] = value
         return flow

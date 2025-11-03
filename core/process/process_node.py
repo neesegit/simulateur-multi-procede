@@ -158,7 +158,7 @@ class ProcessNode(ABC):
                 inputs['flow'] = fractionated_flow
                 inputs['components'] = fractionated_flow.components
 
-                self.logger.info(f"Fractionnement réussi : {len(fractionated)} composants")
+                self.logger.debug(f"Fractionnement réussi : {len(fractionated)} composants")
             except Exception as e:
                 self.logger.error(f"Erreur de fractionnement : {e}")
                 raise

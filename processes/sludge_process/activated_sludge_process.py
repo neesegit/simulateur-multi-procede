@@ -11,6 +11,8 @@ from processes.sludge_process.sludge_metrics import SludgeMetrics
 from processes.sludge_process.sludge_model_adapter import SludgeModelAdapter
 from core.model.model_registry import ModelRegistry
 
+from core.solver.cstr_solver import CSTRSolver
+
 logger = logging.getLogger(__name__)
 
 class ActivatedSludgeProcess(ProcessNode):
@@ -106,13 +108,30 @@ class ActivatedSludgeProcess(ProcessNode):
         dilution = 1.0 / (hrt_h / 24.0) if hrt_h > 0 else 0
         dt_day = dt / 24.0
 
-        for _ in range(max(1, int(dt_day / 0.01))):
-            self.model_adapter.enforce_oxygen_setpoint(c, self.do_setpoint)
-            dc_dt = dilution * (c_in - c) + self.model_adapter.reactions(c)
-            c += dc_dt * (dt_day / max(1, int(dt_day / 0.01)))
-            c = np.maximum(c, 1e-10)
-        self.model_adapter.enforce_oxygen_setpoint(c, self.do_setpoint)
-        return c
+        oxygen_idx = None
+        if self.model_adapter.name == 'ASM1':
+            oxygen_idx = self.model_adapter.model.COMPONENT_INDICES.get('so')
+        elif self.model_adapter.name == 'ASM2D':
+            oxygen_idx = self.model_adapter.model.COMPONENT_INDICES.get('so2')
+
+        c_next = CSTRSolver.solve_step(
+            c=c,
+            c_in=c_in,
+            reaction_func=self.model_adapter.reactions,
+            dt=dt_day,
+            dilution_rate=dilution,
+            method='rk4',
+            oxygen_idx=oxygen_idx,
+            do_setpoint=self.do_setpoint
+        )
+
+        # for _ in range(max(1, int(dt_day / 0.01))):
+        #     self.model_adapter.enforce_oxygen_setpoint(c, self.do_setpoint)
+        #     dc_dt = dilution * (c_in - c) + self.model_adapter.reactions(c)
+        #     c += dc_dt * (dt_day / max(1, int(dt_day / 0.01)))
+        #     c = np.maximum(c, 1e-10)
+        # self.model_adapter.enforce_oxygen_setpoint(c, self.do_setpoint)
+        return c_next
     
     def update_state(self, outputs: Dict[str, Any]) -> None:
         """Met à jour l'état interne"""

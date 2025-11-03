@@ -111,7 +111,8 @@ def export_results(results: Dict[str, Any], with_plots: bool = True) -> Dict[str
         print("\nGénération des graphiques ...")
         dashboard = Visualizer.create_dashboard(
             results,
-            output_dir=f"{exported['base_directory']}/figures"
+            output_dir=f"{exported['base_directory']}/figures",
+            format='both'
         )
         print(f"\t- {len(dashboard)} graphique(s) créé(s)")
         exported['figures'] = {k: str(v) for k, v in dashboard.items()}
@@ -132,7 +133,7 @@ def print_summary(results: Dict[str, Any]) -> None:
     metadata = results.get('metadata', {})
     print(f"\nPériode simulée :")
     print(f"\tDe : {metadata.get('start_time')}")
-    print(f"\tA : {metadata.get('final_time')}")
+    print(f"\tA : {metadata.get('end_time')}")
     print(f"\tPas de temps : {metadata.get('timestep')} heures")
     print(f"\tTotal : {metadata.get('steps_completed')} pas")
 

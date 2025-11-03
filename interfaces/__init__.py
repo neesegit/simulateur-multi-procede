@@ -9,9 +9,9 @@ Ce module regroupe toutes les fonctionnalités d'interface :
 
 from .config import ConfigLoader
 from .result_exporter import ResultsExporter
-from .visualizer import Visualizer
-from .cli_interface import CLIInterface
-from .schema import ConfigSchema
+from .visualisation.visualizer import Visualizer
+from .cli.cli_interface import CLIInterface
+from .config.schema.config_schema import ConfigSchema
 
 __all__ = [
     'ConfigLoader',

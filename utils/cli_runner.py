@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from typing import Dict, Any
-from interfaces.cli_interface import CLIInterface
+from interfaces.cli.cli_interface import CLIInterface
 
 def parse_arguments() -> argparse.Namespace:
     """
