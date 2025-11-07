@@ -7,9 +7,9 @@ Ce module regroupe toutes les fonctionnalités clés :
 - Databus
 """
 
-from .databuses import DataBus
+from .data.databuses import DataBus
 from core.data.flow_data import FlowData
-from .simulation_flow import SimulationFlow 
+from .data.simulation_flow import SimulationFlow 
 from .orchestrator.simulation_orchestrator import SimulationOrchestrator
 from .process.process_factory import ProcessFactory
 from .process.process_node import ProcessNode

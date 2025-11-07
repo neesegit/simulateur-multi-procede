@@ -13,17 +13,7 @@ class ConfigDefaults:
         'auto_fractionate': True,
         'composition': {}
     }
-
-    TYPICAL_URBAN_WASTEWATER = {
-        'cod': 500.0,
-        'ss': 250.0,
-        'tkn': 40.0,
-        'nh4': 28.0,
-        'no3': 0.5,
-        'po4': 8.0,
-        'alkalinity': 6.0
-    }
-
+    
     PROCESS_DEFAULTS = {
         'ActivatedSludgeProcess': {
             'volume': 5000.0,

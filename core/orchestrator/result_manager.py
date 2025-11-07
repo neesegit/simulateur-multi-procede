@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any
-from core.simulation_flow import SimulationFlow
+from core.data.simulation_flow import SimulationFlow
 from core.data.flow_data import FlowData
 
 class ResultManager:

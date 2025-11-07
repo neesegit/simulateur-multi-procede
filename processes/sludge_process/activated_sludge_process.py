@@ -124,13 +124,6 @@ class ActivatedSludgeProcess(ProcessNode):
             oxygen_idx=oxygen_idx,
             do_setpoint=self.do_setpoint
         )
-
-        # for _ in range(max(1, int(dt_day / 0.01))):
-        #     self.model_adapter.enforce_oxygen_setpoint(c, self.do_setpoint)
-        #     dc_dt = dilution * (c_in - c) + self.model_adapter.reactions(c)
-        #     c += dc_dt * (dt_day / max(1, int(dt_day / 0.01)))
-        #     c = np.maximum(c, 1e-10)
-        # self.model_adapter.enforce_oxygen_setpoint(c, self.do_setpoint)
         return c_next
     
     def update_state(self, outputs: Dict[str, Any]) -> None:

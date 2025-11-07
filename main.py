@@ -28,7 +28,7 @@ from utils import (
     cli_config,
     load_config,
     run_sim_results
-    )
+)
 
 @safe_run
 def main() -> int:

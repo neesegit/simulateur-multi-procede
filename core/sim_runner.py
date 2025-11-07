@@ -6,22 +6,21 @@ from interfaces import ResultsExporter, Visualizer
 from interfaces.metrics_exporter import MetricsExporter
 from core.orchestrator.simulation_orchestrator import SimulationOrchestrator 
 from core.process.process_factory import ProcessFactory
-from .decorators import timed
+from ..utils.decorators import timed
 
-def load_config(config_path: Path) -> Dict[str, Any]:
+def run_sim_results(config: Dict[str, Any], plots: bool) -> None:
     """
-    Charge une configuration
+    Appele de fonction
 
     Args:
-        config_path (str): Chemin de la configuration à charger
-
-    Returns:
-        Dict[str, Any]: _description_
+        config (Dict[str, Any]): Configuration de simulation
+        plots (bool): Création des graphiques
     """
-    
-    print(f"Chargement de la configuration : {str(config_path)}")
-    config = ConfigLoader.load(config_path)
-    return config
+    results = run_simulation(config)
+    exported = export_results(results, with_plots=not plots)
+    print("\nTraitement terminé avec succès !")
+    print(f"\nRésultats disponibles dans : {exported['base_directory']}")
+    print_summary(results)
 
 @timed
 def run_simulation(config: Dict[str, Any]) -> Dict[str,Any]:
@@ -150,16 +149,17 @@ def print_summary(results: Dict[str, Any]) -> None:
 
     print("\n"+"="*60)
 
-def run_sim_results(config: Dict[str, Any], plots: bool) -> None:
+def load_config(config_path: Path) -> Dict[str, Any]:
     """
-    Appele de fonction
+    Charge une configuration
 
     Args:
-        config (Dict[str, Any]): Configuration de simulation
-        plots (bool): Création des graphiques
+        config_path (str): Chemin de la configuration à charger
+
+    Returns:
+        Dict[str, Any]: _description_
     """
-    results = run_simulation(config)
-    exported = export_results(results, with_plots=not plots)
-    print("\nTraitement terminé avec succès !")
-    print(f"\nRésultats disponibles dans : {exported['base_directory']}")
-    print_summary(results)
+    
+    print(f"Chargement de la configuration : {str(config_path)}")
+    config = ConfigLoader.load(config_path)
+    return config

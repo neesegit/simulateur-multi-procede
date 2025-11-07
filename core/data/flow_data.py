@@ -41,8 +41,6 @@ class FlowData:
         Returns:
             Valeur du composant
         """
-
-        # Vérifie d'abord les attributs standards
         if key in self._STANDARD_KEYS:
             return getattr(self, key, default)
         return self.components.get(key, default)

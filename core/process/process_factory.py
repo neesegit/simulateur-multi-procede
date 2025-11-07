@@ -78,7 +78,7 @@ class ProcessFactory:
     
     @staticmethod
     def _setup_connections(processes: List[ProcessNode],
-                           config: Dict[str, Any]) -> ConnectionManager:
+                           config: Dict[str, Any]) -> None:
         """
         Configure les connexions entre ProcessNodes
 
@@ -93,7 +93,7 @@ class ProcessFactory:
         if 'connections' not in config or not config['connections']:
             ProcessFactory._create_sequentiel_chain(processes, conn_manager)
             logger.info("\n" + conn_manager.visualize_ascii())
-            return conn_manager
+            return 
 
         for conn_config in config.get('connections', []):
             source = conn_config['source']
@@ -118,7 +118,7 @@ class ProcessFactory:
             raise Exception("Erreurs dans le graphe de connexions")
         
         logger.info("\n"+conn_manager.visualize_ascii())
-        return conn_manager
+        return 
     
     @staticmethod
     def _create_sequentiel_chain(processes: List[ProcessNode],

@@ -1,4 +1,4 @@
-from ..base_plotter import BasePlotter
+from .base_plotter import BasePlotter
 
 class CODPlotter(BasePlotter):
 
