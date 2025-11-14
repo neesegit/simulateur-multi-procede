@@ -1,29 +1,28 @@
 """
-Implémentation complète du modèle ASM2d
+Implémentation complète du modèle ASM3
 
 Le modèle comprend :
-- 19 composants
-- 21 processus biologiques
-- 45 paramètres cinétiques et stoechiométriques
+- 13 composants
+- 12 processus biologiques
 """
 import numpy as np
 import logging
 
 from typing import Dict, Optional
 from core.model.model_registry import ModelRegistry
-from models.asm2d.kinetics import calculate_process_rates
-from models.asm2d.stoichiometry import build_stoichiometric_matrix
+from models.asm3.kinetics import calculate_process_rate
+from models.asm3.stoichiometry import build_stoichiometric_matrix
 
 logger = logging.getLogger(__name__)
 
-class ASM2dModel:
+class ASM3Model:
     """
-    Modèle ASM2d pour la simulation des boues activées avec déphosphatation biologique
+    Modèle ASM3 pour la simulation des boues activées
     """
 
-    def __init__(self, params: Optional[Dict[str, float]] = None) -> None:
+    def __ini__(self, params: Optional[Dict[str, float]] = None) -> None:
         registry = ModelRegistry.get_instance()
-        model_definition = registry.get_model_definition('ASM2dModel')
+        model_definition = registry.get_model_definition('ASM3Model')
         self.DEFAULT_PARAMS = model_definition.get_default_params()
         self.COMPONENT_INDICES = {
             model_definition.get_components_names()[i]: i
@@ -33,11 +32,11 @@ class ASM2dModel:
         self.params = self.DEFAULT_PARAMS.copy()
         if params:
             self.params.update(params)
-
+        
         self.stoichiometric_matrix = build_stoichiometric_matrix(self.params)
 
     def compute_derivatives(self, c: np.ndarray) -> np.ndarray:
-        rho = calculate_process_rates(c, self.params)
+        rho = calculate_process_rate(c, self.params)
         derivatives = self.stoichiometric_matrix.T @ rho
         return derivatives
     
@@ -76,4 +75,3 @@ class ASM2dModel:
             if name in self.COMPONENT_INDICES:
                 concentration[self.COMPONENT_INDICES[name]] = value
         return concentration
-        

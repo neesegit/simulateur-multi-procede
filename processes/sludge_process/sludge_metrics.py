@@ -1,14 +1,36 @@
 """
 Calcule les métriques COD, TKN etc
 """
-
 import numpy as np
 
 from typing import Dict, Any
+from core.model.model_registry import ModelRegistry
 
 class SludgeMetrics:
-    def __init__(self, model_name: str):
-        self.model_name = model_name.upper()
+    def __init__(self, model_type: str, registry: ModelRegistry):
+        self.model_type = model_type
+        model_def = registry.get_model_definition(self.model_type)
+        self.config = model_def.get_metrics_dict()
+
+    def _sum_keys(self, c: Dict[str, float], key_type: str) -> float:
+        """Somme générique des clés configurées pour un type donné"""
+        keys = self.config.get(key_type, [])
+        return float(sum(c.get(k, 0) for k in keys))
+    
+    def _get_value(self, c: Dict[str, float], config_key: str) -> float:
+        """Récupère une valeur simple selon la clé configurée"""
+        if key_name := self.config.get(config_key):
+            return float(c.get(key_name, 0))
+        return 0.0
+    
+    def _cod(self, c): return self._sum_keys(c, 'cod')
+    def _tkn(self, c): return self._sum_keys(c, 'tkn')
+    def _ss(self, c): return self._sum_keys(c, 'ss')
+    def _biomass(self, c): return self._sum_keys(c, 'biomass')
+    def _nh4(self, c): return self._get_value(c, 'nh4')
+    def _no3(self, c): return self._get_value(c, 'no3')
+    def _po4(self, c): return self._get_value(c, 'po4')
+    def _soluble_cod(self, c): return self._sum_keys(c, 'soluble_cod')
 
     def compute(
             self,
@@ -57,7 +79,7 @@ class SludgeMetrics:
         return {
             'flowrate': q_in,
             'temperature': temperature,
-            'model_type': self.model_name,
+            'model_type': self.model_type,
             'components': comp_out,
 
             'cod': cod_out,
@@ -82,67 +104,3 @@ class SludgeMetrics:
             'aeration_energy_kwh': energy,
             'energy_per_m3': energy / (q_in * dt) if q_in > 0 else 0
         }
-
-    def _cod(self, c: Dict[str, float]) -> float:
-        if self.model_name == 'ASM1':
-            keys = ['si', 'ss', 'xi', 'xs', 'xbh', 'xba', 'xp']
-        elif self.model_name == 'ASM2D':
-            keys = ['so2', 'sf', 'sa', 'xi', 'xs', 'xh', 'xaut', 'xpao', 'xpp', 'xpha', 'xmeoh', 'xmep']
-        else:
-            keys = []
-        return float(sum(c.get(k, 0) for k in keys))
-    
-    def _tkn(self, c: Dict[str, float]) -> float:
-        if self.model_name == 'ASM1':
-            keys = ['snh', 'snd', 'xnd']
-        elif self.model_name == 'ASM2D':
-            keys = ['snh4', 'xi', 'xs', 'xh', 'xpao', 'xaut']
-        else:
-            keys = []
-        return float(sum(c.get(k, 0) for k in keys))
-    
-    def _ss(self, c: Dict[str, float]) -> float:
-        if self.model_name == 'ASM1':
-            keys = ['xi', 'xs', 'xbh', 'xba', 'xp']
-        elif self.model_name == 'ASM2D':
-            keys = ['xi', 'xs', 'xh', 'xpao', 'xpp', 'xpha', 'xaut', 'xmeoh', 'xmep']
-        else:
-            keys = []
-        return float(sum(c.get(k, 0) for k in keys))
-    
-    def _biomass(self, c: Dict[str, float]) -> float:
-        if self.model_name == 'ASM1':
-            keys = ['xbh', 'xba']
-        elif self.model_name == 'ASM2D':
-            keys = ['xh', 'xaut', 'xpao']
-        else:
-            keys = []
-        return float(sum(c.get(k, 0) for k in keys))
-    
-    def _nh4(self, c: Dict[str, float]) -> float:
-        if self.model_name == 'ASM1':
-            return float(c.get('snh', 0))
-        elif self.model_name == 'ASM2D':
-            return float(c.get('snh4', 0))
-        return 0.0
-
-    def _no3(self, c: Dict[str, float]) -> float:
-        if self.model_name == 'ASM1':
-            return float(c.get('sno', 0))
-        elif self.model_name == 'ASM2D':
-            return float(c.get('sno3', 0))
-        return 0.0
-
-    def _po4(self, c: Dict[str, float]) -> float:
-        if self.model_name == 'ASM1':
-            return 0.0
-        elif self.model_name == 'ASM2D':
-            return float(c.get('spo4', 0.0))
-        return 0.0
-    
-    def _soluble_cod(self, c: Dict[str, float]) -> float:
-        if self.model_name == 'ASM1':
-            return float(c.get('ss', 0))
-        elif self.model_name == 'ASM2D':
-            return float(c.get('sf', 0) + c.get('sa', 0))
-        return 0.0

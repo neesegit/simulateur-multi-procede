@@ -45,6 +45,16 @@
                 {"id": "xnd", "name": "Azote organique particulaire", "unit": "mg N/L"},
                 {"id": "salk", "name": "Alcalinité", "unit": "mmol/L"}
             ],
+            "metrics": {
+                "cod": ["si", "ss", "xi", "xs", "xbh", "xba", "xp"],
+                "tkn": ["snh", "snd", "xnd"],
+                "ss": ["xi", "xs", "xbh", "xba", "xp"],
+                "biomass": ["xbh", "xba"],
+                "nh4": "snh",
+                "no3": "sno",
+                "po4": null,
+                "soluble_cod": ["ss"]
+            },
             "module": "models.asm1.model",
             "class": "ASM1Model"
         },
@@ -148,11 +158,96 @@
                 {"id": "xmeoh", "name": "Produits endogènes de XH", "unit": "mg COD/L"},
                 {"id": "xmep", "name": "Produits endogènes de XPAO", "unit": "mg COD/L"}
             ],
+            "metrics": {
+                "cod": ["so2", "sf", "sa", "xi", "xs", "xh", "xaut", "xpao", "xpp", "xpha", "xmeoh", "xmep"],
+                "tkn": ["snh4", "xi", "xs", "xh", "xpao", "xaut"],
+                "ss": ["xi", "xs", "xh", "xpao", "xpp", "xpha", "xaut", "xmeoh", "xmep"],
+                "biomass": ["xh", "xaut", "xpao"],
+                "nh4": "snh4",
+                "no3": "sno3",
+                "po4": "spo4",
+                "soluble_cod": ["sf", "sa"]
+            },
             "module": "models.asm2d.model",
             "class": "ASM2dModel"
+        },
+        {
+            "id": "asm3",
+            "type": "ASM3Model",
+            "name": "ASM3 (Activated Sludge Model 3)",
+            "description": "Modèle de boues activées",
+            "category": "biological",
+            "components_count": 13,
+            "processes_count": 12,
+            "default_temperature": 20.0,
+            "parameters": [
+                {"id": "k_h", "label": "Hydrolysis rate constant", "unit": "g CODxs / g CODxh / d", "default": 3.0},
+                {"id": "k_x", "label": "Hydrolysis saturation constant", "unit": "g CODxs / g CODxh", "default": 1.0},
+                {"id": "k_sto_rate", "label": "Storage rate constant", "unit": "g CODss / g CODxh / d", "default": 5.0},
+                {"id": "eta_nox", "label": "Anoxic reduction factor", "unit": "-", "default": 0.6},
+                {"id": "k_o2", "label": "Saturation constant for Sno2", "unit": "g O2 / m^3", "default": 0.2},
+                {"id": "k_nox", "label": "Saturation constant for substrate Ss", "unit": "g NO3--N / m^3", "default": 0.5},
+                {"id": "k_s", "label": "Saturation constant for substrate Ss", "unit": "g CODss / m^3", "default": 2.0},
+                {"id": "k_sto", "label": "Saturation constant for Xsto", "unit": "g CODxsto / g CODxh", "default": 1.0},
+                {"id": "mu_h", "label": "Heterotrophic max. growth rate of Xh", "unit": "1/j", "default": 2.0},
+                {"id": "k_nh4", "label": "Saturation constant for ammonium, Snh4", "unit": "g N / m^3", "default": 0.01},
+                {"id": "k_alk", "label": "Saturation constant for alkalinity for Xh", "unit": "mole HCO3- / m^3", "default": 0.1},
+                {"id": "b_h_o2", "label": "Aerobic endogenous respiration rate of Xh", "unit": "1/d", "default": 0.2},
+                {"id": "b_h_nox", "label": "Anoxic endogenous respiration rate of Xh", "unit": "1/d", "default": 0.1},
+                {"id": "b_sto_o2", "label": "Aerobic respiration rate for Xsto", "unit": "1/d", "default": 0.2},
+                {"id": "b_sto_nox", "label": "Anoxic respiration rate for Xsto", "unit": "1/d", "default": 0.1},
+                {"id": "mu_a", "label": "Autotrophic max. growth rate of Xa", "unit": "1/d", "default": 1.0},
+                {"id": "k_a_nh4", "label": "Ammonium substrate saturation for Xa", "unit": "g N / m^3", "default": 1.0},
+                {"id": "k_a_o2", "label": "Oxygen saturation for nitrifiers", "unit": "g O2 / m^3", "default": 0.5},
+                {"id": "k_a_alk", "label": "Bicarbonate saturation for nitrifiers", "unit": "mole HCO3- / m^3", "default": 0.5},
+                {"id": "b_a_o2", "label": "Aerobic endogenous respiration rate of Xa", "unit": "1/d", "default": 0.15},
+                {"id": "b_a_nox", "label": "Anoxic endogenous respiration rate of Xa", "unit": "1/d", "default": 0.05},
+
+                {"id": "f_si", "label": "Production of Si in hydrolysis", "unit": "g CODsi / g CODxs", "default": 0},
+                {"id": "y_sto_o2", "label": "Aerobic yield of stored product per Ss", "unit": "g CODxsto / g CODss", "default": 0.85},
+                {"id": "y_sto_nox", "label": "Anoxic yield of stored product per Ss", "unit": "g CODxsto / g CODss", "default": 0.80},
+                {"id": "y_h_o2", "label": "Aerobic yield of heterotrophic biomass", "unit": "g CODxh / g CODxsto", "default": 0.63},
+                {"id": "y_h_nox", "label": "Anoxic yield of heterotrophic biomass", "unit": "g CODxh / g CODxsto", "default": 0.54},
+                {"id": "y_a", "label": "Yield of autotrophic biomass per NO3--N", "unit": "g CODxa / g Nsnox", "default": 0.24},
+                {"id": "f_xi", "label": "Production of Xi in endog. respiration", "unit": "g CODxi / g CODxbm", "default": 0.20},
+                {"id": "i_n_si", "label": "N content of Si", "unit": "g N / g CODsi", "default": 0.01},
+                {"id": "i_n_ss", "label": "N content of Ss", "unit": "g N / g CODss", "default": 0.03},
+                {"id": "i_n_xi", "label": "N content of Xi", "unit": "g N / g CODxi", "default": 0.02},
+                {"id": "i_n_xs", "label": "N content of Xs", "unit": "g N / g CODxs", "default": 0.04},
+                {"id": "i_n_bm", "label": "N content of biomass, Xh, Xa", "unit": "g N / g CODxbm", "default": 0.07},
+                {"id": "i_ss_xi", "label": "SS to COD ratio for Xi", "unit": "g SS / g CODxi", "default": 0.75},
+                {"id": "i_ss_xs", "label": "SS to COD ratio for Xs", "unit": "g SS / g CODxs", "default": 0.75},
+                {"id": "i_ss_bm", "label": "SS to COD ratio for biomass, Xh, Xa", "unit": "g SS / g CODxbm", "default": 0.90}
+            ],
+            "components": [
+                {"id": "so2", "name": "Dissolved oxygen", "unit": "M(O2)/L^3"},
+                {"id": "si", "name": "Inert soluble organic", "unit": "M(COD)/L^3"},
+                {"id": "ss", "name": "Readily biodegradable organic substrates", "unit": "M(COD)/L^3"},
+                {"id": "snh4", "name": "Ammonium plus ammonia nitrogen", "unit": "M(N)/L^3"},
+                {"id": "sn2", "name": "Dinitrogen", "unit": "M(N)/L^3"},
+                {"id": "snox", "name": "Nitrate plus nitrite nitrogen", "unit": "M(N)/L^3"},
+                {"id": "salk", "name": "Alkalinity", "unit": "mole(HCO3)/L^3"},
+                {"id": "xi", "name": "Inert particulate organic material", "unit": "M(COD)/L^3"},
+                {"id": "xs", "name": "Slowly biodegradable substrates", "unit": "M(COD)/L^3"},
+                {"id": "xh", "name": "Heterotrophic organisms", "unit": "M(COD)/L^3"},
+                {"id": "xsto", "name": "A cell internal storage product of heterotrophic organisms", "unit": "M(COD)/L^3"},
+                {"id": "xa", "name": "Nitrifying organisms", "unit": "M(COD)/L^3"},
+                {"id": "xss", "name": "Suspended solids", "unit": "M(SS)/L^3"}
+            ],
+            "metrics": {
+                "cod": ["si", "ss", "xi", "xs", "xh", "xsto", "xa"],
+                "tkn": ["snh4", "sn2", "snox", "xi", "xs", "xh", "xa"],
+                "ss": ["xi", "xs", "xh", "xsto", "xa", "xss"],
+                "biomass": ["xh", "xa"],
+                "nh4": "snh4",
+                "no3": "snox",
+                "po4": null,
+                "soluble_cod": ["si", "ss"]
+            },
+            "module": "models.asm3.model",
+            "class": "ASM3Model"
         }
     ],
-
     "categories": {
         "biological": {
             "name": "Modèles biologiques",

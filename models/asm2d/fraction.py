@@ -7,7 +7,7 @@ from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
-class ASM2dFraction:
+class ASM2DFraction:
     """
     Fractionnement des paramètres mesurables en composants ASM2d
     """

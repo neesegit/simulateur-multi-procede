@@ -2,10 +2,12 @@
 Classe de base ProcessNode pour tous les procédés de traitement
 Chauqe procédé hérite de cette classe et implémente sa logique spécifique
 """
+import logging
+import importlib
 
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List
-import logging
+from utils.decorators import safe_fractionation
 
 class ProcessNode(ABC):
     """
@@ -119,6 +121,7 @@ class ProcessNode(ABC):
         
         return flow.cod > 0 or flow.ss > 0 or flow.tkn > 0
     
+    @safe_fractionation
     def fractionate_input(self, inputs: Dict[str, Any], target_model: str = 'ASM1') -> Dict[str, Any]:
         """
         Fractionne l'input si nécessaire
@@ -135,14 +138,17 @@ class ProcessNode(ABC):
             return inputs
         
         flow = inputs['flow']
-
         self.logger.info(f"Fractionnement en cours vers {target_model}...")
-        if target_model == 'ASM1':
-            from models.asm1.fraction import ASM1Fraction
 
-            measured = flow.extract_measured()
-            try:
-                fractionated = ASM1Fraction.fractionate(
+        model_name = target_model.lower()
+        module_path = f"models.{model_name}.fraction"
+        module = importlib.import_module(module_path)
+
+        class_name = f"{target_model.upper()}Fraction"
+        fraction_class = getattr(module, class_name)
+        
+        measured = flow.extract_measured()
+        fractionated = fraction_class.fractionate(
                     cod=measured.get('cod', 0.0),
                     ss=measured.get('ss', 0.0),
                     tkn=measured.get('tkn', 0.0),
@@ -152,43 +158,14 @@ class ProcessNode(ABC):
                     alkalinity=measured.get('alkalinity')
                     # TODO ratio perso
                 )
-                fractionated_flow = flow.copy()
-                fractionated_flow.components.update(fractionated)
+        fractionated_flow = flow.copy()
+        fractionated_flow.components.update(fractionated)
 
-                inputs['flow'] = fractionated_flow
-                inputs['components'] = fractionated_flow.components
+        inputs['flow'] = fractionated_flow
+        inputs['components'] = fractionated_flow.components
 
-                self.logger.debug(f"Fractionnement réussi : {len(fractionated)} composants")
-            except Exception as e:
-                self.logger.error(f"Erreur de fractionnement : {e}")
-                raise
-        elif target_model.upper() == 'ASM2D':
-            from models.asm2d.fraction import ASM2dFraction
-
-            measured = flow.extract_measured()
-            try:
-                fractionated = ASM2dFraction.fractionate(
-                    cod=measured.get('cod', 0.0),
-                    ss=measured.get('ss', 0.0),
-                    tkn=measured.get('tkn', 0.0),
-                    nh4=measured.get('nh4', 0.0),
-                    no3=measured.get('no3', 0.0),
-                    po4=measured.get('po4', 0.0),
-                    alkalinity=measured.get('alkalinity')
-                    # TODO ratio perso
-                )
-                fractionated_flow = flow.copy()
-                fractionated_flow.components.update(fractionated)
-
-                inputs['flow'] = fractionated_flow
-                inputs['components'] = fractionated_flow.components
-
-                self.logger.info(f"Fractionnement réussi : {len(fractionated)} composants")
-            except Exception as e:
-                self.logger.error(f"Erreur de fractionnement : {e}")
-                raise
-        else:
-            raise ValueError(f"Modèle non supporté : {target_model}")
+        self.logger.debug(f"Fractionnement réussi : {len(fractionated)} composants")
+            
         return inputs
 
     def get_outputs(self) -> Dict[str, Any]:

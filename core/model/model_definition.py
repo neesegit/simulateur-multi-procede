@@ -20,6 +20,7 @@ class ModelDefinition:
     default_temperature: float
     parameters: List[ModelParameter]
     components: List[Dict[str, str]]
+    metrics: Dict[str, Any]
     module: str
     class_name: str
 
@@ -38,6 +39,7 @@ class ModelDefinition:
             default_temperature=data['default_temperature'],
             parameters=[ModelParameter.from_dict(p) for p in data['parameters']],
             components=data.get('components', []),
+            metrics=data.get('metrics', {}),
             module=data['module'],
             class_name=data['class']
         )
@@ -65,4 +67,8 @@ class ModelDefinition:
     def get_components_names(self) -> List[str]:
         """Retourne la liste des noms de composants du modèle"""
         return [c.get('id', 'Inconnu') for c in self.components]
+    def get_components_dict(self) -> Dict[str, str]:
+        return {c.get('id', 'Inconnu'): c.get('name', 'Inconnu') for c in self.components}
     
+    def get_metrics_dict(self) -> Dict[str, Any]:
+        return self.metrics

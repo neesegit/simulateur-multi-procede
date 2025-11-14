@@ -1,5 +1,7 @@
 from typing import Dict, List
 
+from core.model.model_registry import ModelRegistry
+
 class ComponentMapper:
     """
     Mapper pour identifier les composants clés selon le modèle
@@ -17,10 +19,6 @@ class ComponentMapper:
         'cod_particulate': {
             'ASM1': ['xi', 'xs', 'xbh', 'xba', 'xp'],
             'ASM2D': ['xi', 'xs', 'xh', 'xpao', 'xaut']
-        },
-        'nitrogen': {
-            'ASM1': ['snh', 'sno', 'snd', 'xnd'],
-            'ASM2d': ['xi', 'xs', 'xh', 'xpao', 'xaut']
         },
         'nitrogen': {
             'ASM1': ['snh', 'sno', 'snd', 'xnd'],
@@ -64,38 +62,15 @@ class ComponentMapper:
         }
     }
 
-    COMPONENT_LABELS = {
-        'si': 'SI (inerte soluble)',
-        'ss': 'SS (biodégradable rapide)',
-        'xi': 'XI (inerte particulaire)',
-        'xs': 'XS (biodégradable lent)',
-        'xbh': 'XBH (hétérotrophes)',
-        'xba': 'XBA (autotrophes)',
-        'xp': 'XP (produits intertes)',
-        'so': 'O2 dissous',
-        'sno': 'NO3-',
-        'snh': 'NH4+',
-        'snd': 'N org. soluble',
-        'xnd': 'N org. particulaire',
-        'salk': 'Alcalinité',
-
-
-        'so2': 'O2 dissous',
-        'sf': 'SF (fermentescible)',
-        'sa': 'SA (acétate)',
-        'snh4': 'NH4+',
-        'sno3': 'NO3-',
-        'spo4': 'PO4 3-',
-        'sn2': 'N2',
-        'xh': 'XH (hétérotrophes)',
-        'xpao': 'XPAO (PAO)',
-        'xpp': 'XPP (polyphosphates)',
-        'xpha': 'XPHA (PHA)',
-        'xaut': 'XAUT (autotrophes)',
-        'xtss': 'TSS',
-        'xmeoh': 'XMEOH',
-        'xmep': 'XMEP'
-    }
+    def __init__(self) -> None:
+        self.registry = ModelRegistry.get_instance()
+        self.COMPONENT_LABELS: Dict[str, str] = {}
+        self.COMPONENT_MAPPING: Dict[str, Dict[str, List[str]]] = {}
+        model_types = self.registry.get_model_types()
+        for model_type in model_types:
+            model_def = self.registry.get_model_definition(model_type)
+            comp = model_def.get_components_dict()
+            self.COMPONENT_LABELS.update(comp)
 
     @classmethod
     def get_components(cls, category: str, model_type: str) -> List[str]:
@@ -112,10 +87,9 @@ class ComponentMapper:
         model_type = model_type.upper().replace('MODEL', '')
         return cls.COMPONENT_MAPPING.get(category, {}).get(model_type, [])
     
-    @classmethod
-    def get_label(cls, component: str) -> str:
+    def get_label(self, component: str) -> str:
         """Retourne le label lisible d'un composant"""
-        return cls.COMPONENT_LABELS.get(component, component.lower())
+        return self.COMPONENT_LABELS.get(component, component.lower())
     
     @classmethod
     def extract_values(cls, flows: List[Dict], category: str, model_type: str) -> Dict[str, List[float]]:

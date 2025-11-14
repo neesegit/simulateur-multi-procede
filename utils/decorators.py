@@ -1,4 +1,4 @@
-import functools
+from functools import wraps
 import logging
 import time
 from typing import Any
@@ -7,7 +7,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 def safe_run(func):
     """Décorateur pour gérer proprement les erreurs et interruptions"""
-    @functools.wraps(func)
+    @wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -22,9 +22,29 @@ def safe_run(func):
             return 1
     return wrapper
 
+def safe_fractionation(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        target_model = kwargs.get('target_model', 'ASM1')
+        module_path = f"models.{target_model.lower()}.fraction"
+        class_name = f"{target_model.upper}Fraction"
+
+        try:
+            return func(self, *args, **kwargs)
+        except ModuleNotFoundError:
+            self.logger.error(f"Module introuvable pour '{target_model}' ({module_path})")
+            raise ValueError(f"Modèle non supporté : {target_model}")
+        except AttributeError:
+            self.logger.error(f"Classe de fraction '{class_name}' absente dans {module_path}")
+            raise ValueError(f"Classe de fraction manquante pour le modèle : {target_model}")
+        except Exception as e:
+            self.logger.error(f"Erreur inattendue lors du fractionnement ({target_model}) : {e}")
+            raise
+    return wrapper
+
 def timed(func):
     """Décorateur pour mesurer la durée d'exécution d'une fonction"""
-    @functools.wraps(func)
+    @wraps(func)
     def wrapper(*args, **kwargs):
         start: float = time.time()
         result = func(*args, **kwargs)
@@ -35,7 +55,7 @@ def timed(func):
 
 def step(title: str):
     def decorator(func):
-        @functools.wraps(func)
+        @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             print("\n" + "-"*70)
             print(f"{title}")

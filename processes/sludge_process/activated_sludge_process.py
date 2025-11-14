@@ -65,7 +65,7 @@ class ActivatedSludgeProcess(ProcessNode):
         self.model_adapter = SludgeModelAdapter(model_instance, model_name)
         
         self.concentrations = np.zeros(self.model_adapter.size)
-        self.sludge_metrics = SludgeMetrics(model_name)
+        self.sludge_metrics = SludgeMetrics(self.model_type, registry)
         self.logger.info(f"{self} initialisé avec modèle {model_type}")
     
     def initialize(self) -> None:
@@ -111,7 +111,7 @@ class ActivatedSludgeProcess(ProcessNode):
         oxygen_idx = None
         if self.model_adapter.name == 'ASM1':
             oxygen_idx = self.model_adapter.model.COMPONENT_INDICES.get('so')
-        elif self.model_adapter.name == 'ASM2D':
+        else:
             oxygen_idx = self.model_adapter.model.COMPONENT_INDICES.get('so2')
 
         c_next = CSTRSolver.solve_step(
