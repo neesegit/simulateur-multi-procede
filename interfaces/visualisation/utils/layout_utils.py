@@ -7,3 +7,9 @@ def create_subplot_layout(n_plots: int):
         return 2, 3
     else:
         return 3, 3
+
+def hex_to_rgb(hex_color: str) -> str:
+    """Convertit une couleur hex en RGB"""
+    hex_color = hex_color.lstrip('#')
+    r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    return f'{r}, {g}, {b}'

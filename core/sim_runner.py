@@ -6,7 +6,7 @@ from interfaces import ResultsExporter, Visualizer
 from interfaces.metrics_exporter import MetricsExporter
 from core.orchestrator.simulation_orchestrator import SimulationOrchestrator 
 from core.process.process_factory import ProcessFactory
-from ..utils.decorators import timed
+from utils.decorators import timed
 
 def run_sim_results(config: Dict[str, Any], plots: bool) -> None:
     """

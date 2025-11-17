@@ -20,7 +20,7 @@ class ASM3Model:
     Modèle ASM3 pour la simulation des boues activées
     """
 
-    def __ini__(self, params: Optional[Dict[str, float]] = None) -> None:
+    def __init__(self, params: Optional[Dict[str, float]] = None) -> None:
         registry = ModelRegistry.get_instance()
         model_definition = registry.get_model_definition('ASM3Model')
         self.DEFAULT_PARAMS = model_definition.get_default_params()
@@ -70,7 +70,7 @@ class ASM3Model:
         Returns:
             np.ndarray: Vecteur numpy
         """
-        concentration = np.zeros(19)
+        concentration = np.zeros(13)
         for name, value in c_dict.items():
             if name in self.COMPONENT_INDICES:
                 concentration[self.COMPONENT_INDICES[name]] = value

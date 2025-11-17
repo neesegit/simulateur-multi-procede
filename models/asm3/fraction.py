@@ -44,6 +44,7 @@ class ASM3Fraction:
         tkn: float = 0.0,
         nh4: float = 0.0,
         no3: float = 0.0,
+        po4: float = 0.0,
         alkalinity: Optional[float] = None,
         cod_soluble: Optional[float] = None,
         rbcod: Optional[float] = None,
@@ -79,12 +80,11 @@ class ASM3Fraction:
         else:
             c['ss'] = cod * r['f_ss_cod']
 
+        c['xs'] = cod * r['f_xs_cod']
         c['xi'] = cod * r['f_xs_cod']
 
         c['xh'] = cod * r['f_xh_cod']
-
         c['xa'] = cod * r['f_xa_cod']
-
         c['xsto'] = cod * r['f_xsto_cod']
 
         if tkn > 0:

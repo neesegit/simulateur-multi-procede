@@ -20,15 +20,11 @@ Exemples :
 import sys
 from pathlib import Path
 
-from utils import (
-    setup_logging, 
-    setup_directories, 
-    safe_run, 
-    parse_arguments,
-    cli_config,
-    load_config,
-    run_sim_results
-)
+from utils.cli_runner import cli_config, parse_arguments
+from utils.decorators import safe_run
+from utils.logging_utils import setup_logging
+from utils.directory_utils import setup_directories
+from core.sim_runner import run_sim_results, load_config
 
 @safe_run
 def main() -> int:

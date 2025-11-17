@@ -7,7 +7,7 @@ def build_stoichiometric_matrix(params: dict) -> np.ndarray:
     Returns:
         np.ndarray: Matrice numpy 13x12
     """
-    S = np.zeros((13,12))
+    S = np.zeros((12,13))
 
     #raccourcie
     f_si = params['f_si']
