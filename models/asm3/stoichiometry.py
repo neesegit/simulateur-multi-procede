@@ -22,7 +22,7 @@ def build_stoichiometric_matrix(params: dict) -> np.ndarray:
     i_n_xi = params['i_n_xi']
     i_n_xs = params['i_n_xs']
     i_n_bm = params['i_n_bm']
-    i_ss_xi = params['i_n_xi']
+    i_ss_xi = params['i_ss_xi']
     i_ss_xs = params['i_ss_xs']
     i_ss_bm = params['i_ss_bm']
 

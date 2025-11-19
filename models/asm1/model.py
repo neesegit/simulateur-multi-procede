@@ -69,39 +69,6 @@ class ASM1Model:
 
         return derivatives
     
-    def step(self, concentrations: np.ndarray, dt: float, so_setpoint: Optional[float] = None) -> np.ndarray:
-        """
-        Effectue un pas de temps de simulation avec méthode d'Euler
-
-        Explication :
-        Méthode d'Euler explicite : C(t+dt) = C(t) + dC/dt x dt
-
-        C'est la méthode la plus simple pour résoudre une EDO
-        Plus dt est petit, plus c'est précis
-
-        Args:
-            concentrations (np.ndarray): Concentrations au temps t (13,)
-            dt (float): Pas de temps (jours)
-            so_setpoint (float, optional): Consigne d'oxygène dissous(mg/L) - si fournie, SO est fixé
-
-        Returns:
-            np.ndarray: Concentrations au temps t+dt (13,)
-        """
-        # Calcule les dérivées
-        derivatives = self.compute_derivatives(concentrations)
-
-        # Méthode d'Euler : C_next = C_current + dC/dt x dt
-        concentration_next = concentrations + derivatives*dt
-
-        # Contraintes : concentration >= 0 (pas de valeurs négatives)
-        concentrations_next = np.maximum(concentration_next, 1e-10)
-
-        # Si consigne d'oxygène fournie, on la fixe (contrôle d'aération)
-        if so_setpoint is not None:
-            concentrations_next[7] = so_setpoint
-
-        return concentrations_next
-    
     def get_component_names(self) -> list:
         """
         Retourne les noms des 13 composants dans l'odre

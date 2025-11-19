@@ -5,19 +5,19 @@ def calculate_process_rate(c: np.ndarray, p: dict) -> np.ndarray:
     rho = np.zeros(12)
 
     # raccourcie
-    so2 = max(c[0], 1e-10)
-    si = max(c[1], 1e-10)
-    ss = max(c[2], 1e-10)
-    snh4 = max(c[3], 1e-10)
-    sn2 = max(c[4], 1e-10)
-    snox = max(c[5], 1e-10)
-    salk = max(c[6], 1e-10)
-    xi = max(c[7], 1e-10)
-    xs = max(c[8], 1e-10)
-    xh = max(c[9], 1e-10)
-    xsto = max(c[10], 1e-10)
-    xa = max(c[11], 1e-10)
-    xss = max(c[12], 1e-10)
+    so2 = max(c[0], 1e-6)
+    si = max(c[1], 1e-6)
+    ss = max(c[2], 1e-6)
+    snh4 = max(c[3], 1e-6)
+    sn2 = max(c[4], 1e-6)
+    snox = max(c[5], 1e-6)
+    salk = max(c[6], 1e-6)
+    xi = max(c[7], 1e-6)
+    xs = max(c[8], 1e-6)
+    xh = max(c[9], 1e-6)
+    xsto = max(c[10], 1e-6)
+    xa = max(c[11], 1e-6)
+    xss = max(c[12], 1e-6)
 
     k_h = p['k_h']
     k_x = p['k_x']

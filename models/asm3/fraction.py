@@ -81,7 +81,7 @@ class ASM3Fraction:
             c['ss'] = cod * r['f_ss_cod']
 
         c['xs'] = cod * r['f_xs_cod']
-        c['xi'] = cod * r['f_xs_cod']
+        c['xi'] = cod * r['f_xi_cod']
 
         c['xh'] = cod * r['f_xh_cod']
         c['xa'] = cod * r['f_xa_cod']

@@ -250,8 +250,8 @@ class BaseVisualizer(ABC):
             rows=rows,
             cols=cols,
             subplot_titles=subplot_titles,
-            vertical_spacing=0.12,
-            horizontal_spacing=0.10
+            vertical_spacing=0.20,
+            horizontal_spacing=0.15
         )
 
         for idx, config in enumerate(plot_configs):
@@ -272,7 +272,7 @@ class BaseVisualizer(ABC):
             width=500*cols
         )
 
-        saved_path = save(Path(output_dir), node_id, fig, height=300*rows, width=500*rows, format=format)
+        saved_path = save(Path(output_dir), node_id, fig, height=300*rows, width=900*rows, format=format)
 
         if show:
             fig.show()
@@ -301,11 +301,15 @@ class BaseVisualizer(ABC):
             total_values = [sum(components_data[c][i] for c in components_data) for i in range(len(timestamps))]
             self.plot_lines(
                 fig, timestamps,
-                {'Total': total_values},
+                {f'{config.plot_type.upper()} Total': total_values},
                 row, col,
                 colors=['#1f77b4']
             )
-        elif config.plot_type in ['biomass', 'substrates']:
+        elif config.plot_type == 'substrates':
+            self.plot_lines(
+                fig, timestamps, components_data, row, col, config.colors
+            )
+        elif config.plot_type == ['biomass']:
             self.plot_stacked_area(
                 fig, timestamps, components_data, row, col, config.colors
             )

@@ -1,0 +1,90 @@
+{
+  "name": "simulation_20251118_135553",
+  "description": "Simulation créée via CLI",
+  "simulation": {
+    "start_time": "2025-11-18T00:00:00",
+    "end_time": "2026-01-07T00:00:00",
+    "timestep_hours": 0.1
+  },
+  "influent": {
+    "flowrate": 1000.0,
+    "temperature": 20.0,
+    "auto_fractionate": true,
+    "composition": {
+      "cod": 500.0,
+      "ss": 250.0,
+      "tkn": 40.0,
+      "nh4": 28.0,
+      "no3": 0.5,
+      "po4": 8.0,
+      "alkalinity": 6.0
+    }
+  },
+  "processes": [
+    {
+      "node_id": "activatedsludge_1",
+      "type": "ActivatedSludgeProcess",
+      "name": "Boues activées #1",
+      "config": {
+        "model": "ASM2dModel",
+        "volume": 5000.0,
+        "dissolved_oxygen_setpoint": 2.0,
+        "depth": 4.0,
+        "recycle_ratio": 1.0,
+        "waste_ratio": 0.01
+      }
+    },
+    {
+      "node_id": "activatedsludge_2",
+      "type": "ActivatedSludgeProcess",
+      "name": "Boues activées #2",
+      "config": {
+        "model": "ASM2dModel",
+        "volume": 5000.0,
+        "dissolved_oxygen_setpoint": 2.0,
+        "depth": 4.0,
+        "recycle_ratio": 1.0,
+        "waste_ratio": 0.01
+      }
+    },
+    {
+      "node_id": "activatedsludge_3",
+      "type": "ActivatedSludgeProcess",
+      "name": "Boues activées #3",
+      "config": {
+        "model": "ASM2dModel",
+        "volume": 5000.0,
+        "dissolved_oxygen_setpoint": 2.0,
+        "depth": 4.0,
+        "recycle_ratio": 1.0,
+        "waste_ratio": 0.01
+      }
+    }
+  ],
+  "connections": [
+    {
+      "source": "influent",
+      "target": "activatedsludge_1",
+      "fraction": 1.0,
+      "is_recycle": false
+    },
+    {
+      "source": "activatedsludge_1",
+      "target": "activatedsludge_2",
+      "fraction": 0.5,
+      "is_recycle": false
+    },
+    {
+      "source": "activatedsludge_1",
+      "target": "activatedsludge_3",
+      "fraction": 0.5,
+      "is_recycle": false
+    },
+    {
+      "source": "activatedsludge_3",
+      "target": "activatedsludge_1",
+      "fraction": 1.0,
+      "is_recycle": true
+    }
+  ]
+}

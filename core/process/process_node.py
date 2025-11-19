@@ -138,7 +138,7 @@ class ProcessNode(ABC):
             return inputs
         
         flow = inputs['flow']
-        self.logger.info(f"Fractionnement en cours vers {target_model}...")
+        self.logger.debug(f"Fractionnement en cours vers {target_model}...")
 
         model_name = target_model.lower()
         module_path = f"models.{model_name}.fraction"
