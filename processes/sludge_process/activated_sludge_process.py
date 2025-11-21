@@ -45,6 +45,8 @@ class ActivatedSludgeProcess(ProcessNode):
         self.recycle_ratio = config.get('recycle_ratio', 1.0)
         self.waste_ratio = config.get('waste_ratio', 0.01)
 
+        self.use_calibration = config.get('use_calibration', True)
+
         model_type = config.get('model', 'ASM1')
         model_param = config.get('model_parameters', {})
 
@@ -70,7 +72,11 @@ class ActivatedSludgeProcess(ProcessNode):
     
     def initialize(self) -> None:
         """Initialise l'état du bassin"""
-        init_state = self.model_adapter.initial_state(do_setpoint=self.do_setpoint)
+        init_state = self.model_adapter.initial_state(
+            do_setpoint=self.do_setpoint,
+            process_id=self.node_id,
+            use_calibration=self.use_calibration
+        )
         self.concentrations = self.model_adapter.dict_to_vector(init_state)
         self.state = init_state
 

@@ -1,4 +1,6 @@
-from typing import Any, Dict
+import logging
+
+from typing import Any, Dict, Optional
 from pathlib import Path
 
 from interfaces.config import ConfigLoader 
@@ -7,20 +9,83 @@ from interfaces.metrics_exporter import MetricsExporter
 from core.orchestrator.simulation_orchestrator import SimulationOrchestrator 
 from core.process.process_factory import ProcessFactory
 from utils.decorators import timed
+from core.calibration.calibration_manager import CalibrationManager
+from core.calibration.calibration_result import CalibrationResult
 
-def run_sim_results(config: Dict[str, Any], plots: bool) -> None:
+logger = logging.getLogger(__name__)
+
+def run_sim_with_calibration(
+        config: Dict[str, Any],
+        plots: bool = True,
+        calibration_mode: str = 'auto',
+        interactive: bool = False
+    ) -> Optional[Dict[str, Any]]:
     """
-    Appele de fonction
+    Lance une simulation avec gestion automatique de la calibration
 
     Args:
         config (Dict[str, Any]): Configuration de simulation
-        plots (bool): Création des graphiques
+        plots (bool, optional): Générer les graphiques. Defaults to True.
+        calibration_mode (str, optional): 'auto' (valide), 'skip' (ignore), 'force' (recalibrer). Defaults to 'auto'.
+        interactive (bool, optional): Demander confirmation avant chaque étape. Defaults to False.
+
+    Returns:
+        Optional[Dict[str, Any]]: Résultats de simulation ou None si erreur
     """
-    results = run_simulation(config)
-    exported = export_results(results, with_plots=not plots)
-    print("\nTraitement terminé avec succès !")
-    print(f"\nRésultats disponibles dans : {exported['base_directory']}")
+    print("\n"+"="*70)
+    print("Workflow simulation + calibration")
+    print("="*70)
+
+    print("\n[1/3] Gestion de la calibration")
+
+    try:
+        calib_manager = CalibrationManager(config)
+
+        match calibration_mode:
+            case 'skip':
+                skip_existing = True
+            case _:
+                skip_existing = False
+        
+        calibration_results = calib_manager.run_all(
+            skip_if_exists=skip_existing,
+            interactive=interactive
+        )
+
+        failed_calib = [
+            pid for pid, result in calibration_results.items()
+            if result is None
+        ]
+
+        if failed_calib:
+            logger.warning(
+                f"Calibration échouée pour : {', '.join(failed_calib)}"
+            )
+    except Exception as e:
+        logger.error(f"Erreur lors de la calibration : {e}")
+        print(f"Erreur : {e}")
+        if not interactive:
+            raise
+
+    print("\n[2/3] Préparation de la simulation")
+
+    try:
+        results = run_simulation(config)
+    except Exception as e:
+        logger.error(f"Erreur lors de la simulation : {e}")
+        print(f"Erreur : {e}")
+        raise
+
+    print("\n[3/3] Export et visualisation")
+    try:
+        exported = export_results(results, with_plots=plots)
+        print(f"\nRésultats disponibles dans : {exported['base_directory']}")
+    except Exception as e:
+        logger.error(f"Erreur lors de l'export : {e}")
+        print(f"Export partiel : {e}")
+    
     print_summary(results)
+    return results
 
 @timed
 def run_simulation(config: Dict[str, Any]) -> Dict[str,Any]:
@@ -50,7 +115,7 @@ def run_simulation(config: Dict[str, Any]) -> Dict[str,Any]:
     print("\n"+"="*60)
     print("Simulation en cours ...")
     print("="*60)
-    results= orchestrator.run()
+    results = orchestrator.run()
 
     print("\n"+"="*60)
     print("Simulation terminée")

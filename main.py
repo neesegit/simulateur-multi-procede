@@ -24,7 +24,7 @@ from utils.cli_runner import cli_config, parse_arguments
 from utils.decorators import safe_run
 from utils.logging_utils import setup_logging
 from utils.directory_utils import setup_directories
-from core.sim_runner import run_sim_results, load_config
+from core.sim_runner import run_sim_with_calibration, load_config
 
 @safe_run
 def main() -> int:
@@ -46,8 +46,13 @@ def main() -> int:
             return 0
         logger.info("Utilisation de la configuration interactive")
 
-        run_sim_results(config_dict, args.no_plots)
-        return 0
+        results = run_sim_with_calibration(
+            config_dict,
+            plots=not args.no_plots,
+            calibration_mode='auto',
+            interactive=True
+        )
+        return 0 if results else 1
     
     # Vérifie que la config existe
     config_path = Path(args.config)
@@ -57,8 +62,13 @@ def main() -> int:
         return 1
         
     config = load_config(config_path)
-    run_sim_results(config, args.no_plots)
-    return 0
+    result = run_sim_with_calibration(
+        config,
+        plots=not args.no_plots,
+        calibration_mode=args.calibration,
+        interactive=False
+    )
+    return 0 if result else 1
 
 if __name__ == '__main__':
     sys.exit(main())

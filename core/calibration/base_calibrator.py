@@ -1,73 +1,83 @@
-"""
-Classe de base abstraite pour les calibrateurs
-Définit l'interface commune pour tous les types de procédés
-"""
 import logging
 import numpy as np
 
-
+from typing import Dict, Any, Optional, Tuple, List
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Tuple, Optional, List
 from datetime import datetime, timedelta
 
-from core.orchestrator.simulation_orchestrator import SimulationOrchestrator
-from core.process.process_factory import ProcessFactory
+from .calibration_cache import CalibrationCache
+from .configuration_comparator import ConfigurationComparator
+from .calibration_result import CalibrationResult
 
-logger = logging.getLogger(__name__)
+from core.orchestrator.simulation_orchestrator import SimulationOrchestrator
+
+from utils.input_helpers import ask_yes_no
 
 class BaseCalibrator(ABC):
     """
-    Classe abstraite pour la calibration steady-state
+    Classe abstraite pour tous les calibrateurs
 
-    Définie l'interface générique pour calibrer n'importe quel type de procédé
+    Définit l'interface générale et la logique commune
     """
 
     def __init__(
-            self,
-            config: Dict[str, Any],
-            convergence_days: float = 200.0,
-            tolerance: float = 0.01,
-            check_interval: int = 50,
-            process_type: str = "unknown"
+        self,
+        process_id: str,
+        process_config: Dict[str, Any],
+        model_type: str,
+        convergence_days: float = 200.0,
+        tolerance: float = 0.01,
+        check_interval: int = 50,
+        convergence_window: int = 100
     ) -> None:
         """
         Initialise le calibrateur
 
         Args:
-            config (Dict[str, Any]): Configuration de simulation
-            convergence_days (float, optional): Durée maximale de simulation. Defaults to 200.0.
-            tolerance (float, optional): Tolérance de convergence. Defaults to 0.01.
-            check_interval (int, optional): Intervalle de vérification. Defaults to 50.
-            process_type (str, optional): Type de procédé. Defaults to "unknown".
+            process_id (str): ID unique du procédé
+            process_config (Dict[str, Any]): Configuration du procédé
+            model_type (str): Type du modèle
+            convergence_days (float, optional): Durée maximale de calibration. Defaults to 200.0.
+            tolerance (float, optional): Tolérance de convergence (%). Defaults to 0.01.
+            check_interval (int, optional): Vérification tous les N pas. Defaults to 50.
+            convergence_window (int, optional): Fenêtre pour vérifier la convergence. Defaults to 100.
         """
-        self.config = config
+        self.process_id = process_id
+        self.process_config = process_config
+        self.model_type = model_type
+
         self.convergence_days = convergence_days
         self.tolerance = tolerance
         self.check_interval = check_interval
-        self.process_type = process_type
+        self.convergence_window = convergence_window
 
-        logger.info(
-            f"Calibrateur {process_type} initialisé : "
-            f"{convergence_days} jours, tolérance={tolerance*100:.1f}%"
+        self.cache = CalibrationCache()
+        self.comparator = ConfigurationComparator()
+
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
+        self.logger.info(
+            f"Calibrateur initialisé : {self.__class__.__name__} "
+            f"pour {model_type} ({process_id})"
         )
 
     @abstractmethod
     def get_convergence_parameters(self) -> List[str]:
         """
-        Retourne la liste des paramètres à vérifier pour la convergence
+        Retourne la lsite des paramètres à vérifier pour la convergence
 
         Returns:
-            List[str]: Liste de noms de paramètres
+            List[str]: Noms des paramètres
         """
         pass
 
     @abstractmethod
     def get_key_output_parameters(self) -> List[str]:
         """
-        Retourne les paramètres clés à extraire pour les steady-states
+        Retourne les paramètres clés à extraire
 
         Returns:
-            List[str]: Liste de noms de paramètres
+            List[str]: Noms des paramètres de sortie
         """
         pass
 
@@ -76,87 +86,27 @@ class BaseCalibrator(ABC):
         Crée une configuration adaptée pour la calibration
 
         Returns:
-            Dict[str, Any]: Configuration modifiée pour calibration
+            Dict[str, Any]: Configuration modifiée
         """
-        calib_config = self.config.copy()
+        calib_config = self.process_config.copy()
 
-        sim_config = calib_config.get('simulation', {})
-
-        start_time = datetime.fromisoformat(
-            sim_config.get('start_time', '2025-01-01T00:00:00')
-        )
-
+        start_time = datetime(2025, 1, 1, 0, 0, 0)
         end_time = start_time + timedelta(days=self.convergence_days)
 
+        sim_config = calib_config.get('simulation', {})
         sim_config['start_time'] = start_time.isoformat()
         sim_config['end_time'] = end_time.isoformat()
         sim_config['timestep_hours'] = 1.0
+
         calib_config['simulation'] = sim_config
         calib_config['name'] = f"{calib_config.get('name', 'sim')}_calibration"
 
-        logger.debug(f"Config de calibration créée : {start_time} à {end_time}")
+        self.logger.debug(
+            f"Config de calibration créée : {start_time.date()} à {end_time.date()}"
+        )
 
         return calib_config
     
-    def check_convergence(
-            self,
-            orchestrator: SimulationOrchestrator,
-            window_size: int = 50
-    ) -> bool:
-        """
-        Vérifie si la simulation a convergé
-
-        Args:
-            orchestrator (SimulationOrchestrator): Orchestrateur de simulation
-            window_size (int, optional): Taille de la fenêtre de vérification. Defaults to 50.
-
-        Returns:
-            bool: True si convergé
-        """
-        convergence_params = self.get_convergence_parameters()
-
-        for node_id, history in orchestrator.simulation_flow._history.items():
-            if node_id == 'influent':
-                continue
-
-            if len(history) < window_size*2:
-                logger.debug(
-                    f"Historique insuffisant pour {node_id} "
-                    f"({len(history)} < {window_size*2})"
-                )
-                return False
-            
-            recent_window = history[-window_size:]
-            previous_window = history[-window_size*2: -window_size]
-            
-            for param in convergence_params:
-                recent_values = self._extract_parameter_values(
-                    recent_window, param
-                )
-                previous_values = self._extract_parameter_values(
-                    previous_window, param
-                )
-
-                if not recent_values or not previous_values:
-                    continue
-
-                recent_mean = np.mean(recent_values)
-                previous_mean = np.mean(previous_values)
-
-                if recent_mean > 1e-6:
-                    relative_change = abs(
-                        (recent_mean - previous_mean) / recent_mean
-                    )
-                    if relative_change > self.tolerance:
-                        logger.debug(
-                            f"Non convergé - {node_id}.{param} : "
-                            f"variation={relative_change*100:.2f}"
-                        )
-                        return False
-                    
-        logger.info("Convergence atteinte")
-        return True
-
     def _extract_parameter_values(
             self,
             history: List[Any],
@@ -170,221 +120,244 @@ class BaseCalibrator(ABC):
             param (str): Nom du paramètre
 
         Returns:
-            np.ndarray: Array numpy des valeurs
+            np.ndarray: Array des valeurs
         """
         values = []
+
         for state in history:
             if hasattr(state, param):
                 value = getattr(state, param, None)
                 if value is not None:
-                    values.append(value)
+                    values.append(float(value))
                     continue
-
+            
             if hasattr(state, 'components') and isinstance(state.components, dict):
                 value = state.components.get(param)
                 if value is not None:
-                    values.append(value)
+                    values.append(float(value))
                     continue
-
+            
             if isinstance(state, dict):
                 value = state.get(param)
                 if value is not None:
-                    values.append(value)
+                    values.append(float(value))
                     continue
-            
+        
         return np.array(values)
     
-    def run_calibration(self) -> Dict[str, Any]:
-        """
-        Exécute la calibration steady-state
-
-        Returns:
-            Dict[str, Any]: Résultats de la simulation de calibration
-        """
-        print("\n" + "="*70)
-        print(f"Calibration {self.process_type}")
-        print("="*70)
-        print(f"\nDurée maximale: {self.convergence_days} jours")
-        print(f"Tolérance : {self.tolerance*100:.1f}%")
-        print(f"Vérification : tous les {self.check_interval} pas")
-        print(f"Paramètres clés : {', '.join(self.get_convergence_parameters())}")
-
-        calib_config = self.create_calibration_config()
-
-        print("\nInitialisation de l'orchestrateur ...")
-        orchestrator = SimulationOrchestrator(calib_config)
-
-        print("Création des procédés ...")
-        processes = ProcessFactory.create_from_config(calib_config)
-        for process in processes:
-            orchestrator.add_process(process)
-            print(f"\t- {process.name} ({process.node_id})")
-
-        orchestrator.initialize()
-
-        print("\n"+"-"*70)
-        print("Simulation de calibration en cours ...")
-        print("-"*70)
-
-        total_steps = orchestrator.state.total_steps
-        converged = False
-
-        while orchestrator.state.current_time < orchestrator.state.end_time:
-            orchestrator._run_timestep()
-            orchestrator.state.advance()
-
-            if orchestrator.state.current_step % 100 == 0:
-                progress = orchestrator.state.progress_percent()
-                print(
-                    f"\tProgression : {progress:.1f}% "
-                    f"({orchestrator.state.current_step}/{total_steps} pas)"
-                )
-
-            if orchestrator.state.current_step % self.check_interval == 0:
-                if orchestrator.state.current_step >= 200:
-                    if self.check_convergence(orchestrator):
-                        converged = True
-                        print(
-                            "\nConvergence atteinte au pas "
-                            f"{orchestrator.state.current_step}"
-                        )
-                        break
-            
-        if not converged:
-            print(
-                "\nConvergence non atteinte après "
-                f"{self.convergence_days} jours"
-            )
-            logger.warning(
-                f"Calibration {self.process_type} terminée sans convergence"
-            )
-
-        metadata = {
-            'sim_name': calib_config.get('name'),
-            'process_type': self.process_type,
-            'start_time': str(orchestrator.state.start_time),
-            'end_time': str(orchestrator.state.current_time),
-            'total_hours': (
-                orchestrator.state.current_time - orchestrator.state.start_time
-            ).total_seconds() / 3600,
-            'timestep': orchestrator.state.timestep,
-            'steps_completed': orchestrator.state.current_step,
-            'converged': converged
-        }
-
-        results = orchestrator.result_manager.collect(metadata)
-
-        print("\n"+"="*70)
-        print("Calibration terminée")
-        print("="*70)
-
-        return results
-    
-    def print_calibration_results(self, results: Dict[str, Any]) -> None:
-        """
-        Affiche un résumé des résultats de calibration
-
-        Args:
-            results (Dict[str, Any]): Résultats de calibration
-        """
-        print("\n"+"-"*70)
-        print("Résumé de calibration")
-        print("-"*70)
-
-        metadata = results.get('metadata', {})
-        print(f"\nType procédé : {metadata.get('process_type', 'unknown')}")
-        print(f"Durée simulée : {metadata.get('total_hours', 0):.1f} heures")
-        print(f"Pas effectués : {metadata.get('steps_completed', 0)}")
-        print(f"Convergence : {'Oui' if metadata.get('converged') else 'Non'}")
-
-        stats = results.get('statistics', {})
-
-        if stats:
-            print("\nEtats finaux des procédés :")
-            for node_id, node_stats in stats.items():
-                if node_id == 'influent':
-                    continue
-
-                print(f"\n\t{node_id} :")
-                for param in self.get_key_output_parameters():
-                    key = f"avg_{param}" if param != 'num_samples' else param
-                    if key in node_stats:
-                        value = node_stats[key]
-                        if isinstance(value, float):
-                            print(f"\t\t{param:20s} : {value:>10.2f}")
-                        else:
-                            print(f"\t\t{param:20s} : {value:>10}")
-
-        print("\n"+"-"*70)
-
-    def extract_steady_states(
+    def check_convergence(
             self,
-            results: Dict[str, Any],
-            convergence_window: int = 100
-    ) -> Dict[str, Dict[str, float]]:
+            orchestrator: SimulationOrchestrator,
+            window_size: Optional[int] = None
+    ) -> bool:
         """
-        Extrait les steady-states depuis les résultats
+        Vérifie si la simulation a convergé
 
         Args:
-            results (Dict[str, Any]): Résultats de simulation
-            convergence_window (int, optional): Nombre de points à moyenner. Defaults to 100.
+            orchestrator (SimulationOrchestrator): Orchestrateur de simulation
+            window_size (Optional[int], optional): Taille de la fenêtre (utilise convergence_window si None). Defaults to None.
 
         Returns:
-            Dict[str, Dict[str, float]]: Dictionnaire des steady-states par noeud
+            bool: True si convergé
         """
-        steady_states = {}
+        if window_size is None:
+            window_size = self.convergence_window
 
-        history = results.get('history', {})
+        convergence_params = self.get_convergence_parameters()
 
-        for node_id, node_history in history.items():
+        for node_id, history in orchestrator.simulation_flow._history.items():
             if node_id == 'influent':
                 continue
 
-            if not node_history or len(node_history) < convergence_window:
-                logger.warning(
+            if len(history) < window_size*2:
+                self.logger.debug(
+                    f"Historique insuffisant pour {node_id} "
+                    f"({len(history)} < {window_size*2})"
+                )
+                return False
+            
+            recent_window = history[-window_size:]
+            previous_window = history[-window_size*2: -window_size]
+
+            for param in convergence_params:
+                recent_values = self._extract_parameter_values(recent_window, param)
+                previous_values = self._extract_parameter_values(previous_window, param)
+
+                if not len(recent_values) or not len(previous_values):
+                    continue
+
+                recent_mean = np.mean(recent_values)
+                previous_mean = np.mean(previous_values)
+
+                if recent_mean > 1e-6:
+                    relative_change = abs(
+                        (recent_mean - previous_mean) / recent_mean
+                    )
+
+                    if relative_change > self.tolerance:
+                        self.logger.debug(
+                            f"None convergé - {node_id}.{param} : "
+                            f"variation={relative_change*100:.2f}%"
+                        )
+                        return False
+            
+        self.logger.info("Convergence atteinte")
+        return True
+    
+    def extract_steady_states(
+            self,
+            orchestrator: SimulationOrchestrator
+    ) -> Dict[str, Dict[str, float]]:
+        """
+        Extrait les steady-states depuis l'historique
+
+        Args:
+            orchestrator (SimulationOrchestrator): Orchestrateur après simulation
+
+        Returns:
+            Dict[str, Dict[str, float]]: {node_id : {param: value}}
+        """
+        steady_states = {}
+        window = self.convergence_window
+
+        for node_id, history in orchestrator.simulation_flow._history.items():
+            if node_id == 'influent':
+                continue
+
+            if not history or len(history) < window:
+                self.logger.warning(
                     f"Historique insuffisant pour '{node_id}' "
-                    f"({len(node_history)} < {convergence_window})"
+                    f"({len(history)} < {window})"
                 )
                 continue
 
-            final_states = node_history[-convergence_window:]
+            final_states = history[-window:]
             steady_state = {}
 
-            all_parameters = self._get_all_parameters(final_states)
-            for param in all_parameters:
+            for param in self.get_key_output_parameters():
                 values = self._extract_parameter_values(final_states, param)
                 if len(values) > 0:
                     steady_state[param] = float(np.mean(values))
             
             steady_states[node_id] = steady_state
 
-            logger.info(
-                f"Steady-state extrait pour '{node_id}' "
+            self.logger.info(
+                f"Steady-state extrait pour '{node_id}' : "
                 f"{len(steady_state)} paramètres"
             )
-
+        
         return steady_states
-
-    def _get_all_parameters(self, states: List[Any]) -> set:
+    
+    def check_calibration_needed(self) -> Tuple[bool, Optional[str]]:
         """
-        Identifie tous les paramètres présents dans les états
-
-        Args:
-            states (List[Any]): Liste des états
+        Vérifie is une calibration est nécessaire
 
         Returns:
-            set: Set de noms de paramètres
+            Tuple[bool, Optional[str]]: (needed, reason)
         """
-        all_params = set()
+        if not self.cache.exists(self.process_id, self.model_type):
+            return True, "Aucune calibration en cache"
+        
+        cached = self.cache.load(self.process_id, self.model_type)
+        if cached is None:
+            return True, "Erreur lors de la lecture du cache"
+        
+        current_hash = self.comparator.compute_hash(self.process_config)
 
-        for state in states:
-            if hasattr(state, '__dict__'):
-                all_params.update(state.__dict__.keys())
+        if current_hash != cached.metadata.config_hash:
+            config_diff = self.comparator.compare_configs(
+                self.process_config,
+                cached.metadata.process_config
+            )
 
-            if hasattr(state, 'components') and isinstance(state.components, dict):
-                all_params.update(state.components.keys())
+            reason = (
+                f"Configuration modifiée depuis la calibration "
+                f"({datetime.fromisoformat(cached.metadata.created_at).strftime('%Y-%m%d %H:%M')})\n"
+            )
 
-            if isinstance(state, dict):
-                all_params.update(state.keys())
+            if config_diff['modified']:
+                reason += f"\tParamètres modifiés : {list(config_diff['modified'].keys())}\n"
+            if config_diff['added']:
+                reason += f"\tParamètres ajoutés : {list(config_diff['added'].keys())}\n"
+            if config_diff['removed']:
+                reason += f"\tParamètres supprimés : {list(config_diff['removed'].keys())}"
 
-        return all_params
+            return True, reason
+        return False, None
+    
+    def run(
+            self,
+            skip_if_exists: bool = False,
+            interactive: bool = False
+    ) -> Optional[CalibrationResult]:
+        """
+        Lance le processus de calibration complet
+
+        Args:
+            skip_if_exists (bool, optional): Utilise la calibration existante si elle est valide. Defaults to False.
+            interactive (bool, optional): Demande à l'utilisateur en cas de doute. Defaults to False.
+
+        Returns:
+            Optional[CalibrationResult]: CalibrationResult ou None
+        """
+        print("\n"+"="*70)
+        print(f"Calibration - {self.model_type} ({self.process_id})")
+        print("="*70)
+
+        needed, reason = self.check_calibration_needed()
+
+        if not needed:
+            print(f"\nCalibration valide et à jour")
+            cached = self.cache.load(self.process_id, self.model_type)
+            if cached is not None:
+                print(
+                    f"\tCréée : {cached.metadata.created_at}\n"
+                    f"\tConvergée : {'Oui' if cached.metadata.converged else 'Non'}\n"
+                    f"\tTemps de simulation : {cached.metadata.calibration_time_hours:.1f}h"
+                )
+                return cached
+        print(f"\nCalibration nécessaire : {reason}")
+
+        if skip_if_exists:
+            print("-> Utilisation de la dernière calibration")
+            return self.cache.load(self.process_id, self.model_type)
+        
+        if interactive:
+            response = ask_yes_no("Lancer une nouvelle calibration ?")
+            if not response:
+                return self.cache.load(self.process_id, self.model_type)
+            
+        return self._run_calibration()
+    
+    @abstractmethod
+    def _run_calibration(self) -> Optional[CalibrationResult]:
+        """
+        Implémente la logique spécifique de calibration
+
+        Returns:
+            Optional[CalibrationResult]: CalibrationResult
+        """
+        pass
+
+    def print_results(self, result: CalibrationResult) -> None:
+        """Affiche un résumé des résultats de calibration"""
+        meta = result.metadata
+
+        print("\n"+"="*70)
+        print("Résultats de calibration")
+        print("="*70)
+        print(f"\nProcédé : {meta.process_id} ({meta.model_type})")
+        print(f"Créée : {meta.created_at}")
+        print(f"Convergence : {'Oui' if meta.converged else 'Non'}")
+        print(f"Durée simulée : {meta.calibration_time_hours:.1f} heures")
+        print(f"Tolérance : {self.tolerance*100:.2f}%")
+
+        print("\nEtats stationnaires finaux :")
+        for node_id, steady_state in result.steady_states.items():
+            print(f"\n\t{node_id} :")
+            for param, value in steady_state.items():
+                if isinstance(value, float):
+                    print(f"\t{param:30s} : {value:>12.2f}")
+                else:
+                    print(f"\t{param:30s} : {value}")
+        print("\n" + "="*70)

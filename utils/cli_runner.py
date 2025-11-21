@@ -37,6 +37,13 @@ Exemples d'utilisation :
     )
 
     parser.add_argument(
+        '--calibration',
+        choices=['auto', 'skip', 'force'],
+        default='auto',
+        help='Mode de calibration (défaut : auto)'
+    )
+
+    parser.add_argument(
         '--log-level',
         choices=['DEBUG','INFO','WARNING','ERROR'],
         default='INFO',

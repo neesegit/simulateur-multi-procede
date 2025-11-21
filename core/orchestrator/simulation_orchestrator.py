@@ -51,6 +51,7 @@ class SimulationOrchestrator:
         for process in self.process_nodes:
             process.initialize()
         influent = InfluentInitializer.create_from_config(self.config, self.state.current_time)
+        print('='*70+f'\n{influent}\n'+'='*70)
         self.databus.write_flow('influent', influent)
         self.simulation_flow.add_flow('influent', influent)
         self.logger.info("Simulation initialisée")
