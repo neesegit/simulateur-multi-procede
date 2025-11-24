@@ -25,6 +25,7 @@ class BaseCalibrator(ABC):
         process_id: str,
         process_config: Dict[str, Any],
         model_type: str,
+        full_config: Optional[Dict[str, Any]] = None,
         convergence_days: float = 200.0,
         tolerance: float = 0.01,
         check_interval: int = 50,
@@ -37,6 +38,7 @@ class BaseCalibrator(ABC):
             process_id (str): ID unique du procédé
             process_config (Dict[str, Any]): Configuration du procédé
             model_type (str): Type du modèle
+            full_config (Dict[str, Any], optional): Configuration complète (incluant influent). Defaults to None
             convergence_days (float, optional): Durée maximale de calibration. Defaults to 200.0.
             tolerance (float, optional): Tolérance de convergence (%). Defaults to 0.01.
             check_interval (int, optional): Vérification tous les N pas. Defaults to 50.
@@ -45,6 +47,7 @@ class BaseCalibrator(ABC):
         self.process_id = process_id
         self.process_config = process_config
         self.model_type = model_type
+        self.full_config = full_config
 
         self.convergence_days = convergence_days
         self.tolerance = tolerance
@@ -100,6 +103,28 @@ class BaseCalibrator(ABC):
 
         calib_config['simulation'] = sim_config
         calib_config['name'] = f"{calib_config.get('name', 'sim')}_calibration"
+
+        if self.full_config and 'influent' in self.full_config:
+            calib_config['influent'] = self.full_config['influent'].copy()
+            self.logger.debug("Influent copié depuis la configuration complète")
+        else:
+            self.logger.warning(
+                "Aucun influent trouvé dans la configuration complète. "
+                "Utilisation de valeurs par défaut."
+            )
+            calib_config['influent'] = {
+                'flowrate': 1000.0,
+                'temperature': 20.0,
+                'composition': {
+                    'cod': 500.0,
+                    'ss': 200.0,
+                    'tkn': 40.0,
+                    'nh4': 25.0,
+                    'no3': 0.0,
+                    'po4': 5.0,
+                    'alkalinity': 5.0
+                }
+            }
 
         self.logger.debug(
             f"Config de calibration créée : {start_time.date()} à {end_time.date()}"
@@ -255,14 +280,15 @@ class BaseCalibrator(ABC):
         Returns:
             Tuple[bool, Optional[str]]: (needed, reason)
         """
-        if not self.cache.exists(self.process_id, self.model_type):
+        current_hash = self.comparator.compute_hash(self.process_config)
+
+        if not self.cache.exists(self.process_id, self.model_type, current_hash):
             return True, "Aucune calibration en cache"
         
-        cached = self.cache.load(self.process_id, self.model_type)
+        cached = self.cache.load(self.process_id, self.model_type, current_hash)
         if cached is None:
             return True, "Erreur lors de la lecture du cache"
         
-        current_hash = self.comparator.compute_hash(self.process_config)
 
         if current_hash != cached.metadata.config_hash:
             config_diff = self.comparator.compare_configs(
@@ -306,26 +332,29 @@ class BaseCalibrator(ABC):
 
         needed, reason = self.check_calibration_needed()
 
+        current_hash = self.comparator.compute_hash(self.process_config)
+
         if not needed:
             print(f"\nCalibration valide et à jour")
-            cached = self.cache.load(self.process_id, self.model_type)
+            cached = self.cache.load(self.process_id, self.model_type, current_hash)
             if cached is not None:
                 print(
                     f"\tCréée : {cached.metadata.created_at}\n"
                     f"\tConvergée : {'Oui' if cached.metadata.converged else 'Non'}\n"
-                    f"\tTemps de simulation : {cached.metadata.calibration_time_hours:.1f}h"
+                    f"\tTemps de simulation : {cached.metadata.calibration_time_hours:.1f}h\n"
+                    f"\tHash config : {current_hash[:8]}"
                 )
                 return cached
         print(f"\nCalibration nécessaire : {reason}")
 
         if skip_if_exists:
             print("-> Utilisation de la dernière calibration")
-            return self.cache.load(self.process_id, self.model_type)
+            return self.cache.load(self.process_id, self.model_type, current_hash)
         
         if interactive:
             response = ask_yes_no("Lancer une nouvelle calibration ?")
             if not response:
-                return self.cache.load(self.process_id, self.model_type)
+                return self.cache.load(self.process_id, self.model_type, current_hash)
             
         return self._run_calibration()
     

@@ -75,7 +75,8 @@ class ActivatedSludgeProcess(ProcessNode):
         init_state = self.model_adapter.initial_state(
             do_setpoint=self.do_setpoint,
             process_id=self.node_id,
-            use_calibration=self.use_calibration
+            use_calibration=self.use_calibration,
+            process_config=self.config
         )
         self.concentrations = self.model_adapter.dict_to_vector(init_state)
         self.state = init_state

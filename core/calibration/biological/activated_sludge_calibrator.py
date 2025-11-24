@@ -21,6 +21,7 @@ class ActivatedSludgeCalibrator(BaseCalibrator):
             process_id: str,
             process_config: Dict[str, Any],
             model_type: str,
+            full_config: Optional[Dict[str, Any]] = None,
             convergence_days: float = 200.0,
             tolerance: float = 0.01,
             check_interval: int = 50
@@ -29,6 +30,7 @@ class ActivatedSludgeCalibrator(BaseCalibrator):
             process_id=process_id,
             process_config=process_config,
             model_type=model_type,
+            full_config=full_config,
             convergence_days=convergence_days,
             tolerance=tolerance,
             check_interval=check_interval

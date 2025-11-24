@@ -13,6 +13,7 @@ from core.process.process_node import ProcessNode
 from core.process.process_registry import ProcessRegistry
 from core.connection.connection_manager import ConnectionManager
 
+
 logger = logging.getLogger(__name__)
 
 class ProcessFactory:

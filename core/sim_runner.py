@@ -98,6 +98,7 @@ def run_simulation(config: Dict[str, Any]) -> Dict[str,Any]:
     Returns:
         Dict[str, Any]: Résultats de la simulation
     """
+    #calibration_results['activatedsludge_1'].metadata.config_hash
     sim_name = config.get('name', 'simulation')
 
     print(f"Initialisation de la simulation '{sim_name}'...")

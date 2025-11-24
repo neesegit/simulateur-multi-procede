@@ -6,6 +6,7 @@ import logging
 
 from typing import Dict, Any, Optional
 from core.calibration.calibration_cache import CalibrationCache
+from core.calibration.configuration_comparator import ConfigurationComparator
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,8 @@ class SludgeModelAdapter:
             self, 
             do_setpoint: float,
             process_id: Optional[str] = None,
-            use_calibration: bool = True
+            use_calibration: bool = True,
+            process_config: Optional[Dict[str, Any]] = None
         ) -> Dict[str, float]:
         """
         Crée l'état initial du procédé
@@ -48,7 +50,7 @@ class SludgeModelAdapter:
             Dict[str, float]: Etat initial complet
         """
         if use_calibration and process_id:
-            steady_state = self._load_steady_state(process_id)
+            steady_state = self._load_steady_state(process_id, process_config)
             if steady_state:
                 logger.info(
                     f"Etat initial chargé depuis calibration pour {process_id}"
@@ -68,7 +70,7 @@ class SludgeModelAdapter:
 
         return self._get_default_initial_state(do_setpoint)
     
-    def _load_steady_state(self, process_id: str) -> Optional[Dict[str, float]]:
+    def _load_steady_state(self, process_id: str, process_config: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, float]]:
         """
         Charge le steady-state depuis la calibration en cache
 
@@ -81,7 +83,13 @@ class SludgeModelAdapter:
         try:
             cache = CalibrationCache()
 
-            cached = cache.load(process_id, f"{self.name}Model")
+            config_hash = None
+            if process_config:
+                comparator = ConfigurationComparator()
+                config_hash = comparator.compute_hash(process_config)
+                logger.debug(f"Hash de configuration calculé : {config_hash[:8]}")
+
+            cached = cache.load(process_id, f"{self.name}Model", config_hash)
 
             if cached is None:
                 logger.debug(

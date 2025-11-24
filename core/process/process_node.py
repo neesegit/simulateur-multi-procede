@@ -6,7 +6,7 @@ import logging
 import importlib
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from utils.decorators import safe_fractionation
 
 class ProcessNode(ABC):
@@ -14,7 +14,7 @@ class ProcessNode(ABC):
     Classe abstraite représentant un noeud de procédé dans la chaine de traitement
     """
 
-    def __init__(self, node_id: str, name: str, config: Dict[str, Any]):
+    def __init__(self, node_id: str, name: str, config: Dict[str, Any], current_hash: Optional[str] = None):
         """
         Initialise un noeud de procédé
 
@@ -27,6 +27,7 @@ class ProcessNode(ABC):
         self.name = name
         self.config = config
         self.logger = logging.getLogger(f"{__name__}.{node_id}")
+        self.current_hash = current_hash
 
         # Etat interne du procédé
         self.state: Dict[str, Any] = {}

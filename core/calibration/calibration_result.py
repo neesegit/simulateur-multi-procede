@@ -33,3 +33,6 @@ class CalibrationResult:
         steady_states = data['steady_states']
         simulation_results = data['simulation_results']
         return cls(metadata, steady_states, simulation_results)
+
+    def __repr__(self) -> str:
+        return f"<CalibrationResult: metadata={self.metadata}, steady_states={self.steady_states}, simulation_results={self.simulation_results}, created_at={self.created_at}>"

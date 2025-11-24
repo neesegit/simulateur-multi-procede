@@ -36,7 +36,8 @@ class CalibrationManager:
             calibrator = calibrator_class(
                 process_id=process_id,
                 process_config=proc_config,
-                model_type=model_type
+                model_type=model_type,
+                full_config=self.config
             )
 
             self.calibrators[process_id] = calibrator
