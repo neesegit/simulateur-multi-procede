@@ -59,54 +59,6 @@ class ConfigLoader:
         return config
     
     @staticmethod
-    def load_multiple(
-        config_dir: str,
-        pattern: str = "*.json"
-    ) -> Dict[str, Dict[str, Any]]:
-        """
-        Charge plusieurs configurations depuis un répertoire
-
-        Args:
-            config_dit (str): Répertoire contenant les configs
-            pattern (str, optional): Pattern de fichier. Defaults to "*.json".
-
-        Returns:
-            Dict[str, Dict[str, Any]]: Dictionnaire {nom_fichier: config}
-
-        Raises:
-            FileNotFoundError: Si le répertoire n'existe pas
-            ValueError: Si aucune configuration trouvée
-        """
-        dir_path = Path(config_dir)
-
-        if not dir_path.exists():
-            raise FileNotFoundError(
-                f"Répertoire introuvable: {config_dir}"
-            )
-        
-        configs = {}
-
-        for file_path in dir_path.glob(pattern):
-            try:
-                config = ConfigLoader.load(file_path)
-                configs[file_path.stem] = config
-                logger.info(f"Configuration chargée : {file_path.name}")
-            except Exception as e:
-                logger.warning(
-                    f"Erreur lors du chargement de {file_path.name} : {e}"
-                )
-
-        if not configs:
-            raise ValueError(
-                f"Aucune configuration trouvée dans {config_dir}"
-                f" avec pattern {pattern}"
-            )
-        
-        logger.info(f"{len(configs)} configration(s) chargée(s)")
-
-        return configs
-    
-    @staticmethod
     def save(config: Dict[str, Any], output_path: Path) -> None:
         """
         Sauvegarde une configuration dans un fichier

@@ -5,11 +5,14 @@ import logging
 
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+from datetime import datetime
 
-from .utils.timestamp_utils import extract_timestamps
 from .visualizer_factory import VisualizerFactory
 
 logger = logging.getLogger(__name__)
+
+def extract_timestamps(flows) -> List[datetime]:
+    return [datetime.fromisoformat(f["timestamp"]) for f in flows]
 
 class Visualizer:
     """
