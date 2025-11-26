@@ -53,7 +53,7 @@ class ActivatedSludgeProcess(ProcessNode):
         registry = ModelRegistry.get_instance()
 
         try:
-            model_instance = registry.create_model(
+            self.model_instance = registry.create_model(
                 model_type=model_type,
                 params=model_param
             )
@@ -64,7 +64,7 @@ class ActivatedSludgeProcess(ProcessNode):
             raise
 
         model_name = model_type.replace('Model', '').upper()
-        self.model_adapter = SludgeModelAdapter(model_instance, model_name)
+        self.model_adapter = SludgeModelAdapter(self.model_instance, model_name)
         
         self.concentrations = np.zeros(self.model_adapter.size)
         self.sludge_metrics = SludgeMetrics(self.model_type, registry)
