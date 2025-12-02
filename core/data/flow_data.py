@@ -1,6 +1,10 @@
+import logging
+
 from typing import Dict, Any, Optional
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class FlowData:
@@ -96,3 +100,16 @@ class FlowData:
             FlowData: Instance de FlowData
         """
         return FlowData(**asdict(self))
+    
+    def __post_init__(self):
+        """Valide les données après initialisation"""
+        if self.flowrate < 0:
+            raise ValueError(f"flowrate doit être positif, reçu : {self.flowrate}")
+        if self.temperature < 0 or self.temperature > 50:
+            logger.warning(f"Température inhabituelle : {self.temperature}°C")
+
+        for attr in ['ss', 'cod', 'bod', 'tkn', 'nh4', 'no3', 'po4']:
+            value = getattr(self, attr)
+            if value < 0:
+                logger.warning(f"{attr} négatif ({value}), mis à 0")
+                setattr(self, attr, 0.0)

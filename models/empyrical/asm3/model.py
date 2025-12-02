@@ -10,8 +10,8 @@ import logging
 
 from typing import Dict, Optional
 from core.model.model_registry import ModelRegistry
-from models.asm3.kinetics import calculate_process_rate
-from models.asm3.stoichiometry import build_stoichiometric_matrix
+from models.empyrical.asm3.kinetics import calculate_process_rate
+from models.empyrical.asm3.stoichiometry import build_stoichiometric_matrix
 
 logger = logging.getLogger(__name__)
 

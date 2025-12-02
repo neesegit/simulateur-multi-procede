@@ -11,8 +11,8 @@ import logging
 
 from typing import Dict, Optional
 from core.model.model_registry import ModelRegistry
-from models.asm2d.kinetics import calculate_process_rates
-from models.asm2d.stoichiometry import build_stoichiometric_matrix
+from models.empyrical.asm2d.kinetics import calculate_process_rates
+from models.empyrical.asm2d.stoichiometry import build_stoichiometric_matrix
 
 logger = logging.getLogger(__name__)
 

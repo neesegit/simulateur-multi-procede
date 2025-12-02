@@ -2,7 +2,7 @@ import numpy as np
 
 from models.model_interface import ModelInterface
 
-class MechanisticModel(ModelInterface):
+class empyricalModel(ModelInterface):
     """Classe de base pour les modèles mécanistes (ASM)"""
 
     @property

@@ -75,7 +75,7 @@ class ModelDefinition:
     def get_metrics_dict(self) -> Dict[str, Any]:
         return self.metrics
     
-    def is_mechanistic(self) -> bool:
+    def is_empyrical(self) -> bool:
         """Vérifie si le modèle est empyrique"""
         return self.category == 'empirical'
     

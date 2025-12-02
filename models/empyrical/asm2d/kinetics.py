@@ -87,11 +87,11 @@ def calculate_process_rates(c: np.ndarray, p: dict) -> np.ndarray:
     #11 Aerobic storage of XPP
     rho[10] = q_pp*(so2/(k_o2+so2))*(spo4/(k_ps+spo4))*(salk/(k_alk+salk))*((xpha/xpao)/(k_pha+xpha/xpao))*((k_max-xpp/xpao)/(k_pp+k_max-xpp/xpao))*xpao
     #12 Anoxic storage of XPP
-    rho[11] = rho[10]*eta_no3_pao*(k_o2/so2)*(sno3/(k_no3+sno3))
+    rho[11] = rho[10]*eta_no3_pao*(k_o2/(k_o2+so2))*(sno3/(k_no3+sno3))
     #13 Aerobic growth of XPAO
     rho[12] = mu_pao*(so2/(k_o2+so2))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/(k_alk+salk))*((xpha/xpao)/(k_pha+xpha/xpao))*xpao
     #14 Anoxic growth of XPAO
-    rho[13] = rho[12]*eta_no3*(k_o2/so2)*(sno3/(k_no3+sno3))
+    rho[13] = rho[12]*eta_no3*(k_o2/(k_o2+so2))*(sno3/(k_no3+sno3))
     #15 Lysis of XPAO
     rho[14] = b_pao*xpao*(salk/(k_alk+salk))
     #16 Lysis of XPP

@@ -150,25 +150,20 @@ class BaseCalibrator(ABC):
         values = []
 
         for state in history:
+            
+            value = None
+
             if hasattr(state, param):
                 value = getattr(state, param, None)
-                if value is not None:
-                    values.append(float(value))
-                    continue
-            
-            if hasattr(state, 'components') and isinstance(state.components, dict):
-                value = state.components.get(param)
-                if value is not None:
-                    values.append(float(value))
-                    continue
-            
-            if isinstance(state, dict):
+            elif hasattr(state, 'components') and isinstance(state.components, dict):
+                value = state.components.get(param)            
+            elif isinstance(state, dict):
                 value = state.get(param)
-                if value is not None:
-                    values.append(float(value))
-                    continue
+
+            if value is not None:
+                values.append(float(value))
         
-        return np.array(values)
+        return np.array(values) if values else np.array([])
     
     def check_convergence(
             self,

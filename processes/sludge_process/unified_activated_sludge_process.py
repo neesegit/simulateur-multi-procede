@@ -65,16 +65,16 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
             self.logger.error(f"Erreur de chargement du modèle : {e}")
             raise
 
-        self.is_mechanistic = model_type.endswith('Model') and 'ASM' in model_type.upper()
-        self.is_ml = not self.is_mechanistic
+        self.is_empyrical = model_type.endswith('Model') and 'ASM' in model_type.upper()
+        self.is_ml = not self.is_empyrical
 
-        if self.is_mechanistic:
+        if self.is_empyrical:
             self._init_mechanistric()
         else:
             self._init_ml()
 
         self.logger.info(
-            f"{self} initilisé - Type : {'Mécaniste' if self.is_mechanistic else 'ML'}"
+            f"{self} initilisé - Type : {'Mécaniste' if self.is_empyrical else 'ML'}"
         )
 
     def _init_mechanistric(self) -> None:
@@ -101,12 +101,12 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
 
     def initialize(self) -> None:
         """Initialise l'état du bassin selon le type de modèle"""
-        if self.is_mechanistic:
-            self._initialize_mechanistic()
+        if self.is_empyrical:
+            self._initialize_empyrical()
         else:
             self._initialize_ml()
 
-    def _initialize_mechanistic(self) -> None:
+    def _initialize_empyrical(self) -> None:
         """Initialisation pour modèles ASM"""
         init_state = self.model_adapter.initial_state(
             do_setpoint=self.do_setpoint,
@@ -147,12 +147,12 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         Returns:
             Dict[str, Any]: Sorties du procédé
         """
-        if self.is_mechanistic:
-            return self._process_mechanistic(inputs, dt)
+        if self.is_empyrical:
+            return self._process_empyrical(inputs, dt)
         else:
             return self._process_ml(inputs, dt)
         
-    def _process_mechanistic(self, inputs: Dict[str, Any], dt: float) -> Dict[str, Any]:
+    def _process_empyrical(self, inputs: Dict[str, Any], dt: float) -> Dict[str, Any]:
         """Traitement avec modèle ASM"""
         inputs = self.fractionate_input(inputs, target_model=self.model_adapter.name)
 
@@ -303,7 +303,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
     
     def update_state(self, outputs: Dict[str, Any]) -> None:
         """Met à jour l'état interne"""
-        if self.is_mechanistic:
+        if self.is_empyrical:
             self.state = outputs.get('components', {}).copy()
         else:
             self.state.update(outputs.get('components', {}))
@@ -311,5 +311,5 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         self.outputs = outputs
 
     def __repr__(self) -> str:
-        model_info = f"ASM={self.model_adapter.name}" if self.is_mechanistic else f"ML={self.model_type}"
+        model_info = f"ASM={self.model_adapter.name}" if self.is_empyrical else f"ML={self.model_type}"
         return f"<UnifiedActivatedSludgeProcess {self.name} [{model_info}] V={self.volume}m^3>"

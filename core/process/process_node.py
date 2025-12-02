@@ -142,7 +142,7 @@ class ProcessNode(ABC):
         self.logger.debug(f"Fractionnement en cours vers {target_model}...")
 
         model_name = target_model.lower()
-        module_path = f"models.{model_name}.fraction"
+        module_path = f"models.empyrical.{model_name}.fraction"
         module = importlib.import_module(module_path)
 
         class_name = f"{target_model.upper()}Fraction"

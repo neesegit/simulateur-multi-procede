@@ -55,7 +55,7 @@
                 "po4": null,
                 "soluble_cod": ["ss"]
             },
-            "module": "models.mechanistric.asm1.model",
+            "module": "models.empyrical.asm1.model",
             "class": "ASM1Model"
         },
         {
@@ -168,7 +168,7 @@
                 "po4": "spo4",
                 "soluble_cod": ["sf", "sa"]
             },
-            "module": "models.mechanistric.asm2d.model",
+            "module": "models.empyrical.asm2d.model",
             "class": "ASM2dModel"
         },
         {
@@ -244,7 +244,7 @@
                 "po4": null,
                 "soluble_cod": ["si", "ss"]
             },
-            "module": "models.mechanistric.asm3.model",
+            "module": "models.empyrical.asm3.model",
             "class": "ASM3Model"
         },
         {
