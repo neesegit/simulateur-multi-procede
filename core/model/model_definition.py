@@ -15,6 +15,7 @@ class ModelDefinition:
     type: str
     name: str
     description: str
+    category: str
     components_count: int
     processes_count: int
     default_temperature: float
@@ -34,6 +35,7 @@ class ModelDefinition:
             type=data['type'],
             name=data['name'],
             description=data['description'],
+            category=data['category'],
             components_count=data['components_count'],
             processes_count=data['processes_count'],
             default_temperature=data['default_temperature'],
@@ -72,3 +74,15 @@ class ModelDefinition:
     
     def get_metrics_dict(self) -> Dict[str, Any]:
         return self.metrics
+    
+    def is_mechanistic(self) -> bool:
+        """Vérifie si le modèle est empyrique"""
+        return self.category == 'empirical'
+    
+    def is_ml(self) -> bool:
+        """Vérifie si le modèle est de type Machine Learning"""
+        return self.category == 'machine_learning'
+    
+    def requires_training(self) -> bool:
+        """Indique si el modèle nécessite un entraînement"""
+        return self.is_ml()

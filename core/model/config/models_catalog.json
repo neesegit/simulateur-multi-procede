@@ -5,7 +5,7 @@
             "type": "ASM1Model",
             "name": "ASM1 (Activated Sludge Model 1)",
             "description": "Modèle de boues activées",
-            "category": "biological",
+            "category": "empirical",
             "components_count": 13,
             "processes_count": 8,
             "default_temperature": 20.0,
@@ -55,7 +55,7 @@
                 "po4": null,
                 "soluble_cod": ["ss"]
             },
-            "module": "models.asm1.model",
+            "module": "models.mechanistric.asm1.model",
             "class": "ASM1Model"
         },
         {
@@ -63,7 +63,7 @@
             "type": "ASM2dModel",
             "name": "ASM2d (Activated Sludge Model 2d)",
             "description": "Modèle de boues activées",
-            "category": "biological",
+            "category": "empirical",
             "components_count": 19,
             "processes_count": 21,
             "default_temperature": 20.0,
@@ -168,7 +168,7 @@
                 "po4": "spo4",
                 "soluble_cod": ["sf", "sa"]
             },
-            "module": "models.asm2d.model",
+            "module": "models.mechanistric.asm2d.model",
             "class": "ASM2dModel"
         },
         {
@@ -176,7 +176,7 @@
             "type": "ASM3Model",
             "name": "ASM3 (Activated Sludge Model 3)",
             "description": "Modèle de boues activées",
-            "category": "biological",
+            "category": "empirical",
             "components_count": 13,
             "processes_count": 12,
             "default_temperature": 20.0,
@@ -244,22 +244,123 @@
                 "po4": null,
                 "soluble_cod": ["si", "ss"]
             },
-            "module": "models.asm3.model",
+            "module": "models.mechanistric.asm3.model",
             "class": "ASM3Model"
+        },
+        {
+            "id": "linear",
+            "type": "LinearModel",
+            "name": "Linear Regression",
+            "description": "Modèle de régression linéaire pour prédiction rapide",
+            "category": "machine_learning",
+            "components_count": 7,
+            "processes_count": 0,
+            "default_temperature": 20.0,
+            "parameters": [],
+            "components": [
+                {"id": "cod", "name": "DCO sortie", "unit": "mg/L"},
+                {"id": "ss", "name": "MES sortie", "unit": "mg/L"},
+                {"id": "nh4", "name": "Ammonium sortie", "unit": "mg/L"},
+                {"id": "no3", "name": "Nitrates sortie", "unit": "mg/L"},
+                {"id": "po4", "name": "Phosphates sortie", "unit": "mg/L"},
+                {"id": "biomass", "name": "Biomass", "unit": "mg/L"},
+                {"id": "cod_removal", "name": "Taux d'élimination DCO", "unit": "%"}
+            ],
+            "metrics": {
+                "cod": ["cod"],
+                "tkn": ["nh4"],
+                "ss": ["ss"],
+                "biomass": ["biomass"],
+                "nh4": "nh4",
+                "no3": "no3",
+                "po4": "po4",
+                "soluble_cod": ["cod"]
+            },
+            "module": "models.ml.linear_model",
+            "class": "LinearModel"
+        },
+        {
+            "id": "randomforest",
+            "type": "RandomForestModel",
+            "name": "Random Forest",
+            "description": "Modèle Random Forest",
+            "category": "machine_learning",
+            "components_count": 7,
+            "processes_count": 0,
+            "default_temperature": 20.0,
+            "parameters": [
+                {"id": "n_estimators", "label": "Nombre d'arbres", "unit": "-", "default": 100},
+                {"id": "max_depth", "label": "Profondeur maximale", "unit": "-", "default": 10}
+            ],
+            "components": [
+                {"id": "cod", "name": "DCO sortie", "unit": "mg/L"},
+                {"id": "ss", "name": "MES sortie", "unit": "mg/L"},
+                {"id": "nh4", "name": "Ammonium sortie", "unit": "mg/L"},
+                {"id": "no3", "name": "Nitrates sortie", "unit": "mg/L"},
+                {"id": "po4", "name": "Phosphates sortie", "unit": "mg/L"},
+                {"id": "biomass", "name": "Biomass", "unit": "mg/L"},
+                {"id": "cod_removal", "name": "Taux d'élimination DCO", "unit": "%"}
+            ],
+            "metrics": {
+                "cod": ["cod"],
+                "tkn": ["nh4"],
+                "ss": ["ss"],
+                "biomass": ["biomass"],
+                "nh4": "nh4",
+                "no3": "no3",
+                "po4": "po4",
+                "soluble_cod": ["cod"]
+            },
+            "module": "models.ml.random_forest_model",
+            "class": "RandomForestModel"
+        },
+        {
+            "id": "rnn",
+            "type": "RNNModel",
+            "name": "RNN (LSTM)",
+            "description": "Réseau de neurones récurrent pour prédictions temporelles",
+            "category": "machine_learning",
+            "components_count": 7,
+            "processes_count": 0,
+            "default_temperature": 20.0,
+            "parameters": [
+                {"id": "sequence_length", "label": "Longueur de séquence", "unit": "-", "default": 7},
+                {"id": "hidden_units", "label": "Unités cachées", "unit": "-", "default": 64},
+                {"id": "num_layers", "label": "Nombre de couches", "unit": "-", "default": 2},
+                {"id": "dropout", "label": "Dropout", "unit": "-", "default": 0.2}
+            ],
+            "components": [
+                {"id": "cod", "name": "DCO sortie", "unit": "mg/L"},
+                {"id": "ss", "name": "MES sortie", "unit": "mg/L"},
+                {"id": "nh4", "name": "Ammonium sortie", "unit": "mg/L"},
+                {"id": "no3", "name": "Nitrates sortie", "unit": "mg/L"},
+                {"id": "po4", "name": "Phosphates sortie", "unit": "mg/L"},
+                {"id": "biomass", "name": "Biomass", "unit": "mg/L"},
+                {"id": "cod_removal", "name": "Taux d'élimination DCO", "unit": "%"}
+            ],
+            "metrics": {
+                "cod": ["cod"],
+                "tkn": ["nh4"],
+                "ss": ["ss"],
+                "biomass": ["biomass"],
+                "nh4": "nh4",
+                "no3": "no3",
+                "po4": "po4",
+                "soluble_cod": ["cod"]
+            },
+            "module": "models.ml.rnn_model",
+            "class": "RNNModel"
         }
+
     ],
     "categories": {
-        "biological": {
-            "name": "Modèles biologiques",
-            "description": "Modèles de simulation basés sur les processus microbiologiques"
+        "empirical": {
+            "name": "Modèles empiriques",
+            "description": "Modèles de simulation dérivés de données expérimentales ou de la littérature"
         },
-        "chemical": {
-            "name": "Modèles chimiques",
-            "description": "Modèles de réactions chimiques pour les procédés de traitement de l'eau"
-        },
-        "physical": {
-            "name": "Modèles physiques",
-            "description": "Modèles basés sur des lois de transport ou des équilibres physiques"
+        "machine_learning": {
+            "name": "Modèles de machine learning",
+            "description": "Modèles basés sur l'apprentissage automatique"
         }
     }
 }

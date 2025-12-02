@@ -65,6 +65,8 @@ class ModelRegistry:
     def create_model(
             self,
             model_type: str,
+            params: Optional[Dict[str, Any]] = None,
+            model_path: Optional[Path] = None,
             **kwargs
     ) -> Any:
         """
@@ -72,6 +74,8 @@ class ModelRegistry:
 
         Args:
             model_type (str): Type du modèle
+            params (Optional[Dict[str, Any]]): Paramètres à passer au constructeur
+            model_path (Optional[Path]): Chemin vers modèle pré-entraîné (ML uniquement)
             **kwargs: Arguments à passer au constructeur du modèle
 
         Returns:
@@ -81,24 +85,46 @@ class ModelRegistry:
         model_class = definition.get_class()
 
         default_params = definition.get_default_params()
-        if 'params' in kwargs:
-            merged_params = default_params.copy()
-            merged_params.update(kwargs['params'])
-            kwargs['params'] = merged_params
-        else:
-            kwargs['params'] = default_params
+        merged_params = default_params.copy()
+        if params:
+            merged_params.update(params)
 
-        instance = model_class(**kwargs)
+        instance = model_class(params=merged_params)
+        if model_path and hasattr(instance, 'load'):
+            try:
+                instance.load(str(model_path))
+                logger.info(f"Modèle ML chargé depuis : {model_path}")
+            except Exception as e:
+                logger.warning(f"Impossible de charger le modèle depuis {model_path} : {e}")
+
         logger.info(f"Modèle instancié : {definition.name} ({model_type})")
         return instance
     
-    def list_models(self) -> List[ModelDefinition]:
+    def list_models(self, category: Optional[str] = None) -> List[ModelDefinition]:
         models = list(self.models.values())
+
+        if category:
+            models = [m for m in models if m.category == category]
+
         return sorted(models, key=lambda m: m.name)
     
     def get_model_types(self) -> List[str]:
         """Retourne la lsite des types de modèles disponibles"""
         return list(self.models.keys())
+    
+    def get_mechanistric_models(self) -> List[str]:
+        """Retourne uniquement les modèles mécanistes"""
+        return [
+            model_type for model_type, definition in self.models.items()
+            if definition.category == 'empirical'
+        ]
+    
+    def get_ml_models(self) -> List[str]:
+        """Retourne uniquement les modèles ML"""
+        return [
+            model_type for model_type, definition in self.models.items()
+            if definition.category == 'machine_learning'
+        ]
     
     def to_cli_format(self) -> Dict[str, Dict[str, Any]]:
         """
@@ -114,6 +140,7 @@ class ModelRegistry:
                 'type': definition.type,
                 'name': definition.name,
                 'description': definition.description,
+                'category': definition.category,
                 'parameters': [
                     {
                         'id': p.id,
@@ -123,7 +150,7 @@ class ModelRegistry:
                     }
                     for p in definition.parameters
                 ],
-                'components': definition.components
+                'components': definition.components,
+                'requires_training': definition.category == 'machine_learning'
             }
         return cli_format
-    
