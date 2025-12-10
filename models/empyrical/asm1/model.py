@@ -16,6 +16,7 @@ from models.empyrical.asm1.stoichiometry import build_stoichiometric_matrix
 
 logger = logging.getLogger(__name__)
 
+#FIXME : classe de base (pour tous les modèles)
 class ASM1Model:
     """
     Modèle ASM1 pour la simulation des boues activées

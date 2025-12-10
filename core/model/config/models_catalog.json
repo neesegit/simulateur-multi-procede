@@ -313,45 +313,7 @@
             },
             "module": "models.ml.random_forest_model",
             "class": "RandomForestModel"
-        },
-        {
-            "id": "rnn",
-            "type": "RNNModel",
-            "name": "RNN (LSTM)",
-            "description": "Réseau de neurones récurrent pour prédictions temporelles",
-            "category": "machine_learning",
-            "components_count": 7,
-            "processes_count": 0,
-            "default_temperature": 20.0,
-            "parameters": [
-                {"id": "sequence_length", "label": "Longueur de séquence", "unit": "-", "default": 7},
-                {"id": "hidden_units", "label": "Unités cachées", "unit": "-", "default": 64},
-                {"id": "num_layers", "label": "Nombre de couches", "unit": "-", "default": 2},
-                {"id": "dropout", "label": "Dropout", "unit": "-", "default": 0.2}
-            ],
-            "components": [
-                {"id": "cod", "name": "DCO sortie", "unit": "mg/L"},
-                {"id": "ss", "name": "MES sortie", "unit": "mg/L"},
-                {"id": "nh4", "name": "Ammonium sortie", "unit": "mg/L"},
-                {"id": "no3", "name": "Nitrates sortie", "unit": "mg/L"},
-                {"id": "po4", "name": "Phosphates sortie", "unit": "mg/L"},
-                {"id": "biomass", "name": "Biomass", "unit": "mg/L"},
-                {"id": "cod_removal", "name": "Taux d'élimination DCO", "unit": "%"}
-            ],
-            "metrics": {
-                "cod": ["cod"],
-                "tkn": ["nh4"],
-                "ss": ["ss"],
-                "biomass": ["biomass"],
-                "nh4": "nh4",
-                "no3": "no3",
-                "po4": "po4",
-                "soluble_cod": ["cod"]
-            },
-            "module": "models.ml.rnn_model",
-            "class": "RNNModel"
         }
-
     ],
     "categories": {
         "empirical": {

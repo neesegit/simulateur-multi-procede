@@ -29,7 +29,7 @@ class ModelDefinition:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ModelDefinition':
-        """Crée une ModelDefinition depuis un disctionnaire"""
+        """Crée une ModelDefinition depuis un dictionnaire"""
         return cls(
             id=data['id'],
             type=data['type'],

@@ -1,8 +1,8 @@
 {
   "processes": [
     {
-      "id": "unified_activated_sludge",
-      "type": "UnifiedActivatedSludgeProcess",
+      "id": "activated_sludge",
+      "type": "ActivatedSludgeProcess",
       "name": "Boues activées",
       "description": "Traitement biologique par boues activées - supporte modèles ASM et ML",
       "category": "biological",
@@ -29,69 +29,6 @@
       ],
       "module": "processes.sludge_process.unified_activated_sludge_process",
       "class": "UnifiedActivatedSludgeProcess"
-    },
-    {
-      "id": "activated_sludge",
-      "type": "ActivatedSludgeProcess",
-      "name": "Boues activées",
-      "description": "Traitement biologique par boues activées",
-      "category": "biological",
-      "model": "",
-      "has_model_choice": true,
-      "required_params": [
-        {
-          "name": "volume",
-          "label": "Volume du bassin",
-          "unit": "m^3",
-          "default": 5000.0,
-          "min": 1.0,
-          "max": 100000.0
-        },
-        {
-          "name": "dissolved_oxygen_setpoint",
-          "label": "Consigne d'oxygène dissous",
-          "unit": "mg/L",
-          "default": 2.0,
-          "min": 0.5,
-          "max": 5.0
-        },
-        {
-          "name": "model",
-          "label": "Modèle biologique",
-          "unit": "",
-          "type": "choice",
-          "choices": ["ASM1", "ASM2d", "ASM3"],
-          "default": "ASM1"
-        }
-      ],
-      "optional_params": [
-        {
-          "name": "depth",
-          "label": "Profondeur",
-          "unit": "m",
-          "default": 4.0,
-          "min": 1.0,
-          "max": 10.0
-        },
-        {
-          "name": "recycle_ratio",
-          "label": "Ratio de recyclage",
-          "unit": "Qr/Qin",
-          "default": 1.0,
-          "min": 0.0,
-          "max": 5.0
-        },
-        {
-          "name": "waste_ratio",
-          "label": "Ratio de purge",
-          "unit": "Qw/Qin",
-          "default": 0.01,
-          "min": 0.001,
-          "max": 0.1
-        }
-      ],
-      "module": "processes.sludge_process.activated_sludge_process",
-      "class": "ActivatedSludgeProcess"
     }
   ],
   

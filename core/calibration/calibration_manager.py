@@ -8,6 +8,10 @@ from .biological.asm1_calibrator import ASM1Calibrator
 from .biological.asm2d_calibrator import ASM2DCalibrator
 from .biological.asm3_calibrator import ASM3Calibrator
 
+from.biological.analytical_asm1_calibrator import AnalyticalASM1Calibrator
+from.biological.analytical_asm2d_calibrator import AnalyticalASM2DCalibrator
+from.biological.analytical_asm3_calibrator import AnalyticalASM3Calibrator
+
 class CalibrationManager:
     """
     Orchestre le processus de calibration pour une simulation complète
@@ -47,9 +51,9 @@ class CalibrationManager:
     def _get_calibrator_class(self, model_type: str) -> type:
         """Retourne la classe de calibrateur appropriée"""
         mapping = {
-            'ASM1Model': ASM1Calibrator,
-            'ASM2dModel': ASM2DCalibrator,
-            'ASM3Model': ASM3Calibrator
+            'ASM1Model': AnalyticalASM1Calibrator,
+            'ASM2dModel': AnalyticalASM2DCalibrator,
+            'ASM3Model': AnalyticalASM3Calibrator
         }
 
         calibrator = mapping.get(model_type)

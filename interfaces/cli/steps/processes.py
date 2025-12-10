@@ -84,9 +84,6 @@ def configure_processes(selected_keys: List[str],
             selected_model_key = _select_model(AVAILABLE_MODELS)
             selected_model_type = AVAILABLE_MODELS[selected_model_key]['type']
             config_params['model'] = selected_model_type
-            if ask_yes_no("\nConfigurer les paramètres du modèle ?", default=False):
-                model_params = _configure_model_parameters(AVAILABLE_PROCESSES[selected_model_key])
-                config_params['model_parameters'] = model_params
 
         # Paramètres requis
         for param in proc_info['required_params']:
@@ -105,17 +102,34 @@ def configure_processes(selected_keys: List[str],
 
         if advanced:
             for param in proc_info['optional_params']:
-                default_val = float(defaults.get(param, 0.0))
-                value = ask_number(
-                    f"\t{param.replace('_',' ').title()}",
-                    default=default_val,
-                    min_val=0
-                )
+                default_val = defaults.get(param)
+                if isinstance(default_val, bool):
+                    value = ask_yes_no(
+                        f"\t{param.replace('_', ' ').title()}",
+                        default=default_val
+                    )
+                elif isinstance(default_val, str) or default_val is None:
+                    continue
+                    display_default = default_val if default_val is not None else 'None'
+                    value = input(f"\t{param.replace('_', ' ').title()} [{display_default}]: ").strip()
+                    if not value:
+                        value = default_val
+                else:
+                    value = ask_number(
+                        f"\t{param.replace('_',' ').title()}",
+                        default=default_val,
+                        min_val=0
+                    )
                 config_params[param] = value
         else:
             # Utilise les valeurs par défaut
             for param in proc_info['optional_params']:
-                config_params[param] = float(defaults.get(param, 0.0))
+                if param == 'use_calibration':
+                    config_params[param] = defaults.get(param, True)
+                elif param == 'model_path':
+                    config_params[param] = defaults.get(param, None)
+                else:
+                    config_params[param] = float(defaults.get(param, 0.0))
 
         # Ajoute le procédé à la config
         process_config = {
@@ -153,32 +167,3 @@ def _select_model(AVAILABLE_MODELS: Dict[str, Dict[str, Any]]) -> str:
             return choice
         else:
             print("Choix invalide")
-
-def _configure_model_parameters(model_info: Dict[str, Any]) -> Dict[str, float]:
-    """
-    Configure les paramètres d'un modèle
-
-    Args:
-        model_info (Dict[str, Any]): Informations sur le modèle
-
-    Returns:
-        Dict[str, float]: Dictionnaire des paramètres configurés
-    """
-    params = {}
-    
-    print(f"\nConfiguration des paramètres du modèle {model_info['name']}")
-    print("(Laissez vide pour utiliser les valeurs par défaut)")
-
-    for param in model_info.get('parameters', []):
-        print(f"\n{param['label']} ({param['unit']})")
-        print(f"\tValeur par défaut : {param['default']}")
-
-        value = ask_number(
-            f"\tNouvelle valeur",
-            default=param['default'],
-            min_val=0
-        )
-
-        params[param['id']] = value
-
-    return params

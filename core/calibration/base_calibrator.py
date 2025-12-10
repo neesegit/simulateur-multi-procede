@@ -20,16 +20,34 @@ class BaseCalibrator(ABC):
     Définit l'interface générale et la logique commune
     """
 
+    INITIAL_STATES = {
+        'ASM1Model': {
+            'si': 30.0,
+            'ss': 5.0,
+            'xi': 200.0,
+            'xs': 50.0,
+            'xbh': 2500.0,
+            'xba': 150.0,
+            'xp': 450.0,
+            'so': 2.0,
+            'sno': 1.0,
+            'snh': 1.5,
+            'snd': 1.0,
+            'xnd': 6.0,
+            'salk': 5.0
+        }
+    }
+
     def __init__(
         self,
         process_id: str,
         process_config: Dict[str, Any],
         model_type: str,
         full_config: Optional[Dict[str, Any]] = None,
-        convergence_days: float = 200.0,
+        convergence_days: float = 5.0,
         tolerance: float = 0.01,
-        check_interval: int = 50,
-        convergence_window: int = 100
+        check_interval: int = 20,
+        convergence_window: int = 48
     ) -> None:
         """
         Initialise le calibrateur
@@ -99,7 +117,7 @@ class BaseCalibrator(ABC):
         sim_config = calib_config.get('simulation', {})
         sim_config['start_time'] = start_time.isoformat()
         sim_config['end_time'] = end_time.isoformat()
-        sim_config['timestep_hours'] = 1.0
+        sim_config['timestep_hours'] = 0.5
 
         calib_config['simulation'] = sim_config
         calib_config['name'] = f"{calib_config.get('name', 'sim')}_calibration"
@@ -121,8 +139,8 @@ class BaseCalibrator(ABC):
                     'tkn': 40.0,
                     'nh4': 25.0,
                     'no3': 0.0,
-                    'po4': 5.0,
-                    'alkalinity': 5.0
+                    'po4': 8.0,
+                    'alkalinity': 6.0
                 }
             }
 
