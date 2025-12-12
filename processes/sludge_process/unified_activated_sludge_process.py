@@ -48,6 +48,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         self.use_calibration = config.get('use_calibration', True)
 
         model_type = config.get('model', 'ASM1Model')
+        #FIXME : les fichiers de config ne contiennent pas ceci
         model_params = config.get('model_parameters', {})
         model_path = config.get('model_path', None)
 
@@ -74,7 +75,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
             self._init_ml()
 
         self.logger.info(
-            f"{self} initilisé - Type : {'Mécaniste' if self.is_empyrical else 'ML'}"
+            f"{self} initilisé - Type : {'Empyrique' if self.is_empyrical else 'ML'}"
         )
 
     def _init_mechanistric(self) -> None:

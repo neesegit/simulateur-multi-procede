@@ -10,14 +10,17 @@ import numpy as np
 import logging
 
 from typing import Dict, Optional
+
 from core.model.model_registry import ModelRegistry
 from models.empyrical.asm1.kinetics import calculate_process_rates
 from models.empyrical.asm1.stoichiometry import build_stoichiometric_matrix
 
+from models.empyrical_model import EmpyricalModel
+
 logger = logging.getLogger(__name__)
 
 #FIXME : classe de base (pour tous les modèles)
-class ASM1Model:
+class ASM1Model(EmpyricalModel):
     """
     Modèle ASM1 pour la simulation des boues activées
     """
@@ -45,6 +48,10 @@ class ASM1Model:
 
         # Construit la matrice stoechiométrique (8 processus x 13 composants)
         self.stoichiometric_matrix = build_stoichiometric_matrix(self.params)
+
+    @property
+    def model_type(self) -> str:
+        return "ASM1Model"
     
     
     def compute_derivatives(self, concentrations: np.ndarray) -> np.ndarray:

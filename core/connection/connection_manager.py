@@ -122,19 +122,20 @@ class ConnectionManager:
 
         order = []
 
-        while not queue:
+        while queue:
             current = queue.pop(0)
             order.append(current)
 
             for neighbor in non_recycle_edges.get(current, []):
                 in_degree[neighbor] -= 1
-                queue.append(neighbor)
+                if in_degree[neighbor] == 0:
+                    queue.append(neighbor)
 
         if len(order) != len(self._nodes):
             raise ValueError("Cycle détecté dans le graphe (hors recyclage)."
                              "Marquez les recyclages avec is_recycle=True")
         
-        logger.info(f"Ordre d'exécution calculé : {'->'.join(order)}")
+        logger.debug(f"Ordre d'exécution calculé : {'->'.join(order)}")
         return order
     
     def detect_cycles(self) -> List[List[str]]:

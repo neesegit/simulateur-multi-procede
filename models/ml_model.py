@@ -53,3 +53,28 @@ class MLModel(ModelInterface):
             self.sequence_buffer.append(features)
             if len(self.sequence_buffer) > self.sequence_length:
                 self.sequence_buffer.pop(0)
+
+    @abstractmethod
+    def predict_step(
+        self,
+        current_state: Dict[str, float],
+        inputs: Dict[str, float],
+        dt: float
+    ) -> Dict[str, float]:
+        """
+        Prédit l'état au prochain pas de temps
+
+        Args:
+            current_state (Dict[str, float]): Etat actual du système
+            inputs (Dict[str, float]): Entrées (débit, température, etc)
+            dt (float): Pas de temps
+
+        Returns:
+            Dict[str, float]: Dict avec les prédictions des composants
+        """
+        pass
+
+    @abstractmethod
+    def initialize_state(self, initial_conditions: Dict[str, float]) -> Dict[str, float]:
+        """Initialise l'état du modèle"""
+        pass

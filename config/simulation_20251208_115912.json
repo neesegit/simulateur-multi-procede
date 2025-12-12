@@ -32,7 +32,7 @@
         "depth": 4.0,
         "recycle_ratio": 1.0,
         "waste_ratio": 0.01,
-        "use_calibration": true
+        "use_calibration": false
       }
     }
   ],

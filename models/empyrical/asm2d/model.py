@@ -14,9 +14,11 @@ from core.model.model_registry import ModelRegistry
 from models.empyrical.asm2d.kinetics import calculate_process_rates
 from models.empyrical.asm2d.stoichiometry import build_stoichiometric_matrix
 
+from models.empyrical_model import EmpyricalModel
+
 logger = logging.getLogger(__name__)
 
-class ASM2dModel:
+class ASM2dModel(EmpyricalModel):
     """
     Modèle ASM2d pour la simulation des boues activées avec déphosphatation biologique
     """
@@ -36,8 +38,8 @@ class ASM2dModel:
 
         self.stoichiometric_matrix = build_stoichiometric_matrix(self.params)
 
-    def compute_derivatives(self, c: np.ndarray) -> np.ndarray:
-        rho = calculate_process_rates(c, self.params)
+    def compute_derivatives(self, concentrations: np.ndarray) -> np.ndarray:
+        rho = calculate_process_rates(concentrations, self.params)
         derivatives = self.stoichiometric_matrix.T @ rho
         return derivatives
     

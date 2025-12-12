@@ -125,7 +125,7 @@ def configure_processes(selected_keys: List[str],
             # Utilise les valeurs par défaut
             for param in proc_info['optional_params']:
                 if param == 'use_calibration':
-                    config_params[param] = defaults.get(param, True)
+                    config_params[param] = defaults.get(param, False)
                 elif param == 'model_path':
                     config_params[param] = defaults.get(param, None)
                 else:

@@ -35,7 +35,7 @@ class SludgeModelAdapter:
             self, 
             do_setpoint: float,
             process_id: Optional[str] = None,
-            use_calibration: bool = True,
+            use_calibration: bool = False,
             process_config: Optional[Dict[str, Any]] = None
         ) -> Dict[str, float]:
         """
@@ -44,7 +44,7 @@ class SludgeModelAdapter:
         Args:
             do_setpoint (float): Consigne d'oxygène dissous
             process_id (Optional[str], optional): ID du procédé. Defaults to None.
-            use_calibration (bool, optional): Utiliser la calibration si disponible. Defaults to True.
+            use_calibration (bool, optional): Utiliser la calibration si disponible. Defaults to False.
 
         Returns:
             Dict[str, float]: Etat initial complet

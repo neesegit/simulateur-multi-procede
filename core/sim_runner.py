@@ -33,41 +33,42 @@ def run_sim_with_calibration(
         Optional[Dict[str, Any]]: Résultats de simulation ou None si erreur
     """
     print("\n"+"="*70)
-    print("Workflow simulation + calibration")
+    print("Workflow simulation")
     print("="*70)
 
-    print("\n[1/3] Gestion de la calibration")
+    #TODO : calibration pour variation d'influent
+    # print("\nGestion de la calibration")
 
-    try:
-        calib_manager = CalibrationManager(config)
+    # try:
+    #     calib_manager = CalibrationManager(config)
 
-        match calibration_mode:
-            case 'skip':
-                skip_existing = True
-            case _:
-                skip_existing = False
+    #     match calibration_mode:
+    #         case 'skip':
+    #             skip_existing = True
+    #         case _:
+    #             skip_existing = False
         
-        calibration_results = calib_manager.run_all(
-            skip_if_exists=skip_existing,
-            interactive=interactive
-        )
+    #     calibration_results = calib_manager.run_all(
+    #         skip_if_exists=skip_existing,
+    #         interactive=interactive
+    #     )
 
-        failed_calib = [
-            pid for pid, result in calibration_results.items()
-            if result is None
-        ]
+    #     failed_calib = [
+    #         pid for pid, result in calibration_results.items()
+    #         if result is None
+    #     ]
 
-        if failed_calib:
-            logger.warning(
-                f"Calibration échouée pour : {', '.join(failed_calib)}"
-            )
-    except Exception as e:
-        logger.error(f"Erreur lors de la calibration : {e}")
-        print(f"Erreur : {e}")
-        if not interactive:
-            raise
+    #     if failed_calib:
+    #         logger.warning(
+    #             f"Calibration échouée pour : {', '.join(failed_calib)}"
+    #         )
+    # except Exception as e:
+    #     logger.error(f"Erreur lors de la calibration : {e}")
+    #     print(f"Erreur : {e}")
+    #     if not interactive:
+    #         raise
 
-    print("\n[2/3] Préparation de la simulation")
+    print("\nPréparation de la simulation")
 
     try:
         results = run_simulation(config)
@@ -76,7 +77,7 @@ def run_sim_with_calibration(
         print(f"Erreur : {e}")
         raise
 
-    print("\n[3/3] Export et visualisation")
+    print("\nExport et visualisation")
     try:
         exported = export_results(results, with_plots=plots)
         print(f"\nRésultats disponibles dans : {exported['base_directory']}")
