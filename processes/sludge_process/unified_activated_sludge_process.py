@@ -124,7 +124,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         #FIXME attention à ces valeurs
         self.state = self.model_instance.initialize_state({
             'cod': 100.0,
-            'ss': 2000.0,
+            'tss': 2000.0,
             'nh4': 2.0,
             'no3': 5.0,
             'po4': 1.0,
@@ -177,7 +177,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         self.metrics = {
             'cod_removal': results['cod_removal_rate'],
             'hr': results['hrt_hours'],
-            'mlss': results['ss'],
+            'mlss': results['tss'],
             'energy_kwh': results['aeration_energy_kwh']
         }
 
@@ -227,7 +227,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         self.metrics = {
             'cod_removal': results.get('cod_removal', 0),
             'hrt': results.get('hrt_hours', 0),
-            'mlss': results.get('ss', 0),
+            'mlss': results.get('tss', 0),
             'energy_kwh': results.get('aeration_energy_kwh', 0)
         }
 
@@ -247,7 +247,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         if flow:
             features.update({
                 'cod_in': flow.cod,
-                'ss_in': flow.ss,
+                'tss_in': flow.tss,
                 'nh4_in': flow.nh4,
                 'no3_in': flow.no3,
                 'po4_in': flow.po4
@@ -284,7 +284,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
             'components': predictions,
 
             'cod': cod_out,
-            'ss': predictions.get('ss', 0),
+            'tss': predictions.get('tss', 0),
             'nh4': predictions.get('nh4', 0),
             'no3': predictions.get('no3', 0),
             'po4': predictions.get('po4', 0),

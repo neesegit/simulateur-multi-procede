@@ -29,7 +29,7 @@ class SludgeMetrics:
     
     def _cod(self, c): return self._sum_keys(c, 'cod')
     def _tkn(self, c): return self._sum_keys(c, 'tkn')
-    def _ss(self, c): return self._sum_keys(c, 'ss')
+    def _tss(self, c): return self._sum_keys(c, 'tss')
     def _biomass(self, c): return self._sum_keys(c, 'biomass')
     def _nh4(self, c): return self._get_value(c, 'nh4')
     def _no3(self, c): return self._get_value(c, 'no3')
@@ -47,7 +47,7 @@ class SludgeMetrics:
     ) -> Dict[str, Any]:
         cod_out = self._cod(comp_out)
         tkn_out = self._tkn(comp_out)
-        ss_out = self._ss(comp_out)
+        tss_out = self._tss(comp_out)
         nh4_out = self._nh4(comp_out)
         no3_out = self._no3(comp_out)
         po4_out = self._po4(comp_out)
@@ -73,7 +73,7 @@ class SludgeMetrics:
             cod_removal = 0.0
 
         biomass = self._biomass(comp_out)
-        mlss = ss_out
+        mlss = tss_out
 
         if mlss < biomass * 1.2:
             mlss = biomass * 1.5
@@ -126,7 +126,7 @@ class SludgeMetrics:
             'cod': cod_out,
             'bod': cod_out * 0.6,
             'tkn': tkn_out,
-            'ss': ss_out,
+            'tss': tss_out,
             'nh4': nh4_out,
             'no3': no3_out,
             'po4': po4_out,

@@ -37,6 +37,10 @@ class ASM3Model(EmpyricalModel):
         
         self.stoichiometric_matrix = build_stoichiometric_matrix(self.params)
 
+    @property
+    def model_type(self) -> str:
+        return "ASM3Model"
+
     def compute_derivatives(self, concentrations: np.ndarray) -> np.ndarray:
         rho = calculate_process_rate(concentrations, self.params)
         derivatives = self.stoichiometric_matrix.T @ rho

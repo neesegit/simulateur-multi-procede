@@ -17,7 +17,7 @@ class FlowData:
     temperature: float # °C
 
     # Paramètres tandards mesurables
-    ss: float = 0.0 # Solides en suspension (mg/L)
+    tss: float = 0.0 # Solides en suspension (mg/L)
     cod: float = 0.0 # DCO (mg/L)
     bod: float = 0.0 # DBO5 (mg/L)
     tkn: float = 0.0 # Azote Kjeldahl total (mg/L)
@@ -32,7 +32,7 @@ class FlowData:
     source_node: Optional[str] = None
     model_type: Optional[str] = None
 
-    _STANDARD_KEYS = {'ss', 'cod', 'bod', 'tkn', 'nh4', 'no3', 'po4', 'alkalinity'}
+    _STANDARD_KEYS = {'tss', 'cod', 'bod', 'tkn', 'nh4', 'no3', 'po4', 'alkalinity'}
 
     def get(self, key: str, default: float = 0.0) -> float:
         """
@@ -78,7 +78,7 @@ class FlowData:
     
     def extract_measured(self, keys: Optional[list[str]] = None) -> Dict[str, float]:
         if keys is None:
-            keys = ['ss', 'cod', 'bod', 'tkn', 'nh4', 'no3', 'po4', 'alkalinity']
+            keys = ['tss', 'cod', 'bod', 'tkn', 'nh4', 'no3', 'po4', 'alkalinity']
         return {k: self.get(k, 0.0) for k in keys}
     
     def to_dict(self) -> Dict[str, Any]:
@@ -108,7 +108,7 @@ class FlowData:
         if self.temperature < 0 or self.temperature > 50:
             logger.warning(f"Température inhabituelle : {self.temperature}°C")
 
-        for attr in ['ss', 'cod', 'bod', 'tkn', 'nh4', 'no3', 'po4']:
+        for attr in ['tss', 'cod', 'bod', 'tkn', 'nh4', 'no3', 'po4']:
             value = getattr(self, attr)
             if value < 0:
                 logger.warning(f"{attr} négatif ({value}), mis à 0")

@@ -151,7 +151,7 @@ class ProcessNode(ABC):
         measured = flow.extract_measured()
         fractionated = fraction_class.fractionate(
                     cod=measured.get('cod', 0.0),
-                    ss=measured.get('ss', 0.0),
+                    tss=measured.get('tss', 0.0),
                     tkn=measured.get('tkn', 0.0),
                     nh4=measured.get('nh4', 0.0),
                     no3=measured.get('no3', 0.0),

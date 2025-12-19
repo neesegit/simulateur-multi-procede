@@ -42,15 +42,15 @@ class RNNModel(MLModel):
         """Features par défaut pour le RNN"""
         return [
             'flowrate', 'temperature', 'volume',
-            'cod_in', 'ss_in', 'nh4_in', 'no3_in', 'po4_in',
-            'cod', 'ss', 'nh4', 'no3', 'po4',
+            'cod_in', 'tss_in', 'nh4_in', 'no3_in', 'po4_in',
+            'cod', 'tss', 'nh4', 'no3', 'po4',
             'biomass', 'hrt_hours'
         ]
     
     def _get_default_targets(self) -> List[str]:
         """Targets par défaut"""
         return [
-            'cod', 'ss', 'nh4', 'no3', 'po4',
+            'cod', 'tss', 'nh4', 'no3', 'po4',
             'biomass', 'cod_removal'
         ]
     

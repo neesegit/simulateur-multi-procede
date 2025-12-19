@@ -24,7 +24,7 @@ def configure_influent(config: Dict) -> None:
     # Paramètres de pollution
     print("\nParamètres de pollution :")
     cod = ask_number("\tDCO totale (mg/L)", default=500.0, min_val=0)
-    ss = ask_number("\tMES (mg/L)", default=250.0, min_val=0)
+    tss = ask_number("\tMES (mg/L)", default=250.0, min_val=0)
     tkn = ask_number("\tTKN - Azote Kjeldahl (mg/L)", default=40.0, min_val=0)
     nh4 = ask_number("\tNH4 - Ammonium (mg/L)", default=28.0, min_val=0)
     no3 = ask_number("\tNO3 - Nitrates (mg/L)", default=0.5, min_val=0)
@@ -38,7 +38,7 @@ def configure_influent(config: Dict) -> None:
             'auto_fractionate': True,
             'composition': {
                 'cod': cod,
-                'ss': ss,
+                'tss': tss,
                 'tkn': tkn,
                 'nh4': nh4,
                 'no3': no3,

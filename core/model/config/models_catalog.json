@@ -161,7 +161,7 @@
             "metrics": {
                 "cod": ["so2", "sf", "sa", "xi", "xs", "xh", "xaut", "xpao", "xpp", "xpha", "xmeoh", "xmep"],
                 "tkn": ["snh4", "xi", "xs", "xh", "xpao", "xaut"],
-                "ss": ["xi", "xs", "xh", "xpao", "xpp", "xpha", "xaut", "xmeoh", "xmep"],
+                "tss": ["xi", "xs", "xh", "xpao", "xpp", "xpha", "xaut", "xmeoh", "xmep"],
                 "biomass": ["xh", "xaut", "xpao"],
                 "nh4": "snh4",
                 "no3": "sno3",
@@ -237,7 +237,7 @@
             "metrics": {
                 "cod": ["si", "ss", "xi", "xs", "xh", "xsto", "xa"],
                 "tkn": ["snh4", "sn2", "snox", "xi", "xs", "xh", "xa"],
-                "ss": ["xi", "xs", "xh", "xsto", "xa", "xss"],
+                "tss": ["xi", "xs", "xh", "xsto", "xa", "xss"],
                 "biomass": ["xh", "xa"],
                 "nh4": "snh4",
                 "no3": "snox",
@@ -259,7 +259,7 @@
             "parameters": [],
             "components": [
                 {"id": "cod", "name": "DCO sortie", "unit": "mg/L"},
-                {"id": "ss", "name": "MES sortie", "unit": "mg/L"},
+                {"id": "tss", "name": "MES sortie", "unit": "mg/L"},
                 {"id": "nh4", "name": "Ammonium sortie", "unit": "mg/L"},
                 {"id": "no3", "name": "Nitrates sortie", "unit": "mg/L"},
                 {"id": "po4", "name": "Phosphates sortie", "unit": "mg/L"},
@@ -269,7 +269,7 @@
             "metrics": {
                 "cod": ["cod"],
                 "tkn": ["nh4"],
-                "ss": ["ss"],
+                "tss": ["ss"],
                 "biomass": ["biomass"],
                 "nh4": "nh4",
                 "no3": "no3",
@@ -294,7 +294,7 @@
             ],
             "components": [
                 {"id": "cod", "name": "DCO sortie", "unit": "mg/L"},
-                {"id": "ss", "name": "MES sortie", "unit": "mg/L"},
+                {"id": "tss", "name": "MES sortie", "unit": "mg/L"},
                 {"id": "nh4", "name": "Ammonium sortie", "unit": "mg/L"},
                 {"id": "no3", "name": "Nitrates sortie", "unit": "mg/L"},
                 {"id": "po4", "name": "Phosphates sortie", "unit": "mg/L"},
@@ -304,7 +304,7 @@
             "metrics": {
                 "cod": ["cod"],
                 "tkn": ["nh4"],
-                "ss": ["ss"],
+                "tss": ["ss"],
                 "biomass": ["biomass"],
                 "nh4": "nh4",
                 "no3": "no3",

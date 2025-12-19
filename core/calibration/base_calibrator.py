@@ -135,7 +135,7 @@ class BaseCalibrator(ABC):
                 'temperature': 20.0,
                 'composition': {
                     'cod': 500.0,
-                    'ss': 200.0,
+                    'tss': 200.0,
                     'tkn': 40.0,
                     'nh4': 25.0,
                     'no3': 0.0,

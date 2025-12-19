@@ -16,6 +16,8 @@ from core.data.simulation_flow import SimulationFlow
 from core.model.model_registry import ModelRegistry
 
 from models.empyrical.asm1.model import ASM1Model
+from models.empyrical.asm2d.model import ASM2dModel
+from models.empyrical.asm3.model import ASM3Model
 
 # ====================================
 # Fixtures de base
@@ -45,7 +47,7 @@ def basic_flow_data(sample_timestamp):
         flowrate=1000.0,
         temperature=20.0,
         cod=500.0,
-        ss=250.0,
+        tss=250.0,
         tkn=40.0,
         nh4=28.0,
         no3=0.5,
@@ -90,6 +92,16 @@ def asm1_model():
     return ASM1Model()
 
 @pytest.fixture
+def asm2d_model():
+    """Instance du modèle ASM2d"""
+    return ASM2dModel()
+
+@pytest.fixture
+def asm3_model():
+    """Instance du modèle ASM3"""
+    return ASM3Model()
+
+@pytest.fixture
 def mock_model():
     """Mock d'un modèle pour tests isolés"""
     mock = MagicMock()
@@ -128,7 +140,7 @@ def minimal_config():
             'temperature': 20.0,
             'composition': {
                 'cod': 500.0,
-                'ss': 250.0,
+                'tss': 250.0,
                 'tkn': 40.0,
                 'nh4': 28.0,
                 'no3': 0.5,
@@ -206,7 +218,7 @@ def mock_process_node():
         'flowrate': 1000.0,
         'temperature': 20.0,
         'cod': 50.0,
-        'ss': 2000.0
+        'tss': 2000.0
     }
     return mock
 
@@ -244,7 +256,7 @@ def sample_simulation_results():
                     'timestamp': '2025-12-11T00:00:00',
                     'flowrate': 1000.0,
                     'cod': 50.0,
-                    'ss': 2000.0
+                    'tss': 2000.0
                 }
             ] * 10
         },

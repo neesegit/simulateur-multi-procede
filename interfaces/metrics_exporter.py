@@ -60,7 +60,7 @@ class MetricsExporter:
                     'cod_particulate': safe_get(flow, 'cod_particulate', 0),
                     'cod_removal': safe_get(flow, 'soluble_cod_removal', 0),
                     'biomass': safe_get(flow, 'biomass_concentration', 0),
-                    'mlss': safe_get(flow, 'ss', 0),
+                    'mlss': safe_get(flow, 'tss', 0),
                     'nh4': safe_get(flow, 'nh4', 0),
                     'no3': safe_get(flow, 'no3', 0),
                     'po4': safe_get(flow, 'po4', 0),
@@ -154,7 +154,7 @@ class MetricsExporter:
                     'po4_mg_L': safe_get(flow, 'po4', 0),
 
                     'biomass_mg_L': safe_get(flow, 'biomass_concentration', 0),
-                    'mlss_mg_L': safe_get(flow, 'ss', 0),
+                    'mlss_mg_L': safe_get(flow, 'tss', 0),
                     'svi_mL_g': safe_get(flow, 'svi', 0),
 
                     'srt_days': safe_get(flow, 'srt_days', 0) if safe_get(flow, 'srt_days', 0) < float('inf') else None,
@@ -218,7 +218,7 @@ class MetricsExporter:
 
                 f.write("2. Biomasse et boues\n")
                 f.write(f"\tBiomasse active : {safe_get(final, 'biomass_concentration', 0):>8.1f} mg/L\n")
-                f.write(f"\tMLSS : {safe_get(final, 'ss', 0):>8.1f} mg/L\n")
+                f.write(f"\tMLSS : {safe_get(final, 'tss', 0):>8.1f} mg/L\n")
                 f.write(f"\tSRT : {safe_get(final, 'srt_days', 0):>8.1f} jours\n")
                 f.write(f"\tSVI : {safe_get(final, 'svi', 0):>8.1f} mL/g\n\n")
 

@@ -45,16 +45,13 @@ class ASM2DFraction:
         'i_tss_xi': 0.75, # TSS/COD pour XI
         'i_tss_xs': 0.75, # TSS/COD pour XS
         'i_tss_bm': 0.90, # TSS/COD pour biomasse
-
-        # Alcalinité
-        'alk_cod_ratio': 0.01 # Alcalinité / COD
     }
 
     @classmethod
     def fractionate(
         cls,
         cod: float,
-        ss: float = 0.0,
+        tss: float = 0.0,
         tkn: float = 0.0,
         nh4: float = 0.0,
         no3: float = 0.0,
@@ -187,15 +184,14 @@ class ASM2DFraction:
 
         if alkalinity is not None:
             c['salk'] = alkalinity
+        elif tkn > 0:
+            c['salk'] = max(0.0, (tkn - no3) / 14.0)
         else:
-            c['salk'] = 5.0 + (cod * r['alk_cod_ratio'])
-
-            if nh4 > 0:
-                c['salk'] += nh4 * 0.7
+            c['salk'] = 5.0
 
         # TSS
-        if ss > 0:
-            c['xtss'] = ss
+        if tss > 0:
+            c['xtss'] = tss
         else:
             tss_from_xi = c['xi'] * r['i_tss_xi']
             tss_from_xs = c['xs'] * r['i_tss_xs']

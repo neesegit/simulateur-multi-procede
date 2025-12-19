@@ -95,7 +95,7 @@ class ResultManager:
             }
 
             summary['operational'][nid] = {
-                'mlss': final.get('ss', 0),
+                'mlss': final.get('tss', 0),
                 'biomass': final.get('biomass_concentration', 0),
                 'srt_days': final.get('srt_days', 0),
                 'svi': final.get('svi', 0),
@@ -133,7 +133,7 @@ class ResultManager:
         """Evalue l'état opérationnel"""
         issues = []
 
-        mlss = data.get('ss', 0)
+        mlss = data.get('tss', 0)
         if mlss < 1500:
             issues.append("MLSS faible")
         elif mlss > 5000:

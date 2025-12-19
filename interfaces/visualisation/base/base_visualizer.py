@@ -297,7 +297,7 @@ class BaseVisualizer(ABC):
             components = self.get_metric_components(config.plot_type)
             components_data = self.extract_aggregate_values(flows, components)
 
-        if config.plot_type in ['cod', 'tkn', 'ss']:
+        if config.plot_type in ['cod', 'tkn', 'tss']:
             total_values = [sum(components_data[c][i] for c in components_data) for i in range(len(timestamps))]
             self.plot_lines(
                 fig, timestamps,

@@ -17,36 +17,29 @@ class ASM1Fraction:
     # Ratios par défaut (typiques pour eaux usées domestiques)
     DEFAULT_RATIOS = {
         # Fraction de la DCO
-        'f_si_cod': 0.05, #DCO soluble inerte / DCO total
-        'f_ss_cod': 0.20, #DCO soluble biodégradable / DCO total
-        'f_xs_cod': 0.40, #DCO particulaire biodégradable / DCO total
-        'f_xi_cod': 0.10, #DCO particulaire inerte / DCO total
-        # Le reste (0.25) = biomasse dans l'influent
+        'f_si': 0.05,
+        'f_xi': 0.10,
+        'f_biomass': 0.08,
+        'f_cv': 1.48,
 
-        # Fractions de l'azote
-        'f_snh_tkn': 0.70, #NH4 / TKN
-        'f_snd_tkn': 0.05, #Azote organique soluble / TKN
-        'f_xnd_tkn': 0.25, #Azote organique particulaire / TKN
-
-        # Ratios stoechimétriques
-        'i_xb': 0.08, #Teneur en azote de la biomasse (gN/gDCO)
-        'i_xp': 0.06, #Teneur en azote des produits inertes (gN/gDCO)
-
-        # Fractions des MES
-        'f_cv': 1.48, #Ratio DCO/MES typique pour particules organiques
+        # Azote
+        'f_snh': 0.70,
+        'f_snd': 0.05
     }
 
     @classmethod
-    def fractionate(cls,
-                    cod: float,
-                    cod_soluble: Optional[float] = None,
-                    ss: float = 0.0,
-                    tkn: float = 0.0,
-                    nh4: float = 0.0,
-                    no3: float = 0.0,
-                    po4: float = 0.0,
-                    alkalinity: Optional[float] = None,
-                    ratios: Optional[Dict[str, float]] = None) -> Dict[str, float]:
+    def fractionate(
+        cls,
+        cod: float,
+        cod_soluble: Optional[float] = None,
+        tss: float = 0.0,
+        tkn: float = 0.0,
+        nh4: float = 0.0,
+        no3: float = 0.0,
+        po4: float = 0.0,
+        alkalinity: Optional[float] = None,
+        ratios: Optional[Dict[str, float]] = None
+    ) -> Dict[str, float]:
         """
         Fractionne les paramètres mesurés en composants ASM1
 
@@ -70,59 +63,59 @@ class ASM1Fraction:
         components = {}
 
         # Fractionnement de la DCO
-        if cod_soluble is None:
-            cod_soluble = cod * (r['f_si_cod'] + r['f_ss_cod'])
+        if cod_soluble is not None:
+            cod_soluble = max(0.0, min(cod_soluble, cod))
+        else:
+            cod_particulaire = min(cod, r['f_cv'] * tss)
+            cod_soluble = max(0.0, cod - cod_particulaire)
 
-        # DCO soluble
-        components['si'] = cod * r['f_si_cod'] # Inerte soluble
-        components['ss'] = cod * r['f_ss_cod'] # Biodégradable soluble
+        cod_particulaire = cod - cod_soluble
 
-        # DCO particulaire
-        components['xi'] = cod * r['f_xi_cod'] # Inerte particulaire
-        components['xs'] = cod * r['f_xs_cod'] # Biodégradable particulaire
+        components['si'] = r['f_si'] * cod
+        components['ss'] = max(0.0, cod_soluble - components['si'])
 
-        # Biomasse dans l'influent (estimation)
-        cod_biomass = cod - (components['si'] + components['ss'] + components['xi'] + components['xs'])
-        components['xbh'] = max(0, cod_biomass*0.9) # 90% hétérotrophes
-        components['xba'] = max(0, cod_biomass*0.1) # 10% autotrophes
+        components['xi'] = r['f_xi'] * cod
 
-        # Produits inertes particulaires (initialement faible)
+        cod_biomass = r['f_biomass'] * cod
+        components['xbh'] = 0.9 * cod_biomass
+        components['xba'] = 0.1 * cod_biomass
+
+        components['xs'] = max(
+            0.0,
+            cod_particulaire - components['xi'] - cod_biomass
+        )
+
         components['xp'] = 0.0
 
-        # Fractionnement de l'azote
         if tkn > 0:
-            # Ammonium (mesuré ou estimé)
-            if nh4 > 0:
-                components['snh'] = nh4
-            else:
-                components['snh'] = tkn * r['f_snh_tkn']
-
-            # Azote organique soluble
-            components['snd'] = tkn * r['f_snd_tkn']
-
-            # Azote organique particulaire
-            n_organique_part = tkn - components['snh'] - components['snd']
-            components['xnd'] = max(0, n_organique_part)
+            components['snh'] = nh4 if nh4 > 0 else r['f_snh'] * tkn
+            components['snd'] = r['f_snd'] * tkn
+            components['xnd'] = max(0.0, tkn - components['snh'] - components['snd'])
         else:
-            components['snh'] = nh4 if nh4 > 0 else 0.0
+            components['snh'] = nh4
             components['snd'] = 0.0
             components['xnd'] = 0.0
 
-        # Nitrates
         components['sno'] = no3
 
         # Oxygène dissous
         # Dans L'influent, généralement très faible
-        # components['so'] = 0.0
+        components['so'] = 0.0
 
         # Alcalinité
         if alkalinity is not None:
             components['salk'] = alkalinity
+        elif tkn > 0:
+            components['salk'] = max(0.0, (tkn - no3) / 14.0)
         else:
-            # Estimation basée sur le TKN (corrélation empirique)
             # typiquement 5-7 mmol/L pour eaux usées domestiques
-            components['salk'] = 5.0 + (tkn/14)*0.1 # conversion approximative
+            components['salk'] = 5.0
+
+        cod_rebuilt = sum(components[c] for c in ['si', 'ss', 'xi', 'xs', 'xbh', 'xba', 'xp'])
         
-        logger.debug(f"Fractionnement ASM1: DCO={cod:.1f} -> {len(components)} composants")
+        logger.debug(
+            f"Fractionnement ASM1: DCO={cod:.1f} mg/L -> {len(components)} composants | "
+            f"Rebuilt COD={cod_rebuilt:.1f} mg/L"
+        )
 
         return components

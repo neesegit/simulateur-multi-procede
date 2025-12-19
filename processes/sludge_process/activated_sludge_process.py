@@ -100,7 +100,7 @@ class ActivatedSludgeProcess(ProcessNode):
         self.metrics = {
             'cod_removal': results['cod_removal_rate'],
             'hrt': results['hrt_hours'],
-            'mlss': results['ss'],
+            'mlss': results['tss'],
             'energy_kwh': results['aeration_energy_kwh']
         }
         self.concentrations = c_out

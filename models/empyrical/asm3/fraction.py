@@ -31,16 +31,14 @@ class ASM3Fraction:
 
         'i_ss_xi': 0.75,
         'i_ss_xs': 0.75,
-        'i_ss_bm': 0.90,
-
-        'alk_cod_ratio': 0.01
+        'i_ss_bm': 0.90
     }
 
     @classmethod
     def fractionate(
         cls,
         cod: float,
-        ss: float = 0.0,
+        tss: float = 0.0,
         tkn: float = 0.0,
         nh4: float = 0.0,
         no3: float = 0.0,
@@ -128,13 +126,13 @@ class ASM3Fraction:
 
         if alkalinity is not None:
             c['salk'] = alkalinity
+        elif tkn > 0:
+            c['salk'] = max(0.0, (tkn - no3) / 14.0)
         else:
-            c['salk'] = 5.0 + (cod * r['alk_cod_ratio'])
-            if nh4 > 0:
-                c['salk'] += nh4 / 14.0 * 0.7
+            c['salk'] = 5.0
         
-        if ss > 0:
-            c['xss'] = ss
+        if tss > 0:
+            c['xss'] = tss
         else:
             tss_from_xi = c['xi'] * r['i_ss_xi']
             tss_from_xs = c['xs'] * r['i_ss_xs']

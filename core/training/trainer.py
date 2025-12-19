@@ -244,7 +244,7 @@ class MLTrainer:
         cod_removal_rate = 0.90
         y['cod'] = df['Chemical Oxygen Demand'] * (1 - cod_removal_rate)
 
-        y['ss'] = 2000 + np.random.normal(0, 200, len(df))
+        y['tss'] = 2000 + np.random.normal(0, 200, len(df))
 
         y['nh4'] = df['Ammonia'] * 0.1
 
@@ -252,7 +252,7 @@ class MLTrainer:
 
         y['po4'] = 1.0
 
-        y['biomass'] = y['ss'] * 0.75
+        y['biomass'] = y['tss'] * 0.75
 
         y['cod_removal'] = cod_removal_rate * 100
 

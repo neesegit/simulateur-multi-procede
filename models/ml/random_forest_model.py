@@ -39,13 +39,13 @@ class RandomForestModel(MLModel):
     def _get_default_features(self) -> List[str]:
         return [
             'flowrate', 'temperature', 'volume',
-            'cod_in', 'ss_in', 'nh4_in', 'no3_in', 'po4_in',
+            'cod_in', 'tss_in', 'nh4_in', 'no3_in', 'po4_in',
             'hrt_hours', 'srt_days'
         ]
     
     def _get_default_targets(self) -> List[str]:
         return [
-            'cod', 'ss', 'nh4', 'no3', 'po4',
+            'cod', 'tss', 'nh4', 'no3', 'po4',
             'biomass', 'cod_removal'
         ]
 

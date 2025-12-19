@@ -273,7 +273,7 @@ class SimulationOrchestrator:
                 flow.components[metric] = outputs[metric]
 
 
-        for key in ['cod', 'ss', 'bod', 'tkn', 'nh4', 'no3', 'po4']:
+        for key in ['cod', 'tss', 'bod', 'tkn', 'nh4', 'no3', 'po4']:
             if key in outputs:
                 value = outputs[key]
                 setattr(flow, key, value)

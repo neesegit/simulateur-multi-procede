@@ -63,7 +63,7 @@ class ConfigValidator:
         start = datetime.fromisoformat(sim["start_time"])
         end = datetime.fromisoformat(sim["end_time"])
         if end <= start:
-            raise ValueError("simulation.end_time doit être après start_time")
+            raise ValueError("end_time doit être après start_time")
         
     @staticmethod
     def _validate_influent(influent: Dict[str, Any]) -> None:
