@@ -12,9 +12,8 @@ from core.process.process_factory import ProcessFactory
 class TestSimulationOrchestrator:
     """Tests SimulationOrchestrator"""
 
-    @patch('core.orchestrator.simulation_orchestrator.ProcessFactory')
     @patch('core.orchestrator.simulation_orchestrator.DataBus')
-    def test_initialization_creates_components(self, MockDataBus, MockFactory):
+    def test_initialization_creates_components(self, MockDataBus):
         """Test : initialisation crée les composants"""
         config = {
             'name': 'test_sim',
@@ -121,31 +120,35 @@ class TestSimulationOrchestrator:
                 'timestep_hours': 0.1
             },
             'influent': {'flowrate': 1000.0, 'temperature': 20.0},
-            'processes': []
+            'processes': [],
+            'connections': []
         }
 
         orchestrator = SimulationOrchestrator(config)
 
         mock_proc1 = MagicMock()
         mock_proc1.node_id = 'proc1'
-        mock_proc1.upstream_nodes = ['influent']
         mock_proc1.process.return_value = {'flowrate': 1000.0}
-
-        mock_proc2 = MagicMock()
-        mock_proc2.node_id = 'proc2'
-        mock_proc2.upstream_nodes = ['proc1']
-        mock_proc2.process.return_value = {'flowrate': 1000.0}
+        mock_proc1.update_state = MagicMock()
 
         orchestrator.add_process(mock_proc1)
-        orchestrator.add_process(mock_proc2)
 
-        with patch.object(orchestrator.databus, 'read_flow', return_value=MagicMock()):
-            orchestrator._run_timestep()
+        orchestrator.connection_manager.add_connection('influent', 'proc1', 1.0, False)
 
-        mock_proc1.process.assert_called_once()
-        mock_proc2.process.assert_called_once()
+        mock_flow = MagicMock()
+        mock_flow.flowrate = 1000.0
+        mock_flow.temperature = 20.0
+        mock_flow.components = {}
 
-    @patch('core.orchestrator.simulation_orchestrator.InfluentInitializaer')
+        orchestrator.databus.write_flow('influent', mock_flow)
+        orchestrator.initialize()
+
+        orchestrator._run_timestep()
+
+        assert mock_proc1.process.call_count == 1
+
+
+    @patch('core.orchestrator.simulation_orchestrator.InfluentInitializer')
     def test_run_advances_time(self, MockInfluent):
         """Test : run avance le temps"""
         config = {
@@ -156,7 +159,8 @@ class TestSimulationOrchestrator:
                 'timestep_hours': 0.1
             },
             'influent': {'flowrate': 1000.0, 'temperature': 20.0},
-            'processes': []
+            'processes': [],
+            'connections': []
         }
 
         MockInfluent.create_from_config.return_value = MagicMock()

@@ -41,7 +41,8 @@ class TestActivatedSludgeProcess:
         MockRegistry.get_instance.assert_called_once()
         mock_registry_instance.create_model.assert_called_once_with(
             model_type='ASM1Model',
-            params={}
+            params={},
+            model_path=None
         )
         MockAdapter.assert_called_once()
         assert process.volume == 5000.0
@@ -167,7 +168,7 @@ class TestSludgeMetrics:
         mock_def.get_metrics_dict.return_value = {
             'cod': ['si', 'ss', 'xbh'],
             'tkn': ['snh'],
-            'ss': ['xbh'],
+            'tss': ['xbh'],
             'biomass': ['xbh']
         }
         mock_registry.get_model_definition.return_value = mock_def
@@ -187,7 +188,7 @@ class TestSludgeMetrics:
 
         assert 'cod' in result
         assert 'tkn' in result
-        assert 'ss' in result
+        assert 'tss' in result
         assert result['biomass_concentration'] == 2500.0
 
     @patch('processes.sludge_process.sludge_metrics.ModelRegistry')
@@ -279,10 +280,10 @@ class TestSludgeModelAdapter:
         assert state is not None
         assert 'so' in state or 'xbh' in state
 
-    def test_initial_state_uses_default(self, asm1_model, asm2d_model, asm3_model):
+    def test_initial_state_uses_default(self, asm1_model, asm2_model, asm3_model):
         """Test : conditions initiales"""
         adapter_asm1 = SludgeModelAdapter(asm1_model, 'ASM1')
-        adapter_asm2d = SludgeModelAdapter(asm2d_model, 'ASM2d')
+        adapter_asm2d = SludgeModelAdapter(asm2_model, 'ASM2d')
         adapter_asm3 = SludgeModelAdapter(asm3_model, 'ASM3')
 
         do_setpoint = 2.0

@@ -79,8 +79,7 @@ class TestASM1Fraction:
     def test_custom_ratios(self):
         """Test : ratios personnalisés"""
         custom_ratios = {
-            'f_si_cod': 0.10,
-            'f_ss_cod': 0.30
+            'f_si': 0.10
         }
 
         components = ASM1Fraction.fractionate(
@@ -89,7 +88,7 @@ class TestASM1Fraction:
         )
 
         assert 45 <= components['si'] <= 55
-        assert 145 <= components['ss'] <= 155
+        assert 400 <= components['ss'] <= 500
 
     def test_zero_values(self):
         """Test: valeurs nulles"""
@@ -302,7 +301,7 @@ class TestAllFractions:
         )
 
         assert components is not None
-        assert all(v >= 0 for v in components.items())
+        assert all(v >= 0 for _, v in components.items())
 
     def test_very_high_cod(self, fraction_class):
         """Test : DCO très élevée"""

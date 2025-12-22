@@ -24,6 +24,7 @@ class FlowData:
     nh4: float = 0.0
     no3: float = 0.0
     po4: float = 0.0
+    alkalinity: float = 0.0
 
     # Tous les autres paramètres sont stockés dans un dict flexible
     components: Dict[str, float] = field(default_factory=dict)

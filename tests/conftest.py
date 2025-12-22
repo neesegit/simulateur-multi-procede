@@ -92,7 +92,7 @@ def asm1_model():
     return ASM1Model()
 
 @pytest.fixture
-def asm2d_model():
+def asm2_model():
     """Instance du modèle ASM2d"""
     return ASM2dModel()
 

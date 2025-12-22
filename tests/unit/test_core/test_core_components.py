@@ -43,7 +43,7 @@ class TestFlowData:
             po4=8.0
         )
 
-        assert flow.tkn == 250.0
+        assert flow.tss == 250.0
         assert flow.cod == 500.0
         assert flow.tkn == 40.0
 
@@ -71,7 +71,7 @@ class TestFlowData:
 
         flow.components['xbh'] = 2500.0
 
-        assert flow.get('cod') == 1000.0
+        assert flow.get('cod') == 500.0
         assert flow.get('xbh') == 2500.0
         assert flow.get('unknown', 0.0) == 0.0
 

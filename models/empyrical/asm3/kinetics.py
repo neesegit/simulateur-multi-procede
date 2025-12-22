@@ -1,6 +1,6 @@
 import numpy as np
 
-def calculate_process_rate(c: np.ndarray, p: dict) -> np.ndarray:
+def calculate_process_rates(c: np.ndarray, p: dict) -> np.ndarray:
 
     rho = np.zeros(12)
 

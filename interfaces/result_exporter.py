@@ -30,7 +30,7 @@ class ResultsExporter:
             output_dir (str): Répertoire de sortie
 
         Returns:
-            Dict[str, Path]: Dictionnaire {node_id: chemin_csv}
+            Dict[str, Path]: Dictionnaire{node_id: chemin_csv}
         """
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)

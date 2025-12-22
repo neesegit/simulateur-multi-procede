@@ -52,10 +52,10 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         model_params = config.get('model_parameters', {})
         model_path = config.get('model_path', None)
 
-        registry = ModelRegistry.get_instance()
+        self.registry = ModelRegistry.get_instance()
 
         try:
-            self.model_instance = registry.create_model(
+            self.model_instance = self.registry.create_model(
                 model_type=model_type,
                 params=model_params,
                 model_path=model_path
@@ -85,8 +85,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
 
         self.concentrations = np.zeros(self.model_adapter.size)
 
-        registry = ModelRegistry.get_instance()
-        self.sludge_metrics = SludgeMetrics(self.model_type, registry)
+        self.sludge_metrics = SludgeMetrics(self.model_type, self.registry)
 
         self.logger.debug("Initialisation mécaniste terminée")
 

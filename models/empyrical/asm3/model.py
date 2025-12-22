@@ -10,7 +10,7 @@ import logging
 
 from typing import Dict, Optional
 from core.model.model_registry import ModelRegistry
-from models.empyrical.asm3.kinetics import calculate_process_rate
+from models.empyrical.asm3.kinetics import calculate_process_rates
 from models.empyrical.asm3.stoichiometry import build_stoichiometric_matrix
 
 from models.empyrical_model import EmpyricalModel
@@ -42,7 +42,7 @@ class ASM3Model(EmpyricalModel):
         return "ASM3Model"
 
     def compute_derivatives(self, concentrations: np.ndarray) -> np.ndarray:
-        rho = calculate_process_rate(concentrations, self.params)
+        rho = calculate_process_rates(concentrations, self.params)
         derivatives = self.stoichiometric_matrix.T @ rho
         return derivatives
     

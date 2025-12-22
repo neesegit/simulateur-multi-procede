@@ -106,7 +106,7 @@ class TestASM2dModel:
 class TestASM2dWithMocks:
     """Tests utilisant des mocks pour isoler les dépendances"""
 
-    @patch('models.empyrical.asm1.kinetics.calculate_process_rates')
+    @patch('models.empyrical.asm2d.model.calculate_process_rates')
     def test_compute_derivatives_calls_kinetics(self, mock_kinetics):
         """Test : compute_derivatives appelle bien calculate_process_rates"""
         mock_kinetics.return_value = np.ones(21)
@@ -119,7 +119,7 @@ class TestASM2dWithMocks:
         mock_kinetics.assert_called_once()
         assert derivatives is not None
 
-    @patch('models.empyrical.asm1.model.build_stoichiometric_matrix')
+    @patch('models.empyrical.asm2d.model.build_stoichiometric_matrix')
     def test_initialization_builds_matrix(self, mock_build):
         """Test : la matrice stoichiométrique est construire à l'init"""
         mock_matrix = np.zeros((21, 19))
@@ -130,7 +130,7 @@ class TestASM2dWithMocks:
         mock_build.assert_called_once()
         assert model.stoichiometric_matrix is mock_matrix
 
-@pytest.mark.parametrize('Concentrations', [
+@pytest.mark.parametrize('concentrations', [
     np.ones(19)*10,
     np.ones(19)*100,
     np.ones(19)*1000,

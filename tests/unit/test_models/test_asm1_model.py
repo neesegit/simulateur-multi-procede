@@ -108,7 +108,7 @@ class TestASM1Model:
 class TestASM1WithMocks:
     """Tests utilisant des mocks pour isoler les dépendances"""
 
-    @patch('models.empyrical.asm1.kinetics.calculate_process_rates')
+    @patch('models.empyrical.asm1.model.calculate_process_rates')
     def test_compute_derivatives_calls_kinetics(self, mock_kinetics):
         """Test : compute_derivatives appelle bien calculate_process_rates"""
         mock_kinetics.return_value = np.ones(8)
@@ -132,7 +132,7 @@ class TestASM1WithMocks:
         mock_build.assert_called_once()
         assert model.stoichiometric_matrix is mock_matrix
 
-@pytest.mark.parametrize('Concentrations', [
+@pytest.mark.parametrize('concentrations', [
     np.ones(13)*10,
     np.ones(13)*100,
     np.ones(13)*1000,
