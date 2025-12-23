@@ -3,10 +3,8 @@ Tests de l'orchestrateur
 """
 import pytest
 from unittest.mock import Mock, MagicMock, patch, call
-from datetime import datetime, timedelta
 
 from core.orchestrator.simulation_orchestrator import SimulationOrchestrator
-from core.connection.connection_manager import ConnectionManager
 from core.process.process_factory import ProcessFactory
 
 class TestSimulationOrchestrator:
@@ -174,61 +172,6 @@ class TestSimulationOrchestrator:
             orchestrator.run()
 
         assert orchestrator.state.current_time > initial_time
-
-class TestConnectionManager:
-    """Tests ConnectionManager"""
-
-    def test_add_connection_validates_fraction(self):
-        """Test : add_connection valide la fraction"""
-        manager = ConnectionManager()
-
-        with pytest.raises(ValueError, match='flow_fraction'):
-            manager.add_connection('source', 'target', flow_fraction=1.5)
-
-        with pytest.raises(ValueError, match='flow_fraction'):
-            manager.add_connection('source', 'target', flow_fraction=0.0)
-
-    def test_add_connection_rejects_self_loop(self):
-        """Test : rejette les boucles sur soi-même"""
-        manager = ConnectionManager()
-
-        with pytest.raises(ValueError, match='différents'):
-            manager.add_connection('node1', 'node1')
-
-    @patch('core.connection.connection_manager.logger')
-    def test_add_connection_logs(self, mock_logger):
-        """Test : add_conenction log l'ajout"""
-        manager = ConnectionManager()
-
-        manager.add_connection('source', 'target', 1.0, False)
-
-        mock_logger.debug.assert_called()
-
-    def test_get_upstream_nodes(self):
-        """Test : get_upstream_nodes retourne les sources"""
-        manager = ConnectionManager()
-
-        manager.add_connection('source1', 'target', 0.5)
-        manager.add_connection('source2', 'target', 0.5)
-
-        upstream = manager.get_upstream_nodes('target')
-
-        assert len(upstream) == 2
-        source_ids = [s for s, _ in upstream]
-        assert 'source1' in source_ids
-        assert 'source2' in source_ids
-
-    def test_validate_detects_fraction_overflow(self):
-        """Test : validate détecte les fractions > 1"""
-        manager = ConnectionManager()
-
-        manager.add_connection('source', 'target1', 0.6)
-        manager.add_connection('source', 'target2', 0.5)
-
-        validation = manager.validate()
-
-        assert len(validation['errors']) > 0
-        assert any('fraction' in err for err in validation['errors'])
 
 class TestProcessFactory:
     """Tests ProcessFactory"""

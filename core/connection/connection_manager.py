@@ -8,6 +8,8 @@ import logging
 from typing import List, Set, Tuple, Dict, Any
 from .connection import Connection
 
+from core.connection.connection_visualizer import ConnectionVisualizer
+
 logger = logging.getLogger(__name__)
 
 class ConnectionManager:
@@ -245,37 +247,33 @@ class ConnectionManager:
             ]
         }
     
-    def visualize_ascii(self) -> str:
+    def visualize_ascii(
+        self,
+        style: str = "detailed",
+        show_fractions: bool = True,
+        show_stats: bool = True,
+        highlight_cycles: bool = True
+    ) -> str:
         """
         Génère une représentation ASCII du graphe
 
+        Args:
+            style (str, optional): Style de visualisation (simple, detailed, tree, flow). Defaults to "detailed".
+            show_fractions (bool, optional): Afficher les fractions de débit. Defaults to True.
+            show_stats (bool, optional): Afficher les statistiques générales. Defaults to True.
+            highlight_cycles (bool, optional): Mettre en évidence les cycles. Defaults to True.
+
         Returns:
-            str: String multi-lignes représentant le graphe
+            str: Représentation ASCII du graphe
         """
-        lines = ["Graphe de connexions : ", "="*50]
-
-        for node in sorted(self._nodes):
-            downstream = self.get_downstream_nodes(node)
-
-            if downstream:
-                for target_id, conn in downstream:
-                    # Fraction (si < 100%)
-                    fraction_str = (
-                        f" [{conn.flow_fraction*100:.0f}%]"
-                        if conn.flow_fraction < 1.0
-                        else ""
-                    )
-
-                    recycle_str = " (recycle)" if conn.is_recycle else ""
-
-                    lines.append(
-                        f" {node} -> {target_id}{fraction_str}{recycle_str}"
-                    )
-            else:
-                lines.append(f" {node} (sortie)")
-        lines.append("="*50)
-
-        return "\n".join(lines)
+        visualizer = ConnectionVisualizer(self)
+        return visualizer.visualize_ascii(
+            style=style,
+            show_fractions=show_fractions,
+            show_stats=show_stats,
+            highlight_cycles=highlight_cycles
+        )
+        
     
     def __repr__(self) -> str:
         return (
