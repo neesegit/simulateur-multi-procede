@@ -11,17 +11,16 @@ class ModelInterface(ABC):
 
     def __init__(self, params: Optional[Dict[str, Any]] = None):
         self.params = params or {}
-        self.is_fitted = False
-
-    @abstractmethod
-    def get_component_names(self) -> List[str]:
-        """Retourne les noms des composants/features"""
-        pass
 
     @property
     @abstractmethod
     def model_type(self) -> str:
         """Type du modèle (asm1, linear, etc)"""
+        pass
+
+    @abstractmethod
+    def get_component_names(self) -> List[str]:
+        """Retourne les noms des composants/features"""
         pass
 
     @property

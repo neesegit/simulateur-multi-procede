@@ -1,0 +1,24 @@
+{
+    "models": [
+        {
+            "id": "asm1",
+            "path": "empirical/asm1.json"
+        },
+        {
+            "id": "asm2d",
+            "path": "empirical/asm2d.json"
+        },
+        {
+            "id": "asm3",
+            "path": "empirical/asm3.json"
+        },
+        {
+            "id": "linear",
+            "path": "machine_learning/linear.json"
+        },
+        {
+            "id": "randomforest",
+            "path": "machine_learning/randomforest.json"
+        }
+    ]
+}

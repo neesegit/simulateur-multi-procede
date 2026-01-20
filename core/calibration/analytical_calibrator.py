@@ -174,7 +174,7 @@ class AnalyticalCalibrator(BaseCalibrator):
                 'dissolved_oxygen_setpoint', 2.0
             )
             c_copy[oxygen_idx] = do_setpoint
-            reactions = model.compute_derivatives(c_copy)
+            reactions = model.derivatives(c_copy)
             dilution_term = dilution_rate * (c_in - c_copy)
             residuals = dilution_term + reactions
 
@@ -300,7 +300,7 @@ class AnalyticalCalibrator(BaseCalibrator):
         """Vérifie que la solution satisfait bien dC/dt ~= 0"""
         c = model.dict_to_concentrations(steady_state)
 
-        reactions = model.compute_derivatives(c)
+        reactions = model.derivatives(c)
         dilution_term = dilution_rate * (c_in - c)
         residuals = dilution_term + reactions
 

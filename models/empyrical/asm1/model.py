@@ -15,12 +15,11 @@ from core.model.model_registry import ModelRegistry
 from models.empyrical.asm1.kinetics import calculate_process_rates
 from models.empyrical.asm1.stoichiometry import build_stoichiometric_matrix
 
-from models.empyrical_model import EmpyricalModel
+from models.reaction_model import ReactionModel
 
 logger = logging.getLogger(__name__)
 
-#FIXME : classe de base (pour tous les modèles)
-class ASM1Model(EmpyricalModel):
+class ASM1Model(ReactionModel):
     """
     Modèle ASM1 pour la simulation des boues activées
     """
@@ -32,50 +31,29 @@ class ASM1Model(EmpyricalModel):
         Args:
             params (Dict[str, float], optional): Dictionnaire de paramètres. Utilise DEFAULT_PARAMS si None
         """
+        super().__init__(params)
 
         registry = ModelRegistry.get_instance()
         model_definition = registry.get_model_definition('ASM1Model')
         self.DEFAULT_PARAMS = model_definition.get_default_params()
+
         self.COMPONENT_INDICES = {
             str(model_definition.get_components_names()[i]): i
             for i in range(len(model_definition.get_components_names()))
         }
 
         # Utilise les paramètres par défaut et override avec ceux fournis
-        self.params = self.DEFAULT_PARAMS.copy()
         if params:
             self.params.update(params)
+        else:
+            self.params = self.DEFAULT_PARAMS.copy()
 
         # Construit la matrice stoechiométrique (8 processus x 13 composants)
-        self.stoichiometric_matrix = build_stoichiometric_matrix(self.params)
+        self._S = None
 
     @property
     def model_type(self) -> str:
         return "ASM1Model"
-    
-    
-    def compute_derivatives(self, concentrations: np.ndarray) -> np.ndarray:
-        """
-        Calcule les dérivées dC/dt pour les 13 composants
-
-        Explication :
-        dC/dt = sum(vitesse_processus x coefficient_stoechiométrique)
-        En algèbre matricielle : dC/dt = S^T x Rho
-
-        Args:
-            concentrations (np.ndarray): Vecteur des concentrations actuelles (13,)
-
-        Returns:
-            np.ndarray: Vecteur des dérivées dC/dt (13,)
-        """
-        # Calcule les vitesses des processus
-        rho = calculate_process_rates(concentrations, self.params)
-
-        # Multiplie par la matrice stoechiométrique transposée
-        # S^T : 13x8, Rho : 8x1 -> résultat : 13x1
-        derivatives = self.stoichiometric_matrix.T @ rho
-
-        return derivatives
     
     def get_component_names(self) -> list:
         """
@@ -86,7 +64,30 @@ class ASM1Model(EmpyricalModel):
         """
         return list(self.COMPONENT_INDICES.keys())
     
-    def concentrations_to_dict(self, concentrations: np.ndarray) -> Dict[str, float]:
+    def process_rates(self, concentrations: np.ndarray) -> np.ndarray:
+        """
+        Calcule les vitesses des 8 processus biologiques
+
+        Args:
+            concentrations (np.ndarray): Vecteur des 13 concentrations
+
+        Returns:
+            np.ndarray: Vecteur des 8 vitesses de processus
+        """
+        return calculate_process_rates(concentrations, self.params)
+    
+    def stoichiometric_matrix(self) -> np.ndarray:
+        """
+        Construit la matrice soechiométrique S (8x13)
+
+        Returns:
+            np.ndarray: Matrice numpy 8x13
+        """
+        if self._S is None:
+            self._S = build_stoichiometric_matrix(self.params)
+        return self._S
+    
+    def concentrations_to_dict(self, state: np.ndarray) -> Dict[str, float]:
         """
         Convertit un vecteur de concentrations en dictionnaire
 
@@ -96,9 +97,9 @@ class ASM1Model(EmpyricalModel):
         Returns:
             Dict[str, float]: Dictionnaire {nom_composant: valeur}
         """
-        return {name: concentrations[idx] for name, idx in self.COMPONENT_INDICES.items()}
+        return {name: state[idx] for name, idx in self.COMPONENT_INDICES.items()}
     
-    def dict_to_concentrations(self, conc_dict: Dict[str, float]) -> np.ndarray:
+    def dict_to_concentrations(self, state_dict: Dict[str, float]) -> np.ndarray:
         """
         convertit un dictionnaire de concentrations en vecteur numpy
 
@@ -109,7 +110,7 @@ class ASM1Model(EmpyricalModel):
             np.ndarray: Vecteur numpy(13,)
         """
         concentrations = np.zeros(13)
-        for name, value in conc_dict.items():
+        for name, value in state_dict.items():
             if name in self.COMPONENT_INDICES:
                 concentrations[self.COMPONENT_INDICES[name]] = value
         return concentrations

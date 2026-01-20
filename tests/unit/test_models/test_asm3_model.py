@@ -15,8 +15,8 @@ class TestASM3Model:
         """Test : initialisation du modèle"""
         assert asm3_model is not None
         assert hasattr(asm3_model, 'params')
-        assert hasattr(asm3_model, 'stoichiometric_matrix')
-        assert asm3_model.stoichiometric_matrix.shape == (12, 13)
+        assert hasattr(asm3_model, '_S')
+        assert asm3_model._S is None
 
     def test_component_indices(self, asm3_model):
         """Test : composants asm3"""
@@ -28,19 +28,19 @@ class TestASM3Model:
         for comp in components:
             assert comp in asm3_model.COMPONENT_INDICES
 
-    def test_compute_derivatives_shape(self, asm3_model):
+    def test_derivatives_shape(self, asm3_model):
         """Test : shape des dérivées"""
         concentrations = np.ones(13) * 100
-        derivatives = asm3_model.compute_derivatives(concentrations)
+        derivatives = asm3_model.derivatives(concentrations)
 
         assert derivatives is not None
         assert derivatives.shape == (13,)
         assert isinstance(derivatives, np.ndarray)
 
-    def test_compute_derivatives_zero_concentrations(self, asm3_model):
+    def test_derivatives_zero_concentrations(self, asm3_model):
         """Test : dérivées avec concentrations nulles"""
         concentrations = np.zeros(13)
-        derivatives = asm3_model.compute_derivatives(concentrations)
+        derivatives = asm3_model.derivatives(concentrations)
 
         assert not np.any(np.isnan(derivatives))
         assert not np.any(np.isinf(derivatives))
@@ -97,7 +97,7 @@ class TestASM3Model:
     def test_numerical_stability(self, asm3_model, conc_level):
         """Test : stabilité numérique à différents niveaux"""
         concentrations = np.ones(13) * conc_level
-        derivatives = asm3_model.compute_derivatives(concentrations)
+        derivatives = asm3_model.derivatives(concentrations)
 
         assert not np.any(np.isnan(derivatives))
         assert not np.any(np.isinf(derivatives))
@@ -106,14 +106,14 @@ class TestASM3WithMocks:
     """Tests utilisant des mocks pour isoler les dépendances"""
 
     @patch('models.empyrical.asm3.model.calculate_process_rates')
-    def test_compute_derivatives_calls_kinetics(self, mock_kinetics):
-        """Test : compute_derivatives appelle bien calculate_process_rates"""
+    def test_derivatives_calls_kinetics(self, mock_kinetics):
+        """Test : derivatives appelle bien calculate_process_rates"""
         mock_kinetics.return_value = np.ones(12)
 
         model = ASM3Model()
         concentrations = np.ones(13)*100
 
-        derivatives = model.compute_derivatives(concentrations)
+        derivatives = model.derivatives(concentrations)
 
         mock_kinetics.assert_called_once()
         assert derivatives is not None
@@ -125,9 +125,10 @@ class TestASM3WithMocks:
         mock_build.return_value = mock_matrix
 
         model = ASM3Model()
+        model.stoichiometric_matrix()
 
         mock_build.assert_called_once()
-        assert model.stoichiometric_matrix is mock_matrix
+        assert model._S is mock_matrix
 
 @pytest.mark.parametrize('concentrations', [
     np.ones(19)*10,
@@ -136,7 +137,7 @@ class TestASM3WithMocks:
 ])
 def test_stability_various_concentrations(asm3_model, concentrations):
     """Test : stabilité pour différentes concentrations"""
-    derivatives = asm3_model.compute_derivatives(concentrations)
+    derivatives = asm3_model.derivatives(concentrations)
 
     assert not np.any(np.isnan(derivatives))
     assert not np.any(np.isinf(derivatives))

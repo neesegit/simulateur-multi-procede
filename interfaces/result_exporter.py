@@ -49,9 +49,9 @@ class ResultsExporter:
             data = []
             for flow in flows:
                 row = {
-                    'timestamp': flow['timestamp'],
-                    'flowrate': flow['flowrate'],
-                    'temperature': flow['temperature'],
+                    'timestamp': flow.get('timestamp'),
+                    'flowrate': flow.get('flowrate'),
+                    'temperature': flow.get('temperature'),
                     'model_type': flow.get('model_type', ''),
                     **flow.get('components', {})
                 }

@@ -13,38 +13,37 @@ from core.model.model_registry import ModelRegistry
 from models.empyrical.asm3.kinetics import calculate_process_rates
 from models.empyrical.asm3.stoichiometry import build_stoichiometric_matrix
 
-from models.empyrical_model import EmpyricalModel
+from models.reaction_model import ReactionModel
 
 logger = logging.getLogger(__name__)
 
-class ASM3Model(EmpyricalModel):
+class ASM3Model(ReactionModel):
     """
     Modèle ASM3 pour la simulation des boues activées
     """
 
     def __init__(self, params: Optional[Dict[str, float]] = None) -> None:
+        super().__init__(params)
+
         registry = ModelRegistry.get_instance()
         model_definition = registry.get_model_definition('ASM3Model')
         self.DEFAULT_PARAMS = model_definition.get_default_params()
+
         self.COMPONENT_INDICES = {
             model_definition.get_components_names()[i]: i
             for i in range(len(model_definition.get_components_names()))
         }
 
-        self.params = self.DEFAULT_PARAMS.copy()
         if params:
             self.params.update(params)
+        else:
+            self.params = self.DEFAULT_PARAMS.copy()
         
-        self.stoichiometric_matrix = build_stoichiometric_matrix(self.params)
+        self._S = None
 
     @property
     def model_type(self) -> str:
         return "ASM3Model"
-
-    def compute_derivatives(self, concentrations: np.ndarray) -> np.ndarray:
-        rho = calculate_process_rates(concentrations, self.params)
-        derivatives = self.stoichiometric_matrix.T @ rho
-        return derivatives
     
     def get_component_names(self) -> list:
         """
@@ -55,7 +54,15 @@ class ASM3Model(EmpyricalModel):
         """
         return list(self.COMPONENT_INDICES.keys())
     
-    def concentrations_to_dict(self, c: np.ndarray) -> Dict[str, float]:
+    def process_rates(self, concentrations: np.ndarray) -> np.ndarray:
+        return calculate_process_rates(concentrations, self.params)
+    
+    def stoichiometric_matrix(self) -> np.ndarray:
+        if self._S is None:
+            self._S = build_stoichiometric_matrix(self.params)
+        return self._S
+    
+    def concentrations_to_dict(self, state: np.ndarray) -> Dict[str, float]:
         """Convertit un vecteur de concentrations en dictionnaire
 
         Args:
@@ -64,9 +71,9 @@ class ASM3Model(EmpyricalModel):
         Returns:
             Dict[str, float]: Dictionnaire {nom_composant: valeur}
         """
-        return {name: c[idx] for name, idx in self.COMPONENT_INDICES.items()}
+        return {name: state[idx] for name, idx in self.COMPONENT_INDICES.items()}
     
-    def dict_to_concentrations(self, c_dict: Dict[str, float]) -> np.ndarray:
+    def dict_to_concentrations(self, state_dict: Dict[str, float]) -> np.ndarray:
         """
         Convertit un dictionnaire de concentrations en vecteur numpy
 
@@ -77,7 +84,7 @@ class ASM3Model(EmpyricalModel):
             np.ndarray: Vecteur numpy
         """
         concentration = np.zeros(13)
-        for name, value in c_dict.items():
+        for name, value in state_dict.items():
             if name in self.COMPONENT_INDICES:
                 concentration[self.COMPONENT_INDICES[name]] = value
         return concentration

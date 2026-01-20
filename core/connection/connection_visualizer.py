@@ -211,19 +211,27 @@ class ConnectionVisualizer:
         visited.add(node)
 
         downstream = self.manager.get_downstream_nodes(node)
+        child_prefix = prefix + extension
 
         for i, (child_id, conn) in enumerate(downstream):
             is_last_child = (i == len(downstream) - 1)
 
             frac_info = ""
             if show_fractions and conn.flow_fraction < 1.0:
-                frac_info = f" [{conn.flow_fraction*100:0f}%]"
+                frac_info = f" [{int(conn.flow_fraction*100)}%]"
 
             rec_info = " [R]" if conn.is_recycle else ""
 
-            child_prefix = prefix + extension
+            child_visited_marker = (
+                " (déjà visité)" if child_id in visited else ""
+            )
 
-            if not conn.is_recycle:
+            lines.append(
+                    f"{child_prefix}{'└── ' if is_last_child else '├── '}"
+                    f"{child_id}{frac_info}{rec_info}{child_visited_marker}"
+                )
+
+            if not conn.is_recycle and child_id not in visited:
                 lines.extend(
                     self._build_tree_recursive(
                         child_id,
@@ -233,11 +241,7 @@ class ConnectionVisualizer:
                         show_fractions
                     )
                 )
-            else:
-                lines.append(
-                    f"{child_prefix}{'└── ' if is_last_child else '├── '}"
-                    f"{child_id}{frac_info}{rec_info}"
-                )
+                
         return lines
     
     def _visualize_flow(self, show_fractions: bool) -> str:

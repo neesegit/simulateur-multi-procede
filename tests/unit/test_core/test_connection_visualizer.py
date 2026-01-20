@@ -41,7 +41,7 @@ class TestConnectionVisualizerBasics:
         result = visualizer.visualize_ascii(style='simple')
 
         assert isinstance(result, str)
-        assert "GRAPHE" in result or "connexions" in result.lower()
+        assert "graphe" in result.lower() or "connexions" in result.lower()
 
 class TestSimpleVisualization:
     """Tests pour le style 'simple'"""
@@ -105,7 +105,7 @@ class TestDetailedVisualization:
 
         result = visualizer.visualize_ascii(style='detailed', show_stats=True)
         
-        assert 'STATISTIQUES' in result
+        assert 'statistiques' in result.lower()
         assert 'noeuds' in result or 'Noeuds' in result
         assert 'Connexions' in result or 'connexions' in result
 
@@ -119,7 +119,7 @@ class TestDetailedVisualization:
         result_with = visualizer.visualize_ascii(style='detailed', show_stats=True)
         result_without = visualizer.visualize_ascii(style='detailed', show_stats=False)
 
-        assert 'STATISTIQUES' in result_with
+        assert 'statistiques' in result_with.lower()
         assert len(result_without) < len(result_with)
 
     def test_detailed_highlights_cycles(self):
@@ -282,18 +282,18 @@ class TestFlowvisualization:
     def test_flow_shows_sequential_order(self):
         """Test : respect l'ordre d'exécution"""
         cm = ConnectionManager()
-        cm.add_connection('influent', 'f', 1.0, False)
-        cm.add_connection('f', 's', 1.0, False)
-        cm.add_connection('s', 't', 1.0, False)
+        cm.add_connection('influent', 'first', 1.0, False)
+        cm.add_connection('first', 'second', 1.0, False)
+        cm.add_connection('second', 'third', 1.0, False)
 
         visualizer = ConnectionVisualizer(cm)
 
         result = visualizer.visualize_ascii(style='flow')
 
         lines = result.split('\n')
-        first_line = next((i for i, line in enumerate(lines) if 'f' in line), None)
-        second_line = next((i for i, line in enumerate(lines) if 's' in line), None)
-        third_line = next((i for i, line in enumerate(lines) if 't' in line), None)
+        first_line = next((i for i, line in enumerate(lines) if 'first' in line), None)
+        second_line = next((i for i, line in enumerate(lines) if 'second' in line), None)
+        third_line = next((i for i, line in enumerate(lines) if 'third' in line), None)
 
         if first_line is not None and second_line is not None and third_line is not None:
             assert first_line < second_line < third_line
@@ -308,7 +308,7 @@ class TestFlowvisualization:
 
         result = visualizer.visualize_ascii(style='flow')
 
-        assert '[R]' in result or 'recyclage' in result.lower()
+        assert 'recycle' in result.lower()
 
     def test_flow_shows_end_marker(self):
         """Test : marque la fin du flux"""
@@ -468,3 +468,160 @@ class TestComplexGraphs:
         visualizer = ConnectionVisualizer(cm)
 
         result = visualizer.visualize_ascii(style='detailed')
+
+        assert isinstance(result, str)
+        assert len(result) > 100
+        assert 'node0' in result
+        assert 'node9' in result
+
+class TestEdgeCases:
+    """tests des cas limites"""
+
+    def test_single_node_no_connection(self):
+        """Test : un seul noeud sans connexions"""
+        cm = ConnectionManager()
+        cm._nodes.add('lonely_node')
+
+        visualizer = ConnectionVisualizer(cm)
+
+        result = visualizer.visualize_ascii()
+
+        assert isinstance(result, str)
+
+    def test_self_loop(self):
+        """Test : boucle sur soi-même (ne devrait pas exister)"""
+        cm = ConnectionManager()
+
+        try:
+            cm.add_connection('node', 'node', 1.0, False)
+        except ValueError:
+            pass
+
+        visualizer = ConnectionVisualizer(cm)
+        result = visualizer.visualize_ascii()
+
+        assert isinstance(result, str)
+
+    def test_fractional_sum_exceeds_one(self):
+        """Test : somme des fractions > 1"""
+        cm = ConnectionManager()
+        cm.add_connection('s', 't1', 0.7, False)
+        cm.add_connection('s', 't2', 0.6, False)
+
+        visualizer = ConnectionVisualizer(cm)
+
+        result = visualizer.visualize_ascii(style='detailed')
+
+        assert '130' in result or '1.3' in result
+
+    def test_very_long_node_names(self):
+        """Test : noms de noeuds très longs"""
+        cm = ConnectionManager()
+        long_name = 'very_long_name_that_exceeds_normal_length'
+        cm.add_connection('s', long_name, 1.0, False)
+
+        visualizer = ConnectionVisualizer(cm)
+
+        result = visualizer.visualize_ascii()
+
+        assert isinstance(result, str)
+        assert long_name in result
+
+@pytest.mark.parametrize('style', ['simple', 'detailed', 'tree', 'flow'])
+class TestAllStyle:
+    """Tests paramétrés pour tous les styles"""
+
+    def test_style_produces_output(self, style):
+        """Test : chaque style produit une sortie"""
+        cm = ConnectionManager()
+        cm.add_connection('s', 't', 1.0, False)
+
+        visualizer = ConnectionVisualizer(cm)
+
+        result = visualizer.visualize_ascii(style=style)
+
+        assert isinstance(result, str)
+        assert len(result) > 0
+
+    def test_style_contains_node_names(self, style):
+        """Test : chaque style contient les noms de noeuds"""
+        cm = ConnectionManager()
+        cm.add_connection('node_a', 'node_b', 1.0, False)
+
+        visualizer = ConnectionVisualizer(cm)
+
+        result = visualizer.visualize_ascii(style=style)
+
+        assert 'node_a' in result
+        assert 'node_b' in result
+
+@pytest.mark.parametrize('fraction', [0.1, 0.5, 0.8, 1.0])
+def test_various_fraction(fraction):
+    """Test : différentes valeurs de fractions"""
+    cm = ConnectionManager()
+    cm.add_connection('source', 'target', fraction, False)
+
+    visualizer = ConnectionVisualizer(cm)
+
+    result = visualizer.visualize_ascii(show_fractions=True)
+
+    percentage = int(fraction*100)
+    assert str(percentage) in result or str(fraction) in result
+
+@pytest.fixture
+def simple_linear_graph():
+    """Graphe linéaire simple"""
+    cm = ConnectionManager()
+    cm.add_connection('node1', 'node2', 1.0, False)
+    cm.add_connection('node2', 'node3', 1.0, False)
+    return cm
+
+@pytest.fixture
+def branching_graph():
+    """Graphe avec branchements"""
+    cm = ConnectionManager()
+    cm.add_connection('source', 'branch1', 0.6, False)
+    cm.add_connection('source', 'branch2', 0.4, False)
+    cm.add_connection('branch1', 'merge', 1.0, False)
+    cm.add_connection('branch2', 'merge', 1.0, False)
+    return cm
+
+@pytest.fixture
+def cyclic_graph():
+    """graphe avec cycle"""
+    cm = ConnectionManager()
+    cm.add_connection('node1', 'node2', 1.0, False)
+    cm.add_connection('node2', 'node3', 1.0, False)
+    cm.add_connection('node3', 'node1', 0.5, True)
+    return cm
+
+class TestWithFixtures:
+    """Test utilisant les fixtures"""
+    def test_simple_linear_detailed(self, simple_linear_graph):
+        """Test : graphe lineaire en mode détaillé"""
+        visualizer = ConnectionVisualizer(simple_linear_graph)
+
+        result = visualizer.visualize_ascii(style='detailed')
+
+        assert 'node1' in result
+        assert 'node2' in result
+        assert 'node3' in result
+
+    def test_branching_tree(self, branching_graph):
+        """Test : graphe avec branchement en arbre"""
+        visualizer = ConnectionVisualizer(branching_graph)
+
+        result = visualizer.visualize_ascii(style='tree')
+
+        assert 'source' in result
+        assert 'branch1' in result
+        assert 'branch2' in result
+        assert 'merge' in result
+
+    def test_cyclic_highlights(self, cyclic_graph):
+        """Test : cycles mis en évidence"""
+        visualizer = ConnectionVisualizer(cyclic_graph)
+
+        result = visualizer.visualize_ascii(style='detailed', highlight_cycles=True)
+
+        assert 'cycle' in result.lower()

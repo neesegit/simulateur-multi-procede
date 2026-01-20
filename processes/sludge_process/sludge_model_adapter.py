@@ -29,7 +29,7 @@ class SludgeModelAdapter:
         return self.model.concentrations_to_dict(vec)
     
     def reactions(self, c: np.ndarray) -> np.ndarray:
-        return self.model.compute_derivatives(c)
+        return self.model.derivatives(c)
 
     def initial_state(
             self, 

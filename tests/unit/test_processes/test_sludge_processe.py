@@ -97,7 +97,7 @@ class TestActivatedSludgeProcess:
         mock_model.COMPONENT_INDICES = {'so': 7}
         mock_model.dict_to_concentrations.return_value = np.ones(13)
         mock_model.concentration_to_dict.return_value = {}
-        mock_model.compute_derivatives.return_value = np.zeros(13)
+        mock_model.derivatives.return_value = np.zeros(13)
         mock_registry.create_model.return_value = mock_model
 
         config = {
@@ -239,10 +239,10 @@ class TestSludgeModelAdapter:
         mock_model.dict_to_concentrations.assert_called_once_with(test_dict)
         assert result is not None
 
-    def test_reactions_calls_compute_derivatives(self):
-        """Test : reactions appelle compute_derivatives"""
+    def test_reactions_calls_derivatives(self):
+        """Test : reactions appelle derivatives"""
         mock_model = MagicMock()
-        mock_model.compute_derivatives.return_value = np.zeros(13)
+        mock_model.derivatives.return_value = np.zeros(13)
         mock_model.COMPONENT_INDICES = {}
 
         adapter = SludgeModelAdapter(mock_model, 'ASM1')
@@ -250,7 +250,7 @@ class TestSludgeModelAdapter:
         c = np.ones(13) * 100
         result = adapter.reactions(c)
 
-        mock_model.compute_derivatives.assert_called_once()
+        mock_model.derivatives.assert_called_once()
         np.testing.assert_array_equal(result, np.zeros(13))
 
     @patch('processes.sludge_process.sludge_model_adapter.CalibrationCache')

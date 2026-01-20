@@ -105,7 +105,7 @@ def asm3_model():
 def mock_model():
     """Mock d'un modèle pour tests isolés"""
     mock = MagicMock()
-    mock.compute_derivatives.return_value = np.zeros(13)
+    mock.derivatives.return_value = np.zeros(13)
     mock.COMPONENT_INDICES = {
         'si': 0, 'ss': 1, 'xi': 2, 'xs': 3,
         'xbh': 4, 'xba': 5, 'xp': 6, 'so': 7,

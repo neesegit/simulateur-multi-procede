@@ -1,0 +1,10 @@
+{
+    "empirical": {
+        "name": "Modèles empiriques",
+        "description": "Modèles de simulation dérivés de données expérimentales ou de la littérature"
+    },
+    "machine_learning": {
+        "name": "Modèles de machine learning",
+        "description": "Modèles basés sur l'apprentissage automatique"
+    }
+}

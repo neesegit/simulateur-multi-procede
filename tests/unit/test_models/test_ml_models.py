@@ -140,7 +140,7 @@ class TestRandomForest:
 
         rf_params = model.model.get_params()
 
-        assert rf_params['n_etimators'] == 50
+        assert rf_params['n_estimators'] == 50
         assert rf_params['max_depth'] == 5
 
     def test_model_type(self):

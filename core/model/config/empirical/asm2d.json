@@ -1,0 +1,113 @@
+{
+    "id": "asm2d",
+    "type": "ASM2dModel",
+    "name": "ASM2d (Activated Sludge Model 2d)",
+    "description": "Modèle de boues activées",
+    "category": "empirical",
+    "components_count": 19,
+    "processes_count": 21,
+    "default_temperature": 20.0,
+    "parameters": [
+        {"id": "k_o2", "label": "Saturation/inhibition coefficient for oxygen", "unit": "g O2/m^3", "default": 0.2},
+        {"id": "k_no3", "label": "Saturation/inhibition coefficient for nitrate", "unit": "g N/m^3", "default": 0.50},
+        {"id": "k_a", "label": "Saturation coefficient for growth on acetate Sa", "unit": "g COD/m^3", "default": 4.0},
+        {"id": "k_nh4", "label": "Saturation/inhibition coefficient for ammonium (nutrient)", "unit": "g N/m^3", "default": 0.05},
+        {"id": "k_p", "label": "Saturation coefficient for phosphate (nutrient)", "unit": "g P/m^3", "default": 0.01},
+        {"id": "k_ps", "label": "Saturation coefficient for phosphate (nutrient)", "unit": "g P/m^3", "default": 0.2},
+        {"id": "k_alk", "label": "Saturation coefficient for alkalinity (HCO3-)", "unit": "mole HCO3-/m^3", "default": 0.1},
+
+
+        {"id": "k_h", "label": "Hydrolysis rate constant", "unit": "1/j", "default": 3.0},
+        {"id": "eta_no3", "label": "Anoxic hydrolysis reduction factor", "unit": "-", "default": 0.6},
+        {"id": "eta_fe", "label": "Anaerobic hydrolysis reduction factor", "unit": "-", "default": 0.4},
+        {"id": "k_x", "label": "Saturation coefficient for particulate COD", "unit": "gXs/gXh", "default": 0.1},
+        
+        {"id": "mu_h", "label": "Maximum growth rate on substrate", "unit": "gXs/gXh/j", "default": 6.0},
+        {"id": "q_fe", "label": "Maximum rate for fermentation", "unit": "gSf/gXh/j", "default": 3.0},
+        {"id": "eta_no3_h", "label": "Reduction factor for denitrification", "unit": "-", "default": 0.80},
+        {"id": "b_h", "label": "Rate constant for lysis and decay", "unit": "1/j", "default": 0.4},
+        {"id": "k_f", "label": "Saturation coefficient for growth on Sf", "unit": "g COD/m^3", "default": 4.0},
+        {"id": "k_fe", "label": "Saturation coefficient for fermentation of Sf", "unit": "g COD/m^3", "default": 4.0},
+
+        {"id": "q_pha", "label": "Rate constant for storage of Xpha (base Xpp)", "unit": "gXpha/gXpao/j", "default": 3.0},
+        {"id": "q_pp", "label": "Rate constant for storage of Xpp", "unit": "gXpp/gXpao/j", "default": 1.5},
+        {"id": "mu_pao", "label": "Maximum growth rate of PAO", "unit": "1/j", "default": 1.0},
+        {"id": "eta_no3_pao", "label": "Reduction factor for anoxic activity", "unit": "-", "default": 0.6},
+        {"id": "b_pao", "label": "Rate for lysis of Xpao", "unit": "1/j", "default": 0.2},
+        {"id": "b_pp", "label": "Rate for lysis of Xpp  ", "unit": "1/j", "default": 0.2},
+        {"id": "b_pha", "label": "Rate for lysis of Xpha", "unit": "1/j", "default": 0.2},
+        {"id": "k_pp", "label": "Saturation coefficient for poly-phosphate", "unit": "g Xpp/g Xpao", "default": 0.01},
+        {"id": "k_max", "label": "Maximum ratio of Xpp/Xpao", "unit": "gXpp/gXpao", "default": 0.34},
+        {"id": "k_ipp", "label": "Inhibition coefficient for PP storage", "unit": "gXpp/gXpao", "default": 0.02},
+        {"id": "k_pha", "label": "Saturation coefficient for PHA", "unit": "gXpha/gXpao", "default": 0.01},
+        
+        {"id": "mu_aut", "label": "Maximum growth rate of Xaut", "unit": "1/j", "default": 1.0},
+        {"id": "b_aut", "label": "Decay rate of Xaut", "unit": "1/j", "default": 0.15},
+        {"id": "k_o2_aut", "label": "Saturation coefficient for oxygen", "unit": "g O2/m^3", "default": 0.5},
+        {"id": "k_nh4_aut", "label": "Saturation coefficient for ammonium (substrate)", "unit": "g N/m^3", "default": 1.0},
+        {"id": "k_alk_aut", "label": "Saturation coefficient for alkalinity (HCO3-)", "unit": "mole HCO3-/m^3", "default": 0.5},
+        
+        {"id": "k_pre", "label": "Rate constant for P precipitation", "unit": "m^3/g Fe(OH)3/j", "default": 1.0},
+        {"id": "k_red", "label": "Rate constant for redissolution", "unit": "1/j", "default": 0.60},
+        
+        {"id": "i_n_si", "label": "N content of inert soluble COD Si", "unit": "g N/g COD", "default": 0.01},
+        {"id": "i_n_sf", "label": "N content of fermentable substrates Sf", "unit": "g N/g COD", "default": 0.03},
+        {"id": "i_n_xi", "label": "N content of inert particulate COD Xi", "unit": "g N/g COD", "default": 0.02},
+        {"id": "i_n_xs", "label": "N content of slowly biodegradable substrate Xs", "unit": "g N/g COD", "default": 0.04},
+        {"id": "i_n_bm", "label": "N content of biomass, Xh, Xpao, Xaut", "unit": "g N/g COD", "default": 0.07},
+
+        {"id": "i_p_si", "label": "P content of inert soluble COD Si", "unit": "g P/g COD", "default": 0.0},
+        {"id": "i_p_sf", "label": "P content of fermentable substrates Sf", "unit": "g P/g COD", "default": 0.01},
+        {"id": "i_p_xi", "label": "P content of inert particulate COD Xi", "unit": "g P/g COD", "default": 0.01},
+        {"id": "i_p_xs", "label": "P content of slowly biodegradable substrate Xs", "unit": "g P/g COD", "default": 0.01},
+        {"id": "i_p_bm", "label": "P content of biomass, Xh, Xpao, Xaut", "unit": "g P/g COD", "default": 0.02},
+
+        {"id": "i_tss_xi", "label": "TSS to COD ratio for Xi", "unit": "g TSS/g COD", "default": 0.75},
+        {"id": "i_tss_xs", "label": "TSS to COD ratio for Xs", "unit": "g TSS/g COD", "default": 0.75},
+        {"id": "i_tss_bm", "label": "TSS to COD ratio for biomass, Xh, Xpao, Xa", "unit": "g TSS/g COD", "default": 0.90},
+
+        {"id": "f_si", "label": "Production of Si in hydrolysis", "unit": "g COD/g COD", "default": 0},
+        
+        {"id": "y_h", "label": "Yield coefficient", "unit": "g COD/g COD", "default": 0.625},
+        {"id": "f_xi", "label": "Fraction of inert COD generated in biomass lysis", "unit": "g COD/g COD", "default": 0.1},
+
+        {"id": "y_pao", "label": "Yield coefficient (biomass/PHA)", "unit": "g COD/g COD", "default": 0.625},
+        {"id": "y_po4", "label": "PP requirement (PO4 release) per PHA stored", "unit": "g P/g COD", "default": 0.4},
+        {"id": "y_pha", "label": "PHA requirement for PP storage", "unit": "g COD/g P", "default": 0.2},
+
+        {"id": "y_a", "label": "Yield of autotrophic biomass per NO3--N", "unit": "g COD/g N", "default": 0.24}
+    ],
+    "components": [
+        {"id": "so2", "name": "Oxygène dissous", "unit": "mg O2/L"},
+        {"id": "sf", "name": "Substrat fermentescible", "unit": "mg COD/L"},
+        {"id": "sa", "name": "Acétate", "unit": "mg COD/L"},
+        {"id": "snh4", "name": "Ammonium", "unit": "mg N/L"},
+        {"id": "sno3", "name": "Nitrate", "unit": "mg N/L"},
+        {"id": "spo4", "name": "Phosphate soluble", "unit": "mg P/L"},
+        {"id": "si", "name": "Substrat inerte soluble", "unit": "mg COD/L"},
+        {"id": "salk", "name": "Alcalinité", "unit": "mmol/L"},
+        {"id": "sn2", "name": "Azote gazeux", "unit": "mg N/L"},
+        {"id": "xi", "name": "Particules inertes", "unit": "mg COD/L"},
+        {"id": "xs", "name": "Substrat lentement biodégradable", "unit": "mg COD/L"},
+        {"id": "xh", "name": "Biomasse hétérotrophe", "unit": "mg COD/L"},
+        {"id": "xpao", "name": "Biomasse PAO", "unit": "mg COD/L"},
+        {"id": "xpp", "name": "Polyphosphate stocké", "unit": "mg P/L"},
+        {"id": "xpha", "name": "PHA stocké", "unit": "mg COD/L"},
+        {"id": "xaut", "name": "Biomasse autotrophe", "unit": "mg COD/L"},
+        {"id": "xtss", "name": "Solides en suspension", "unit": "mg TSS/L"},
+        {"id": "xmeoh", "name": "Produits endogènes de XH", "unit": "mg COD/L"},
+        {"id": "xmep", "name": "Produits endogènes de XPAO", "unit": "mg COD/L"}
+    ],
+    "metrics": {
+        "cod": ["so2", "sf", "sa", "xi", "xs", "xh", "xaut", "xpao", "xpp", "xpha", "xmeoh", "xmep"],
+        "tkn": ["snh4", "xi", "xs", "xh", "xpao", "xaut"],
+        "tss": ["xi", "xs", "xh", "xpao", "xpp", "xpha", "xaut", "xmeoh", "xmep"],
+        "biomass": ["xh", "xaut", "xpao"],
+        "nh4": "snh4",
+        "no3": "sno3",
+        "po4": "spo4",
+        "soluble_cod": ["sf", "sa"]
+    },
+    "module": "models.empyrical.asm2d.model",
+    "class": "ASM2dModel"
+}

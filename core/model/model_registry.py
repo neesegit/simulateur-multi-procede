@@ -18,7 +18,7 @@ class ModelRegistry:
 
     def __init__(self, catalog_path: Optional[Path]) -> None:
         if catalog_path is None:
-            catalog_path = Path(__file__).parent / 'config' / 'models_catalog.json'
+            catalog_path = Path(__file__).parent / 'config'
 
         self.catalog_path = catalog_path
         self.models: Dict[str, ModelDefinition] = {}
@@ -33,17 +33,32 @@ class ModelRegistry:
                 f"Catalogue de modèles introuvable : {self.catalog_path}"
             )
         
-        with open(self.catalog_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        index_path = self.catalog_path / 'index.json'
+        with open(index_path, 'r', encoding='utf-8') as f:
+            index = json.load(f)
 
-        self.categories = data.get('categories', {})
+        categories_path = self.catalog_path / 'categories.json'
+        if categories_path.exists():
+            with open(categories_path, 'r', encoding='utf-8') as f:
+                self.categories = json.load(f)
 
-        for model_data in data.get('models', []):
+        for entry in index.get('models', []):
+            model_path = self.catalog_path / entry['path']
+
+            if not model_path.exists():
+                logger.warning(f"Fichier modèle introuvable : {model_path}")
+                continue
+
+            with open(model_path, 'r', encoding='utf-8') as f:
+                model_data = json.load(f)
+
             definition = ModelDefinition.from_dict(model_data)
             self.models[definition.type] = definition
-            logger.debug(f"Modèle chargé : {definition.type} - {definition.name}")
 
-        logger.debug(f"Catalogue chargé : {len(self.models)} modèle(s)")
+            logger.debug(
+                f"Modèle chargé : {definition.type} ({model_path})"
+            )
+        logger.info(f"{len(self.models)} modèles chargés")
 
     @classmethod
     def get_instance(cls, catalog_path: Optional[Path] = None) -> 'ModelRegistry':

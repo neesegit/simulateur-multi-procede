@@ -1,0 +1,35 @@
+{
+    "id": "randomforest",
+    "type": "RandomForestModel",
+    "name": "Random Forest",
+    "description": "Modèle Random Forest",
+    "category": "machine_learning",
+    "components_count": 7,
+    "processes_count": 0,
+    "default_temperature": 20.0,
+    "parameters": [
+        {"id": "n_estimators", "label": "Nombre d'arbres", "unit": "-", "default": 100},
+        {"id": "max_depth", "label": "Profondeur maximale", "unit": "-", "default": 10}
+    ],
+    "components": [
+        {"id": "cod", "name": "DCO sortie", "unit": "mg/L"},
+        {"id": "tss", "name": "MES sortie", "unit": "mg/L"},
+        {"id": "nh4", "name": "Ammonium sortie", "unit": "mg/L"},
+        {"id": "no3", "name": "Nitrates sortie", "unit": "mg/L"},
+        {"id": "po4", "name": "Phosphates sortie", "unit": "mg/L"},
+        {"id": "biomass", "name": "Biomass", "unit": "mg/L"},
+        {"id": "cod_removal", "name": "Taux d'élimination DCO", "unit": "%"}
+    ],
+    "metrics": {
+        "cod": ["cod"],
+        "tkn": ["nh4"],
+        "tss": ["ss"],
+        "biomass": ["biomass"],
+        "nh4": "nh4",
+        "no3": "no3",
+        "po4": "po4",
+        "soluble_cod": ["cod"]
+    },
+    "module": "models.ml.random_forest_model",
+    "class": "RandomForestModel"
+}

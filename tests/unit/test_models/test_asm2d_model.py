@@ -15,8 +15,8 @@ class TestASM2dModel:
         """Test : initialisation du modèle"""
         assert asm2_model is not None
         assert hasattr(asm2_model, 'params')
-        assert hasattr(asm2_model, 'stoichiometric_matrix')
-        assert asm2_model.stoichiometric_matrix.shape == (21,19)
+        assert hasattr(asm2_model, '_S')
+        assert asm2_model._S is None
 
     def test_component_indices(self, asm2_model):
         """Test : composants spécifiques ASM2d"""
@@ -29,19 +29,19 @@ class TestASM2dModel:
         for comp in components:
             assert comp in asm2_model.COMPONENT_INDICES
 
-    def test_compute_derivatives_shape(self, asm2_model):
+    def test_derivatives_shape(self, asm2_model):
         """Test : shape des dérivées"""
         concentrations = np.ones(19) * 100
-        derivatives = asm2_model.compute_derivatives(concentrations)
+        derivatives = asm2_model.derivatives(concentrations)
 
         assert derivatives is not None
         assert derivatives.shape == (19,)
         assert isinstance(derivatives, np.ndarray)
 
-    def test_compute_derivatives_zero_concentrations(self, asm2_model):
+    def test_derivatives_zero_concentrations(self, asm2_model):
         """Test : dérivées avec concentrations nulles"""
         concentrations = np.zeros(19)
-        derivatives = asm2_model.compute_derivatives(concentrations)
+        derivatives = asm2_model.derivatives(concentrations)
 
         assert not np.any(np.isnan(derivatives))
         assert not np.any(np.isinf(derivatives))
@@ -98,7 +98,7 @@ class TestASM2dModel:
     def test_numerical_stability(self, asm2_model, conc_level):
         """Test : stabilité numérique à différents niveaux"""
         concentrations = np.ones(19) * conc_level
-        derivatives = asm2_model.compute_derivatives(concentrations)
+        derivatives = asm2_model.derivatives(concentrations)
 
         assert not np.any(np.isnan(derivatives))
         assert not np.any(np.isinf(derivatives))
@@ -107,14 +107,14 @@ class TestASM2dWithMocks:
     """Tests utilisant des mocks pour isoler les dépendances"""
 
     @patch('models.empyrical.asm2d.model.calculate_process_rates')
-    def test_compute_derivatives_calls_kinetics(self, mock_kinetics):
-        """Test : compute_derivatives appelle bien calculate_process_rates"""
+    def test_derivatives_calls_kinetics(self, mock_kinetics):
+        """Test : derivatives appelle bien calculate_process_rates"""
         mock_kinetics.return_value = np.ones(21)
 
         model = ASM2dModel()
         concentrations = np.ones(19)*100
 
-        derivatives = model.compute_derivatives(concentrations)
+        derivatives = model.derivatives(concentrations)
 
         mock_kinetics.assert_called_once()
         assert derivatives is not None
@@ -126,9 +126,10 @@ class TestASM2dWithMocks:
         mock_build.return_value = mock_matrix
 
         model = ASM2dModel()
+        model.stoichiometric_matrix()
 
         mock_build.assert_called_once()
-        assert model.stoichiometric_matrix is mock_matrix
+        assert model._S is mock_matrix
 
 @pytest.mark.parametrize('concentrations', [
     np.ones(19)*10,
@@ -137,7 +138,7 @@ class TestASM2dWithMocks:
 ])
 def test_stability_various_concentrations(asm2_model, concentrations):
     """Test : stabilité pour différentes concentrations"""
-    derivatives = asm2_model.compute_derivatives(concentrations)
+    derivatives = asm2_model.derivatives(concentrations)
 
     assert not np.any(np.isnan(derivatives))
     assert not np.any(np.isinf(derivatives))
