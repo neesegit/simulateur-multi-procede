@@ -13,6 +13,10 @@
             "path": "empirical/asm3.json"
         },
         {
+            "id": "takacs",
+            "path": "empirical/takacs.json"
+        },
+        {
             "id": "linear",
             "path": "machine_learning/linear.json"
         },

@@ -23,7 +23,7 @@ class ProcessRegistry:
 
     def __init__(self, catalog_path: Optional[Path]) -> None:
         if catalog_path is None:
-            catalog_path = Path(__file__).parent / 'config' / 'processes_catalog.json'
+            catalog_path = Path(__file__).parent / 'config'
         
         self.catalog_path = catalog_path
         self.processes: Dict[str, ProcessDefinition] = {}
@@ -38,15 +38,31 @@ class ProcessRegistry:
                 f"Catalogue de procédés introuvable : {self.catalog_path}"
             )
         
-        with open(self.catalog_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        index_path = self.catalog_path / 'index.json'
+        with open(index_path, 'r', encoding='utf-8') as f:
+            index = json.load(f)
+        
+        categories_path = self.catalog_path / 'index.json'
+        if categories_path.exists():
+            with open(categories_path, 'r', encoding='utf-8') as f:
+                self.categories = json.load(f)
 
-        self.categories = data.get('categories', {})
+        for entry in index.get('processes', []):
+            process_path = self.catalog_path / entry['path']
 
-        for proc_data in data.get('processes', []):
-            definition = ProcessDefinition.from_dict(proc_data)
+            if not process_path.exists():
+                logger.warning(f"Fichier modèle introuvable : {process_path}")
+                continue
+            
+            with open(process_path, 'r', encoding='utf-8') as f:
+                process_data = json.load(f)
+
+            definition = ProcessDefinition.from_dict(process_data)
             self.processes[definition.type] = definition
-            logger.debug(f"Procédé chargé : {definition.type} - {definition.name}")
+
+            logger.debug(
+                f"Procédé chargé : {definition.type} ({process_path})"
+            )
 
         logger.debug(f"Catalogue chargé : {len(self.processes)} procédé(s)")
 

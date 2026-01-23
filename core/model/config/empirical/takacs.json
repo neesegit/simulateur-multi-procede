@@ -1,0 +1,62 @@
+{
+    "id": "takacs",
+    "type": "TakacsModel",
+    "name": "Takacs Settling Model",
+    "description": "Modèle de sédimentation pour clarificateurs secondaires",
+    "category": "empirical",
+    "components_count": null,
+    "processes_count": 0,
+    "default_temperature": 20.0,
+    "dynamic_components": true,
+    "component_template": {
+        "prefix": "layer_",
+        "unit": "mg TSS/L",
+        "description": "Concentration de solides dans la couche"
+    },
+    "parameters": [
+    {
+        "id": "v0",
+        "label": "Vitesse maximale de sédimentation",
+        "unit": "m/h",
+        "default": 0.474
+    },
+    {
+        "id": "rh",
+        "label": "Paramètre zone entravée",
+        "unit": "m³/g",
+        "default": 0.000576
+    },
+    {
+        "id": "rp",
+        "label": "Paramètre zone de floculation",
+        "unit": "m³/g",
+        "default": 0.00286
+    },
+    {
+        "id": "fns",
+        "label": "Fraction non-settleable",
+        "unit": "-",
+        "default": 0.00228
+    },
+    {
+        "id": "x_f",
+        "label": "Concentration de floculation",
+        "unit": "g/m³",
+        "default": 3000.0
+    },
+    {
+        "id": "n_layers",
+        "label": "Nombre de couches",
+        "unit": "-",
+        "default": 10
+    }
+    ],
+    "components": [],
+    "metrics": {
+        "tss": "all_layers",
+        "overflow_quality": "layer_0",
+        "underflow_quality": "layer_last"
+    },
+    "module": "models.empyrical.takacs_model",
+    "class": "TakacsModel"
+}

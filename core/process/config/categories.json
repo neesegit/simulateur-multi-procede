@@ -1,0 +1,14 @@
+{
+    "biological": {
+      "name": "Traitement biologique",
+      "description": "Procédés utilisant des micro-organismes"
+    },
+    "physical": {
+      "name": "Traitement physique",
+      "description": "Procédés de séparation physique"
+    },
+    "chemical": {
+      "name": "Traitement chimique",
+      "description": "Procédés de traitement chimique"
+    }
+}

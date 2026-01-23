@@ -1,0 +1,8 @@
+{
+    "processes":[
+        {
+            "id": "activated_sludge",
+            "path": "processes/activated_sludge.json"
+        }
+    ]
+}
