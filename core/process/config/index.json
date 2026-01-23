@@ -3,6 +3,10 @@
         {
             "id": "activated_sludge",
             "path": "processes/activated_sludge.json"
+        },
+        {
+            "id": "secondary_settler",
+            "path": "processes/secondary_settler.json"
         }
     ]
 }

@@ -38,7 +38,7 @@ class SecondarySettlerProcess(ProcessNode):
         self.n_layers = config.get('n_layers', 10)
         self.layer_height = self.depth / self.n_layers
 
-        self.underflow_ratio = config.get('undeflow_ratio', 0.5)
+        self.underflow_ratio = config.get('underflow_ratio', 0.5)
         feed_layer_ratio = config.get('feed_layer_ratio', 0.5)
         self.feed_layer = int(self.n_layers * (1 - feed_layer_ratio))
 
