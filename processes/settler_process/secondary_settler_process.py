@@ -146,7 +146,7 @@ class SecondarySettlerProcess(ProcessNode):
             'removal_efficiency': effluent['removal_efficiency'],
             'X_overflow': effluent['X_overflow'],
             'X_underflow': effluent['X_underflow'],
-            'has_sludge_blanket': self.sludge_blanket_info['had_blanket']
+            'has_sludge_blanket': self.sludge_blanket_info.get('has_blanket', False)
         }
 
         self.outputs = results
