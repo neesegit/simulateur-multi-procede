@@ -122,11 +122,19 @@ class TestActivatedSludgeProcess:
             'components': {}
         }
 
-        with patch.object(process, 'fractionate_input') as mock_fract:
-            mock_fract.return_value = inputs
-            process.process(inputs, dt=0.1)
+        with patch.object(process.sludge_metrics, 'compute') as mock_compute:
+            mock_compute.return_value = {
+                'cod_removal_rate': 0.0,
+                'hrt_hours': 10.0,
+                'tss': 3000.0,
+                'aeration_energy_kwh': 0.0
+            }
 
-            mock_fract.assert_called_once()
+            with patch.object(process, 'fractionate_input') as mock_fract:
+                mock_fract.return_value = inputs
+                process.process(inputs, dt=0.1)
+
+                mock_fract.assert_called_once()
 
     @patch('processes.sludge_process.unified_activated_sludge_process.ModelRegistry')
     def test_initialize_loads_calibration(self, MockRegistry):
@@ -327,20 +335,136 @@ class TestProcessNode:
 
         mock_flow = MagicMock()
         mock_flow.cod = 500.0
+        mock_flow.tss = 200.0
+        mock_flow.tkn = 40.0
+        mock_flow.nh4 = 25.0
+        mock_flow.no3 = 5.0
+        mock_flow.po4 = 8.0
+        mock_flow.alkalinity = 200.0
         mock_flow.has_model_components.return_value = False
-        mock_flow.extract_measured.return_value = {'cod': 500.0}
+        mock_flow.extract_measured.return_value = {
+            'cod': 500.0,
+            'tss': 200.0,
+            'tkn': 40.0,
+            'nh4': 25.0,
+            'no3': 5.0,
+            'po4': 8.0,
+            'alkalinity': 200.0
+        }
         mock_flow.components = {}
         mock_flow.copy.return_value = mock_flow
 
         inputs = {'flow': mock_flow}
 
-        with patch('importlib.import_module') as mock_import:
-            mock_module = MagicMock()
-            mock_fraction_class = MagicMock()
-            mock_fraction_class.fractionate.return_value = {'si': 25.0, 'ss': 100.0}
-            mock_module.ASM1Fraction = mock_fraction_class
-            mock_import.return_value = mock_module
+        with patch('core.process.process_node.FractionationRegistry') as mock_registry_class:
+            mock_registry = MagicMock()
+            mock_registry.fractionate.return_value = {
+                'si': 25.0,
+                'ss': 100.0,
+                'xi':50.0,
+                'xs': 200.0,
+                'so': 2.0,
+                'snh': 25.0,
+                'sno': 5.0,
+                'snd': 10.0,
+                'xnd': 5.0,
+                'xbh': 30.0,
+                'xba': 5.0,
+                'xp': 15.0,
+                'salk': 200.0
+            }
+            mock_registry_class.get_instance.return_value = mock_registry
+
+            process = TestProcess('test', 'ASM1', {})
 
             result = process.fractionate_input(inputs, target_model='ASM1')
 
-            mock_fraction_class.fractionate.assert_called_once()
+            mock_registry.fractionate.assert_called_once()
+            call_args = mock_registry.fractionate.call_args.kwargs
+
+            assert call_args['model_type'] == 'ASM1'
+            assert call_args['cod'] == 500.0
+            assert call_args['tss'] == 200.0
+            assert call_args['tkn'] == 40.0
+
+            assert 'si' in result['flow'].components
+            assert result['flow'].components['si'] == 25.0
+
+    def test_fractionate_input_skips_if_has_components(self):
+        """Test : fractionate_input ne fractionne pas si le flow a déjà des composants de modèle"""
+        from core.process.process_node import ProcessNode
+
+        class TestProcess(ProcessNode):
+            def initialize(self) -> None:
+                pass
+
+            def process(self, inputs, dt: float):
+                return {}
+            
+            def update_state(self, outputs) -> None:
+                pass
+
+            def get_required_inputs(self) -> List[str]:
+                return []
+            
+        mock_flow = MagicMock()
+        mock_flow.has_model_components.return_value = True
+        mock_flow.components = {'si': 30.0, 'ss': 120.0}
+        mock_flow.copy.return_value = mock_flow
+
+        inputs = {'flow': mock_flow}
+
+        with patch('core.process.process_node.FractionationRegistry') as mock_registry_class:
+            mock_registry = MagicMock()
+            mock_registry_class.get_instance.return_value = mock_registry
+
+            process = TestProcess('test', 'ASM1', {})
+            result = process.fractionate_input(inputs, target_model='ASM1')
+
+            mock_registry.fractionate.assert_not_called()
+
+            assert result['flow'] == mock_flow
+
+    def test_fractionate_input_handles_missing_parameters(self):
+        """Test : fractionate_input gère correctement les paramètres manquants"""
+        from core.process.process_node import ProcessNode
+
+        class TestProcess(ProcessNode):
+            def initialize(self) -> None:
+                pass
+
+            def process(self, inputs, dt: float):
+                return {}
+            
+            def update_state(self, outputs) -> None:
+                pass
+
+            def get_required_inputs(self) -> List[str]:
+                return []
+        
+        mock_flow = MagicMock()
+        mock_flow.cod = 500.0
+        mock_flow.tss = None
+        mock_flow.tkn = 40.0
+        mock_flow.has_model_components.return_value = False
+        mock_flow.extract_measured.return_value = {
+            'cod': 500.0,
+            'tkn': 40.0
+        }
+        mock_flow.components = {}
+        mock_flow.copy.return_value = mock_flow
+
+        inputs = {'flow': mock_flow}
+
+        with patch('core.process.process_node.FractionationRegistry') as mock_registry_class:
+            mock_registry = MagicMock()
+            mock_registry.fractionate.return_value = {'si': 25.0, 'ss': 100.0}
+            mock_registry_class.get_instance.return_value = mock_registry
+
+            process = TestProcess('test', 'ASM1', {})
+            result = process.fractionate_input(inputs, target_model='ASM1')
+
+            mock_registry.fractionate.assert_called_once()
+
+            call_args = mock_registry.fractionate.call_args.kwargs
+            assert call_args['tss'] == 0.0

@@ -130,6 +130,7 @@ class MetricsRegistry:
     def __init__(self):
         self._calculators: Dict[str, MetricCalculator] = {}
         self._model_metrics: Dict[str, list[str]] = {}
+        self._default_metrics = set()
         self._register_default_calculators()
 
     @classmethod
@@ -141,19 +142,24 @@ class MetricsRegistry:
     def _register_default_calculators(self):
         """Enregistre les calculateurs par défaut"""
 
-        self.register('hrt', HRTCalculator())
-        self.register('srt', SRTCalculator())
-        self.register('svi', SVICalculator())
-        self.register('energy', EnergyConsumptionCalculator())
+        self.register('hrt', HRTCalculator(), True)
+        self.register('srt', SRTCalculator(), True)
+        self.register('svi', SVICalculator(), True)
+        self.register('energy', EnergyConsumptionCalculator(), True)
 
         self._model_metrics['ASM1Model'] = ['cod', 'tkn', 'tss', 'biomass', 'hrt', 'srt', 'svi', 'energy']
         self._model_metrics['ASM2dModel'] = ['cod', 'tkn', 'tss', 'biomass', 'hrt', 'srt', 'svi', 'energy']
         self._model_metrics['ASM3Model'] = ['cod', 'tkn', 'tss', 'biomass', 'hrt', 'srt', 'svi', 'energy']
         self._model_metrics['TakacsModel'] = ['removal_efficiency', 'surface_loading', 'solids_loading']
 
-    def register(self, metric_name: str, calculator: MetricCalculator):
+    def register(self, metric_name: str, calculator: MetricCalculator, default=False):
         """Enregistre un calculateur de métrique"""
+        metric_name = metric_name.lower()
+        if metric_name in self._calculators:
+            raise ValueError(f"Calculator type {metric_name} is already registered")
         self._calculators[metric_name] = calculator
+        if default:
+            self._default_metrics.add(metric_name)
         logger.debug(f"Calculateur de métrique enregistré : {metric_name}")
 
     def register_model_metrics(self, model_type: str, metric_names: list[str]):
@@ -164,6 +170,38 @@ class MetricsRegistry:
         """Retourne les métriques applicables à un modèle"""
         return self._model_metrics.get(model_type, [])
     
+    def get_calculator(self, metric_name: str) -> MetricCalculator:
+        """Récupère le calculateur pour un type de metric"""
+        if metric_name not in self._calculators:
+            raise ValueError(
+                f"Calculator type '{metric_name} is not registered. "
+                "Available calculators: "
+                f"{list(self._calculators.keys())}"
+            )
+        
+        return self._calculators[metric_name]
+
+    def list_registered_metrics(self) -> list[str]:
+        """Retourne la liste des calculateurs enregistrées"""
+        return sorted(self._calculators.keys())
+    
+    def is_registered(self, metric_name: str) -> bool:
+        """Vérifie que le calculateur est enregistrée"""
+        if metric_name in self._calculators:
+            return True
+        return False
+    
+    def unregister(self, metric_name: str) -> None:
+        """Supprime un calculateur enregistrée"""
+        if metric_name in self._default_metrics:
+            raise ValueError(f"Cannot unregister default calculator '{metric_name}'")
+        
+        if metric_name not in self._calculators:
+            raise ValueError(f"Calculator type '{metric_name}' is not registered")
+        
+        del self._calculators[metric_name]
+        logger.debug(f"Calculateur de métrique supprimé : {metric_name}")
+    
     def calculate(
             self,
             metric_name: str,
@@ -172,17 +210,16 @@ class MetricsRegistry:
             context: Dict[str, Any]
     ) -> Dict[str, float]:
         """Calcule une métrique spécifique"""
-        calculator = self._calculators.get(metric_name)
+        calculator = self.get_calculator(metric_name)
 
         if calculator is None:
-            logger.warning(f"Aucun calculateur pour la métrique : {metric_name}")
-            return {}
+            raise ValueError(f"Aucun calculateur pour la métrique : {metric_name}")
+            
         
         try:
             return calculator.calculate(components, inputs, context)
-        except Exception as e:
-            logger.error(f"Erreur lors du calcul de {metric_name} : {e}")
-            return {}
+        except ValueError as e:
+            raise ValueError(f"Erreur lors du calcul de {metric_name} : {e}")
         
     def calculate_all_for_model(
             self,

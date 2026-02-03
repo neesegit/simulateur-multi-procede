@@ -9,6 +9,8 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from utils.decorators import safe_fractionation
 
+from core.registries.fractionation_registry import FractionationRegistry
+
 class ProcessNode(ABC):
     """
     Classe abstraite représentant un noeud de procédé dans la chaine de traitement
@@ -40,6 +42,8 @@ class ProcessNode(ABC):
 
         # Performance
         self.metrics: Any = {}
+
+        self.fractionation_registry = FractionationRegistry.get_instance()
 
         self.logger.info(f"ProcessNode '{name}' ({node_id}) initialisé")
 
@@ -140,33 +144,31 @@ class ProcessNode(ABC):
         
         flow = inputs['flow']
         self.logger.debug(f"Fractionnement en cours vers {target_model}...")
-
-        model_name = target_model.lower()
-        module_path = f"models.empyrical.{model_name}.fraction"
-        module = importlib.import_module(module_path)
-
-        class_name = f"{target_model.upper()}Fraction"
-        fraction_class = getattr(module, class_name)
         
         measured = flow.extract_measured()
-        fractionated = fraction_class.fractionate(
-                    cod=measured.get('cod', 0.0),
-                    tss=measured.get('tss', 0.0),
-                    tkn=measured.get('tkn', 0.0),
-                    nh4=measured.get('nh4', 0.0),
-                    no3=measured.get('no3', 0.0),
-                    po4=measured.get('po4', 0.0),
-                    alkalinity=measured.get('alkalinity')
-                    # TODO ratio perso
-                )
-        fractionated_flow = flow.copy()
-        fractionated_flow.components.update(fractionated)
 
-        inputs['flow'] = fractionated_flow
-        inputs['components'] = fractionated_flow.components
+        try:
+            fractionated = self.fractionation_registry.fractionate(
+                model_type=target_model,
+                cod=measured.get('cod', 0.0),
+                tss=measured.get('tss', 0.0),
+                tkn=measured.get('tkn', 0.0),
+                nh4=measured.get('nh4', 0.0),
+                no3=measured.get('no3', 0.0),
+                po4=measured.get('po4', 0.0),
+                alkalinity=measured.get('alkalinity')
+            )
+            fractionated_flow = flow.copy()
+            fractionated_flow.components.update(fractionated)
 
-        self.logger.debug(f"Fractionnement réussi : {len(fractionated)} composants")
-            
+            inputs['flow'] = fractionated_flow
+            inputs['components'] = fractionated_flow.components
+
+            self.logger.debug(f"Fractionnement réussi : {len(fractionated)} composants")
+        except Exception as e:
+            self.logger.error(f"Erreur lors du fractionnement : {e}")
+            raise
+
         return inputs
 
     def get_outputs(self) -> Dict[str, Any]:

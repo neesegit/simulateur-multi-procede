@@ -38,6 +38,7 @@ class FractionationRegistry:
     
     def __init__(self):
         self._strategies: Dict[str, FractionationStrategy] = {}
+        self._default_models = set()
         self._register_default_strategies()
 
     @classmethod
@@ -51,47 +52,77 @@ class FractionationRegistry:
         """Enregistre les stratégies par défaut"""
         try:
             from models.empyrical.asm1.fraction import ASM1Fraction
-            self.register('ASM1', ASM1FractionationStrategy(ASM1Fraction))
-            self.register('ASM1Model', ASM1FractionationStrategy(ASM1Fraction))
+            self.register('ASM1', ASM1FractionationStrategy(ASM1Fraction), True)
+            self.register('ASM1Model', ASM1FractionationStrategy(ASM1Fraction), True)
         except ImportError:
             logger.warning("ASM1Fraction non disponible")
 
         try:
             from models.empyrical.asm2d.fraction import ASM2DFraction
-            self.register('ASM2D', ASM2DFractionationStrategy(ASM2DFraction))
-            self.register('ASM2dModel', ASM2DFractionationStrategy(ASM2DFraction))
+            self.register('ASM2D', ASM2DFractionationStrategy(ASM2DFraction), True)
+            self.register('ASM2dModel', ASM2DFractionationStrategy(ASM2DFraction), True)
         except ImportError:
             logger.warning("ASM2DFraction non disponible")
 
         try:
             from models.empyrical.asm3.fraction import ASM3Fraction
-            self.register('ASM3', ASM3FractionationStrategy(ASM3Fraction))
-            self.register('ASM3Model', ASM3FractionationStrategy(ASM3Fraction))
+            self.register('ASM3', ASM3FractionationStrategy(ASM3Fraction), True)
+            self.register('ASM3Model', ASM3FractionationStrategy(ASM3Fraction), True)
         except ImportError:
             logger.warning("ASM3Fraction non disponible")
 
-        self.register('LinearModel', NoFractionationStrategy())
-        self.register('RandomForestModel', NoFractionationStrategy())
+        self.register('LinearModel', NoFractionationStrategy(), True)
+        self.register('RandomForestModel', NoFractionationStrategy(), True)
         
-        self.register('TakacsModel', NoFractionationStrategy())
+        self.register('TakacsModel', NoFractionationStrategy(), True)
 
-    def register(self, model_type: str, strategy: FractionationStrategy):
+    def register(self, model_type: str, strategy: FractionationStrategy, default=False):
         """Enregistre une stratégie pour un type de modèle"""
+        key = model_type.upper()
+        if key in self._strategies:
+            raise ValueError(f"Model type '{key}' is already registered")
         self._strategies[model_type.upper()] = strategy
+        if default:
+            self._default_models.add(key)
         logger.debug(f"Stratégie de fractionnement enregistrée pour {model_type}")
     
     def get_strategy(self, model_type: str) -> FractionationStrategy:
         """récupère la stratégie pour un type de modèle"""
-        strategy = self._strategies.get(model_type.upper())
+        key = model_type.upper()
 
-        if strategy is None:
-            logger.warning(
-                f"Aucune stratégie de fractionnement pour {model_type}"
-                "Utilisation de NoFractionationStrategy."
+        if key not in self._strategies:
+            raise ValueError(
+                f"Model type '{key}' is not registered. "
+                "Available models: "
+                f"{list(self._strategies.keys())}"
             )
-            return NoFractionationStrategy()
         
-        return strategy
+        return self._strategies[key]
+
+    def list_registered_models(self) -> list[str]:
+        """Retourne la liste des modèles enregistrées"""
+        return sorted(self._strategies.keys())
+    
+    def is_registered(self, model_type: str) -> bool:
+        """Vérifie que le modèle est enregistrée"""
+        key = model_type.upper()
+
+        if key in self._strategies:
+            return True
+        return False
+
+    def unregister(self, model_type: str) -> None:
+        """Supprime une stratégie enregistrée"""
+        key = model_type.upper()
+
+        if key in self._default_models:
+            raise ValueError(f"Cannot unregister default model '{key}'")
+
+        if key not in self._strategies:
+            raise ValueError(f"Model type '{key}' is not registered")
+        
+        del self._strategies[key]
+        logger.debug(f"Stratégie de fractionnement supprimée pour {key}")
     
     def fractionate(
             self,
@@ -127,6 +158,7 @@ class FractionationRegistry:
         return strategy.fractionate(
             cod=cod,
             tss=tss,
+            tkn=tkn,
             nh4=nh4,
             no3=no3,
             po4=po4,

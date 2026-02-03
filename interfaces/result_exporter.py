@@ -13,6 +13,8 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 import logging
 
+from core.registries.export_registry import ExportRegistry
+
 logger = logging.getLogger(__name__)
 
 class ResultsExporter:
@@ -32,8 +34,8 @@ class ResultsExporter:
         Returns:
             Dict[str, Path]: Dictionnaire{node_id: chemin_csv}
         """
+        registry = ExportRegistry.get_instance()
         output_path = Path(output_dir)
-        output_path.mkdir(parents=True, exist_ok=True)
 
         history = results.get('history', {})
         exported_files = {}
@@ -45,27 +47,18 @@ class ResultsExporter:
                 logger.warning(f"Aucune donnée pour {node_id}, export CSV ignoré")
                 continue
 
-            # Convertit en DataFrame
-            data = []
-            for flow in flows:
-                row = {
-                    'timestamp': flow.get('timestamp'),
-                    'flowrate': flow.get('flowrate'),
-                    'temperature': flow.get('temperature'),
-                    'model_type': flow.get('model_type', ''),
-                    **flow.get('components', {})
-                }
-                data.append(row)
+            try:
+                filepath = registry.export(
+                    format_name='csv',
+                    results=results,
+                    output_path=output_path,
+                    node_id=node_id
+                )
+                exported_files[node_id] = filepath
+                logger.info(f"CSV exporté : {filepath}")
+            except Exception as e:
+                logger.error(f"Erreur export CSV pour {node_id}: {e}")
 
-            df = pd.DataFrame(data)
-
-            # Sauvegarde
-            csv_path = output_path / f"{node_id}_results.csv"
-            df.to_csv(csv_path, index=False)
-            exported_files[node_id] = csv_path
-
-            logger.info(f"CSV exporté : {csv_path} ({len(df)} lignes)")
-        
         return exported_files
     
     @staticmethod
@@ -80,16 +73,23 @@ class ResultsExporter:
         Returns:
             Path: Chemin du fichier crée
         """
+        registry = ExportRegistry.get_instance()
         path = Path(output_path)
-        path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Sauvegarde en JSON
-        with open(path, 'w') as f:
-            json.dump(results, f, indent=2, default=str)
+        try:
+            sim_name = results['metadata'].get('sim_name', 'simulation')
+            filepath = registry.export(
+                format_name='json',
+                results=results,
+                output_path=path.parent,
+                name=sim_name
+            )
+            logger.info(f"JSON exporté : {filepath}")
+            return filepath
+        except Exception as e:
+            logger.error(f"Erreur export JSON : {e}")
+            raise
 
-        logger.info(f"JSON exporté : {path}")
-        return path
-    
     @staticmethod
     def export_summary(results: Dict[str, Any], output_path: str) -> Path:
         """
