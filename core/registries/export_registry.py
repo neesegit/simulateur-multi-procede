@@ -207,6 +207,7 @@ class ExportRegistry:
 
     def __init__(self):
         self._strategies: Dict[str, ExportStrategy] = {}
+        self._default_export = set()
         self._register_default_strategies()
 
     @classmethod
@@ -217,17 +218,56 @@ class ExportRegistry:
     
     def _register_default_strategies(self):
         """Enregistre les stratégies par défaut"""
-        self.register(CSVExportStrategy())
-        self.register(JSONExportStrategy())
+        self.register(CSVExportStrategy(), True)
+        self.register(JSONExportStrategy(), True)
 
-    def register(self, strategy: ExportStrategy):
+    def register(self, strategy: ExportStrategy, default=False):
         """Enregistre une stratégie d'export"""
+        key = strategy.format_name.lower()
+        if key in self._strategies:
+            raise ValueError(f"Export type '{key}' is already registered")
         self._strategies[strategy.format_name.lower()] = strategy
+        if default:
+            self._default_export.add(key)
         logger.debug(f"Stratégie d'export enregistrée : {strategy.format_name}")
+
+    def get_strategy(self, format_name: str) -> ExportStrategy:
+        """Récupère la stratégie pour un type d'export"""
+        key = format_name.lower()
+
+        if key not in self._strategies:
+            raise ValueError(
+                f"Export type '{key}' is not registered. "
+                "Available exports: "
+                f"{list(self._strategies.keys())}"
+            )
+        
+        return self._strategies[key]
 
     def get_available_formats(self) -> list[str]:
         """Retourne la liste des formats disponibles"""
         return list(self._strategies.keys())
+    
+    def is_registered(self, format_name: str) -> bool:
+        """Vérifie que le modèle est enregistrée"""
+        key = format_name.lower()
+
+        if key in self._strategies:
+            return True
+        return False
+
+    def unregister(self, format_name: str) -> None:
+        """Supprime une stratégie enregistrée"""
+        key = format_name.lower()
+
+        if key in self._default_export:
+            raise ValueError(f"Cannot unregister default model '{key}'")
+        
+        if key not in self._strategies:
+            raise ValueError(f"Export type '{key}' is not registered")
+        
+        del self._strategies[key]
+        logger.debug(f"Stratégie de fractionnement supprimée pour {key}")
     
     def export(
             self,
