@@ -9,7 +9,7 @@ class TestFractionationRegistry:
 
     def test_singleton_pattern(self):
         """Test: FractionationRegistry implémnete le pattern singleton"""
-        from core.registries.fractionation_registry import FractionationRegistry
+        from core.registries.fractionation.registry import FractionationRegistry
 
         instance1 = FractionationRegistry.get_instance()
         instance2 = FractionationRegistry.get_instance()
@@ -19,7 +19,7 @@ class TestFractionationRegistry:
 
     def test_register_fractionator(self):
         """Test: enregistrement d'un nouveau fractionneur"""
-        from core.registries.fractionation_registry import FractionationRegistry
+        from core.registries.fractionation.registry import FractionationRegistry
 
         registry = FractionationRegistry.get_instance()
 
@@ -32,7 +32,7 @@ class TestFractionationRegistry:
 
     def test_register_duplicate_raises_error(self):
         """Test: Enregistrer un modèle existant lève une erreur"""
-        from core.registries.fractionation_registry import FractionationRegistry
+        from core.registries.fractionation.registry import FractionationRegistry
 
         registry = FractionationRegistry.get_instance()
 
@@ -46,7 +46,7 @@ class TestFractionationRegistry:
 
     def test_fractionate_calls_correct_fractionator(self):
         """Test: fractionate appelle le bon fractionneur"""
-        from core.registries.fractionation_registry import FractionationRegistry
+        from core.registries.fractionation.registry import FractionationRegistry
 
         registry = FractionationRegistry.get_instance()
 
@@ -84,7 +84,7 @@ class TestFractionationRegistry:
 
     def test_fractionate_unregistered_model_raises_error(self):
         """Test: Fractionner un modèle non enregistré lève une erreur"""
-        from core.registries.fractionation_registry import FractionationRegistry
+        from core.registries.fractionation.registry import FractionationRegistry
 
         registry = FractionationRegistry.get_instance()
 
@@ -96,7 +96,7 @@ class TestFractionationRegistry:
 
     def test_list_registered_models(self):
         """Test: Lister tous les modèles enregistrés"""
-        from core.registries.fractionation_registry import FractionationRegistry
+        from core.registries.fractionation.registry import FractionationRegistry
 
         registry = FractionationRegistry.get_instance()
 
@@ -114,7 +114,7 @@ class TestFractionationRegistry:
 
     def test_unregister_model(self):
         """Test : Désenregistrer un modèle"""
-        from core.registries.fractionation_registry import FractionationRegistry
+        from core.registries.fractionation.registry import FractionationRegistry
 
         registry = FractionationRegistry.get_instance()
 
@@ -129,7 +129,7 @@ class TestFractionationRegistry:
 
     def test_fractionate_with_partial_parameters(self):
         """Test: fractionner avec seulement certains paramètres fournis"""
-        from core.registries.fractionation_registry import FractionationRegistry
+        from core.registries.fractionation.registry import FractionationRegistry
 
         registry = FractionationRegistry.get_instance()
 

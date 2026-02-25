@@ -1,0 +1,5 @@
+{
+  "hrt": { "min_hours": 2.0, "max_hours": 48.0 },
+  "srt": { "min_days": 3.0, "max_days": 50.0, "fallback_days": 20.0 },
+  "svi": { "formula_numerator": 300.0, "min": 50.0, "max": 300.0, "fallback": 120.0 }
+}

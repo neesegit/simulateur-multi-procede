@@ -99,6 +99,56 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
 
         self.logger.debug("Initialisation ML terminée")
 
+    def _fit_with_synthetic_data(self) -> None:
+        """Auto-entraîne le modèle sur des données synthétiques.
+
+        Utilisé en fallback quand aucun model_path n'est fourni.
+        Les prédictions seront approximatives — fournir un vrai jeu d'entraînement
+        via model_path pour des résultats précis.
+        """
+        rng = np.random.default_rng(42)
+        n = 200
+
+        feature_ranges = {
+            'flowrate':    (800, 1200),
+            'temperature': (15, 25),
+            'volume':      (self.volume * 0.9, self.volume * 1.1),
+            'cod_in':      (300, 700),
+            'tss_in':      (150, 400),
+            'nh4_in':      (20, 50),
+            'no3_in':      (0, 2),
+            'po4_in':      (5, 15),
+            'hrt_hours':   (2, 48),
+            'srt_days':    (8, 25),
+        }
+        target_ranges = {
+            'cod':         (20, 80),
+            'tss':         (5, 30),
+            'nh4':         (0.5, 5),
+            'no3':         (5, 20),
+            'po4':         (2, 8),
+            'biomass':     (2000, 4000),
+            'cod_removal': (80, 95),
+        }
+
+        X_cols = []
+        for name in self.feature_names:
+            lo, hi = feature_ranges.get(name, (0.0, 100.0))
+            X_cols.append(rng.uniform(lo, hi, n))
+        X = np.column_stack(X_cols)
+
+        y_cols = []
+        for name in self.target_names:
+            lo, hi = target_ranges.get(name, (0.0, 100.0))
+            y_cols.append(rng.uniform(lo, hi, n))
+        y = np.column_stack(y_cols)
+
+        self.model_instance.fit(X, y)
+        self.logger.warning(
+            "Modèle ML entraîné sur données synthétiques. "
+            "Fournir 'model_path' dans la config pour un modèle réel."
+        )
+
     def initialize(self) -> None:
         """Initialise l'état du bassin selon le type de modèle"""
         if self.is_empyrical:
@@ -120,7 +170,9 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
 
     def _initialize_ml(self) -> None:
         """Initialisation pour modèles ML"""
-        #FIXME attention à ces valeurs
+        if not self.model_instance.is_fitted:
+            self._fit_with_synthetic_data()
+
         self.state = self.model_instance.initialize_state({
             'cod': 100.0,
             'tss': 2000.0,
@@ -166,7 +218,7 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         
         assert self.sludge_metrics is not None
         results = self.sludge_metrics.compute(
-            comp_out, inflow_components, q_in, dt, self.volume, temperature
+            comp_out, inflow_components, q_in, dt, self.volume, temperature, self.waste_ratio
         )
 
         self.concentrations = c_out
@@ -269,11 +321,9 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
         cod_in = features.get('cod_in', 0)
         q_in = features.get('flowrate', 0)
 
-        cod_removal = 0
-        if cod_in > 0:
-            cod_removal = ((cod_in - cod_out) / cod_in) * 100
+        cod_removal = max(0.0, ((cod_in - cod_out) / cod_in) * 100) if cod_in > 0 else 0.0
 
-        oxygen_consumed = (cod_in - cod_out) * q_in *dt / 1000.0
+        oxygen_consumed = max(0.0, (cod_in - cod_out)) * q_in * dt / 1000.0
         energy = oxygen_consumed * 2.0
 
         results = {
@@ -281,6 +331,11 @@ class UnifiedActivatedSludgeProcess(ProcessNode):
             'temperature': features.get('temperature', 20),
             'model_type': self.model_type,
             'components': predictions,
+
+            'cod_in': cod_in,
+            'tss_in': features.get('tss_in', 0),
+            'nh4_in': features.get('nh4_in', 0),
+            'no3_in': features.get('no3_in', 0),
 
             'cod': cod_out,
             'tss': predictions.get('tss', 0),

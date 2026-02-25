@@ -13,7 +13,7 @@ from plotly.subplots import make_subplots
 from pathlib import Path
 from ..utils.io_utils import save
 
-class TakacsVisualizer(BaseVisualizer):
+class TAKACSVisualizer(BaseVisualizer):
     """Visualiseur pour le modèle de décantation Takacs"""
 
     def get_plot_configs(self) -> List[PlotConfig]:
@@ -64,7 +64,7 @@ class TakacsVisualizer(BaseVisualizer):
                 comp_dict = flow.get('components', {})
                 value = comp_dict.get(component, 0.0)
 
-            value.append(float(value) if value is not None else 0.0)
+            values.append(float(value) if value is not None else 0.0)
         
         return values
     
@@ -74,12 +74,12 @@ class TakacsVisualizer(BaseVisualizer):
         """
         plot_configs = self.get_plot_configs()
 
-        rows = 3
+        rows = 2
         cols = 2
 
         subplot_titles = [
             config.title for config in plot_configs
-        ] + ['Profil de concentration (dernière étape)', '']
+        ]
 
         fig = make_subplots(
             rows=rows,
@@ -89,7 +89,7 @@ class TakacsVisualizer(BaseVisualizer):
             horizontal_spacing=0.15,
             specs=[
                 [{'type': 'xy'}, {'type': 'xy'}],
-                [{'type:' 'xy'}, {'type': 'xy'}],
+                [{'type': 'xy'}, {'type': 'xy'}],
                 [{'type': 'xy', 'colspan': 2}, None]
             ]
         )
@@ -102,7 +102,6 @@ class TakacsVisualizer(BaseVisualizer):
             fig.update_yaxes(title_text=config.ylabel, row=row, col=col)
             fig.update_xaxes(title_text='Temps', row=row, col=col)
 
-        self._plot_concentration_profile(fig, flows, 3, 1)
 
         fig.update_layout(
             title_text=f"Décanteur Secondaire - {node_id}",
@@ -126,76 +125,3 @@ class TakacsVisualizer(BaseVisualizer):
             fig.show()
 
         return saved_path
-    
-    def _plot_concentration_profile(
-            self,
-            fig: go.Figure,
-            flows: List[Dict],
-            row: int,
-            col: int
-    ) -> None:
-        """
-        Trace le profil de concentration dans les couches du settler
-        """
-
-        if not flows:
-            return
-        
-        last_flow = flows[-1]
-        layer_concentrations = last_flow.get('layer_concentrations', [])
-
-        if not layer_concentrations:
-            return
-        
-        n_layers = len(layer_concentrations)
-        layers = list(range(n_layers))
-
-        fig.add_trace(
-            go.Scatter(
-                x=layer_concentrations,
-                y=layers,
-                mode='lines+markers',
-                name='Concentration TSS',
-                line=dict(color='#1f77b4', width=3),
-                marker=dict(size=8),
-            ),
-            row=row,
-            col=col
-        )
-
-        feed_layer = last_flow.get('feed_layer', n_layers // 2)
-        fig.add_hline(
-            y=feed_layer,
-            line_dash="dash",
-            line_color="red",
-            annotation_text="Alimentation",
-            row=str(row),
-            col=str(col)
-        )
-
-        sludge_blanket = last_flow.get('sludge_blanket', {})
-        if sludge_blanket.get('has_blanket'):
-            blanket_top = sludge_blanket.get('blanket_top_layer', 0)
-            blanket_bottom = sludge_blanket.get('blanket_bottom_layer', 0)
-
-            fig.add_hrect(
-                y0=blanket_top,
-                y1=blanket_bottom,
-                fillcolor="orange",
-                opacity=0.2,
-                annotation_text="Voile de boues",
-                row=str(row),
-                col=str(col)
-            )
-
-        fig.update_xaxes(
-            title_text='Concentration TSS (mg/L)',
-            row=row,
-            col=col
-        )
-        fig.update_yaxes(
-            title_text='Couche (0=surface, N=fond)',
-            row=row,
-            col=col,
-            autorange="reversed"
-        )

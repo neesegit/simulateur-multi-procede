@@ -23,7 +23,7 @@
     "metrics": {
         "cod": ["cod"],
         "tkn": ["nh4"],
-        "tss": ["ss"],
+        "tss": ["tss"],
         "biomass": ["biomass"],
         "nh4": "nh4",
         "no3": "no3",

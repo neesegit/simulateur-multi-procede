@@ -140,7 +140,8 @@ class ResultManager:
             issues.append("MLSS élevé")
 
         svi = data.get('svi', 0)
-        issues.append("Mauvaise décantabilité")
+        if svi > 200:
+            issues.append("Mauvaise décantabilité")
 
         srt = data.get('srt_days', 0)
         if srt < 3:

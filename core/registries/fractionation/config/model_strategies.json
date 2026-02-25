@@ -1,0 +1,11 @@
+{
+  "ASM1":              "ASM1FractionationStrategy",
+  "ASM1MODEL":         "ASM1FractionationStrategy",
+  "ASM2D":             "ASM2DFractionationStrategy",
+  "ASM2DMODEL":        "ASM2DFractionationStrategy",
+  "ASM3":              "ASM3FractionationStrategy",
+  "ASM3MODEL":         "ASM3FractionationStrategy",
+  "LINEARMODEL":       "NoFractionationStrategy",
+  "RANDOMFORESTMODEL": "NoFractionationStrategy",
+  "TAKACSMODEL":       "NoFractionationStrategy"
+}

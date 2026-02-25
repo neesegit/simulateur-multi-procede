@@ -6,7 +6,7 @@ class TestFractionationIntegration:
 
     def test_asm1_fractionation(self):
         """Test: Fractionnement ASM1"""
-        from core.registries.fractionation_registry import FractionationRegistry
+        from core.registries.fractionation.registry import FractionationRegistry
 
         registry = FractionationRegistry.get_instance()
 

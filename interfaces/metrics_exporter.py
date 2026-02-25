@@ -58,9 +58,9 @@ class MetricsExporter:
                     'cod_total': safe_get(flow, 'cod'),
                     'cod_soluble': safe_get(flow, 'cod_soluble', 0),
                     'cod_particulate': safe_get(flow, 'cod_particulate', 0),
-                    'cod_removal': safe_get(flow, 'soluble_cod_removal', 0),
+                    'cod_removal': safe_get(flow, 'cod_removal_rate', 0),
                     'biomass': safe_get(flow, 'biomass_concentration', 0),
-                    'mlss': safe_get(flow, 'tss', 0),
+                    'mlss': safe_get(flow, 'mlss', 0), #or safe_get(flow, 'tss', 0),
                     'nh4': safe_get(flow, 'nh4', 0),
                     'no3': safe_get(flow, 'no3', 0),
                     'po4': safe_get(flow, 'po4', 0),
@@ -145,7 +145,7 @@ class MetricsExporter:
                     'cod_total_mg_L': safe_get(flow, 'cod', 0),
                     'cod_soluble_mg_L': safe_get(flow, 'cod_soluble', 0),
                     'cod_particulate_mg_L': safe_get(flow, 'cod_particulate', 0),
-                    'cod_removal_percent': safe_get(flow, 'soluble_cod_removal', 0),
+                    'soluble_cod_removal_percent': safe_get(flow, 'soluble_cod_removal', 0),
 
                     'nh4_mg_L': safe_get(flow, 'nh4', 0),
                     'no3_mg_L': safe_get(flow, 'no3', 0),
@@ -154,7 +154,7 @@ class MetricsExporter:
                     'po4_mg_L': safe_get(flow, 'po4', 0),
 
                     'biomass_mg_L': safe_get(flow, 'biomass_concentration', 0),
-                    'mlss_mg_L': safe_get(flow, 'tss', 0),
+                    'mlss_mg_L': safe_get(flow, 'mlss', 0),
                     'svi_mL_g': safe_get(flow, 'svi', 0),
 
                     'srt_days': safe_get(flow, 'srt_days', 0) if safe_get(flow, 'srt_days', 0) < float('inf') else None,

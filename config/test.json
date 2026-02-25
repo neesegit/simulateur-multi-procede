@@ -1,0 +1,47 @@
+{
+  "name": "step_avec_recyclage",
+  "simulation": {
+    "start_time": "2025-01-01T00:00:00",
+    "end_time":   "2025-01-02T00:00:00",
+    "timestep_hours": 0.1
+  },
+  "influent": {
+    "flowrate": 1000.0,
+    "temperature": 20.0,
+    "auto_fractionate": true,
+    "composition": {
+      "cod": 500.0, "ss": 250.0, "tkn": 40.0,
+      "nh4": 28.0, "no3": 0.5, "po4": 8.0, "alkalinity": 6.0
+    }
+  },
+  "processes": [
+    {
+      "node_id": "bassin_1",
+      "type": "ActivatedSludgeProcess",
+      "name": "Bassin aération",
+      "config": {
+        "model": "ASM1Model",
+        "volume": 5000.0,
+        "dissolved_oxygen_setpoint": 2.0,
+        "recycle_ratio": 1.0,
+        "waste_ratio": 0.005
+      }
+    },
+    {
+      "node_id": "decanteur_1",
+      "type": "SecondarySettlerProcess",
+      "name": "Décanteur secondaire",
+      "config": {
+        "area": 1000.0,
+        "depth": 4.0,
+        "n_layers": 10,
+        "underflow_ratio": 0.6
+      }
+    }
+  ],
+  "connections": [
+    { "source": "influent",    "target": "bassin_1",    "fraction": 1.0, "is_recycle": false },
+    { "source": "bassin_1",    "target": "decanteur_1", "fraction": 1.0, "is_recycle": false },
+    { "source": "decanteur_1", "target": "bassin_1",    "fraction": 0.6, "is_recycle": true  }
+  ]
+}

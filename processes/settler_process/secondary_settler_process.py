@@ -182,11 +182,36 @@ class SecondarySettlerProcess(ProcessNode):
                 components_overflow[comp] = value
                 components_underflow[comp] = value
 
+        # Métriques de qualité de l'effluent (overflow)
+        input_flow = inputs.get('flow')
+        if input_flow:
+            nh4 = getattr(input_flow, 'nh4', components_overflow.get('snh', 0.0))
+            no3 = getattr(input_flow, 'no3', components_overflow.get('sno', 0.0))
+            tkn = getattr(input_flow, 'tkn', 0.0)
+            input_cod = getattr(input_flow, 'cod', 0.0)
+            if input_cod > 0:
+                cod_soluble = input_flow.components.get('cod_soluble', 0.0)
+                cod_particulate = max(0.0, input_cod - cod_soluble)
+                cod = cod_soluble + cod_particulate * fraction_overflow
+            else:
+                cod = 0.0
+        else:
+            nh4 = components_overflow.get('snh', 0.0)
+            no3 = components_overflow.get('sno', 0.0)
+            tkn = (components_overflow.get('snh', 0.0)
+                   + components_overflow.get('snd', 0.0)
+                   + components_overflow.get('xnd', 0.0))
+            cod = 0.0
+
         results = {
             'flowrate': Q_overflow,
             'temperature': temperature,
             'model_type': self.model_type,
             'tss': effluent['X_overflow'],
+            'cod': cod,
+            'nh4': nh4,
+            'no3': no3,
+            'tkn': tkn,
             'components': components_overflow,
 
             'underflow': {
@@ -195,12 +220,16 @@ class SecondarySettlerProcess(ProcessNode):
                 'components': components_underflow
             },
 
+            'X_overflow': effluent['X_overflow'],
+            'X_underflow': effluent['X_underflow'],
             'removal_efficiency': effluent['removal_efficiency'],
             'mass_overflow_kg_h': effluent['mass_overflow_kg_h'],
             'mass_underflow_kg_h': effluent['mass_underflow_kg_h'],
 
             'sludge_blanket': self.sludge_blanket_info,
             'layer_concentrations': self.concentrations.tolist(),
+            'feed_layer': self.feed_layer,
+            'layer_height': self.layer_height,
 
             'overflow_rate': Q_overflow / self.area,
             'underflow_rate': Q_underflow / self.area,

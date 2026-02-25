@@ -6,7 +6,7 @@ import logging
 
 from typing import Dict, Any
 from core.model.model_registry import ModelRegistry
-from core.registries.metrics_registry import MetricsRegistry, create_composite_calculator
+from core.registries.metrics.registry import MetricsRegistry, create_composite_calculator
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,8 @@ class SludgeMetrics:
             q_in: float,
             dt: float,
             volume: float,
-            temperature: float = 20.0
+            temperature: float = 20.0,
+            waste_ratio: float = 0.01
     ) -> Dict[str, Any]:
         """Calcule toutes les métriques pour un pas de temps"""
         cod_out = self.cod_calculator.calculate(comp_out, {}, {})['value'] if self.cod_calculator else 0
@@ -80,20 +81,21 @@ class SludgeMetrics:
             cod_removal = 0.0
 
         mlss = tss_out
-        if mlss < biomass * 1.2:
-            mlss = biomass * 1.5
-        mlss = np.clip(mlss, 1500.0, 5000.0)
 
         context = {
             'volume': volume,
-            'waste_ratio': 0.01,
-            'temperature': temperature
+            'waste_ratio': waste_ratio,
+            'temperature': temperature,
+            'dt': dt
         }
 
         inputs = {
             'flowrate': q_in,
             'cod_in': cod_in,
-            'cod_out': cod_out
+            'cod_out': cod_out,
+            'tss': tss_out,                     # TSS pré-calculée pour SRTCalculator et SVICalculator
+            'cod_soluble_in': cod_soluble_in,   # COD soluble influent pour EnergyConsumptionCalculator
+            'cod_soluble_out': cod_soluble       # COD soluble effluent pour EnergyConsumptionCalculator
         }
 
         hrt_result = self.metrics_registry.calculate('hrt', comp_out, inputs, context)

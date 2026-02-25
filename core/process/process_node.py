@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from utils.decorators import safe_fractionation
 
-from core.registries.fractionation_registry import FractionationRegistry
+from core.registries.fractionation.registry import FractionationRegistry
 
 class ProcessNode(ABC):
     """
@@ -124,7 +124,7 @@ class ProcessNode(ABC):
         if flow.has_model_components():
             return False
         
-        return flow.cod > 0 or flow.ss > 0 or flow.tkn > 0
+        return flow.cod > 0 or flow.tss > 0 or flow.tkn > 0
     
     @safe_fractionation
     def fractionate_input(self, inputs: Dict[str, Any], target_model: str = 'ASM1') -> Dict[str, Any]:

@@ -6,6 +6,7 @@ Simulateur modulaire de procédés de traitement des eaux usées permettant d'é
 
 ## Table des matières
 
+- [Prérequis](#prérequis)
 - [Installation](#installation)
 - [Utilisation rapide](#utilisation-rapide)
 - [Architecture](#architecture)
@@ -14,7 +15,18 @@ Simulateur modulaire de procédés de traitement des eaux usées permettant d'é
 - [Configuration](#configuration)
 - [Connexions entre procédés](#connexions-entre-procédés)
 - [Sorties](#sorties)
+- [Tests](#tests)
+- [Limitations connues](#limitations-connues)
 - [Étendre le simulateur](#étendre-le-simulateur)
+
+---
+
+## Prérequis
+
+- Python **3.10+**
+- pip
+
+Dépendances principales : `numpy`, `scipy`, `pandas`, `plotly`, `scikit-learn`, `tensorflow` (voir `requirements.txt` pour les versions exactes).
 
 ---
 
@@ -55,9 +67,9 @@ python main.py --help
 ============================================================
 Simulation en cours ...
 ============================================================
-2026-02-23 13:59:24,740 - core.orchestrator.simulation_orchestrator.simulation_20251208_115818 - INFO - Simulation : 240 pas de temps
-2026-02-23 13:59:24,784 - core.orchestrator.simulation_orchestrator.simulation_20251208_115818 - INFO - 41.7% complété
-2026-02-23 13:59:24,819 - core.orchestrator.simulation_orchestrator.simulation_20251208_115818 - INFO - 83.3% complété
+2026-02-23 13:59:24,740 - INFO - Simulation : 240 pas de temps
+2026-02-23 13:59:24,784 - INFO - 41.7% complété
+2026-02-23 13:59:24,819 - INFO - 83.3% complété
 
 ============================================================
 Simulation terminée
@@ -67,9 +79,6 @@ Export des métriques de performance ...
         - Métriques CSV : 1 fichier(s)
         - Rapport : performance_report.txt
         - Répertoire : output\results\simulation_20251208_115818
-        - CSV : 1 fichier(s)
-        - JSON : simulation_20251208_115818_full.json
-        - Résumé : simulation_20251208_115818_summary.txt
 
 Génération des graphiques ...
 
@@ -89,7 +98,7 @@ Statistiques par procédé :
                 Debit moyen :   1000.0 m^3/h
                 DCO moyenne :     500.0 mg/L
 
-        activatedsludge_1 :
+        bassin_1 :
                 Debit moyen :   1000.0 m^3/h
                 DCO moyenne :    1717.5 mg/L
                 Échantillons :      240
@@ -141,7 +150,19 @@ SimulationFlow (historique) ──► Résultats / Graphiques
 │   ├── model/           # ModelRegistry + fichiers JSON des modèles
 │   ├── orchestrator/    # SimulationOrchestrator
 │   ├── process/         # ProcessRegistry + fichiers JSON des procédés
-│   ├── registries/      # Fractionnement, métriques, export
+│   ├── registries/
+│   │   ├── metrics/
+│   │   │   ├── calculators/   # HRT, SRT, SVI, énergie, composite…
+│   │   │   ├── config/        # model_metrics.json, calculators.json
+│   │   │   └── registry.py    # MetricsRegistry
+│   │   ├── fractionation/
+│   │   │   ├── strategies/    # ASM1, ASM2D, ASM3, NoFractionation
+│   │   │   ├── config/        # model_strategies.json
+│   │   │   └── registry.py    # FractionationRegistry
+│   │   └── export/
+│   │       ├── strategies/    # CSV, JSON, Excel, Parquet
+│   │       ├── config/        # default_formats.json
+│   │       └── registry.py    # ExportRegistry
 │   └── solver/          # Solveurs ODE (Euler, RK4), CSTR, settler
 ├── models/
 │   ├── empyrical/       # ASM1, ASM2d, ASM3, Takacs
@@ -153,6 +174,7 @@ SimulationFlow (historique) ──► Résultats / Graphiques
 │   ├── cli/             # Interface interactive
 │   ├── config/          # Chargement et validation des configs
 │   └── visualisation/   # Dashboards Plotly par modèle
+├── tests/               # Tests unitaires et d'intégration (pytest)
 ├── utils/
 ├── main.py
 └── requirements.txt
@@ -195,7 +217,29 @@ Ces modèles résolvent des EDO via un solveur RK4 à chaque pas de temps. L'inf
 
 ## Configuration
 
-La simulation est pilotée par un fichier JSON. Structure minimale :
+La simulation est pilotée par un fichier JSON.
+
+### Paramètres globaux
+
+| Champ | Obligatoire | Description |
+|-------|-------------|-------------|
+| `name` | ✓ | Identifiant de la simulation (utilisé pour nommer les fichiers de sortie) |
+| `description` | | Description libre |
+| `simulation.start_time` | ✓ | Début de la simulation (ISO 8601, ex. `"2025-01-01T00:00:00"`) |
+| `simulation.end_time` | ✓ | Fin de la simulation (ISO 8601) |
+| `simulation.timestep_hours` | | Pas de temps en heures (défaut : `0.1`) |
+
+### Paramètres de l'influent
+
+| Champ | Description |
+|-------|-------------|
+| `flowrate` | Débit entrant (m³/h) |
+| `temperature` | Température (°C) |
+| `composition` | Paramètres mesurables de l'effluent brut (mg/L) |
+
+Paramètres de composition reconnus : `cod`, `ss` (MES), `tkn`, `nh4`, `no3`, `po4`, `alkalinity`.
+
+### Structure minimale
 
 ```json
 {
@@ -253,8 +297,8 @@ La simulation est pilotée par un fichier JSON. Structure minimale :
 | `volume` | ✓ | `5000.0` | Volume du bassin (m³) |
 | `dissolved_oxygen_setpoint` | ✓ | `2.0` | Consigne OD (mg/L) |
 | `depth` | | `4.0` | Profondeur (m) |
-| `recycle_ratio` | | `1.0` | Ratio Qr/Qin |
-| `waste_ratio` | | `0.01` | Ratio Qw/Qin |
+| `recycle_ratio` | | `1.0` | Ratio Qrecycle/Qin — débit de recyclage interne |
+| `waste_ratio` | | `0.01` | Ratio Qwaste/Qin — fraction du débit éliminée comme boues en excès |
 | `model_path` | | `null` | Chemin modèle ML pré-entraîné |
 
 ### Paramètres de procédé — décanteur secondaire
@@ -282,7 +326,7 @@ Chaque connexion est définie par :
 | `fraction` | Fraction du débit transmise (0 < fraction ≤ 1.0) |
 | `is_recycle` | `true` si c'est un recyclage (ignoré dans le tri topologique) |
 
-### Exemple — chaîne série
+### Exemple — chaîne série simple
 
 ```
 influent ──► bassin_1 ──► decanteur_1
@@ -293,6 +337,66 @@ influent ──► bassin_1 ──► decanteur_1
   { "source": "influent",    "target": "bassin_1",    "fraction": 1.0, "is_recycle": false },
   { "source": "bassin_1",    "target": "decanteur_1", "fraction": 1.0, "is_recycle": false }
 ]
+```
+
+### Exemple — boues activées avec décanteur et recyclage
+
+Configuration typique d'une station d'épuration : le décanteur concentre les boues, dont une partie est recyclée vers le bassin pour maintenir un SRT > HRT.
+
+```
+influent ──► bassin_1 ──► decanteur_1 ──► effluent traité
+                ▲               │
+                └── recyclage ──┘ (boues recirculées)
+```
+
+```json
+{
+  "name": "step_avec_recyclage",
+  "simulation": {
+    "start_time": "2025-01-01T00:00:00",
+    "end_time":   "2025-01-02T00:00:00",
+    "timestep_hours": 0.1
+  },
+  "influent": {
+    "flowrate": 1000.0,
+    "temperature": 20.0,
+    "auto_fractionate": true,
+    "composition": {
+      "cod": 500.0, "ss": 250.0, "tkn": 40.0,
+      "nh4": 28.0, "no3": 0.5, "po4": 8.0, "alkalinity": 6.0
+    }
+  },
+  "processes": [
+    {
+      "node_id": "bassin_1",
+      "type": "ActivatedSludgeProcess",
+      "name": "Bassin aération",
+      "config": {
+        "model": "ASM1Model",
+        "volume": 5000.0,
+        "dissolved_oxygen_setpoint": 2.0,
+        "recycle_ratio": 1.0,
+        "waste_ratio": 0.005
+      }
+    },
+    {
+      "node_id": "decanteur_1",
+      "type": "SecondarySettlerProcess",
+      "name": "Décanteur secondaire",
+      "config": {
+        "area": 1000.0,
+        "depth": 4.0,
+        "n_layers": 10,
+        "underflow_ratio": 0.6
+      }
+    }
+  ],
+  "connections": [
+    { "source": "influent",    "target": "bassin_1",    "fraction": 1.0, "is_recycle": false },
+    { "source": "bassin_1",    "target": "decanteur_1", "fraction": 1.0, "is_recycle": false },
+    { "source": "decanteur_1", "target": "bassin_1",    "fraction": 0.6, "is_recycle": true  }
+  ]
+}
 ```
 
 ### Exemple — dérivation parallèle
@@ -324,20 +428,50 @@ Après chaque simulation, les résultats sont écrits dans `output/results/<nom_
 ```
 output/results/ma_simulation/
 ├── csv/
-│   └── bassin_1_results.csv       # Série temporelle complète par nœud
+│   └── bassin_1_results.csv          # Série temporelle complète par nœud
 ├── metrics/
-│   ├── bassin_1_performance.csv   # DCO, NH4, biomasse, énergie…
-│   ├── performance_metrics_*.json # Statistiques agrégées (min/max/moy)
-│   └── performance_report.txt     # Rapport textuel lisible
+│   ├── bassin_1_performance.csv      # DCO, NH4, biomasse, énergie…
+│   └── performance_metrics_*.json   # Statistiques agrégées (min/max/moy)
 ├── figures/
-│   └── bassin_1_dashboard.html    # Dashboard Plotly interactif
-├── ma_simulation_full.json        # Historique complet sérialisé
-└── ma_simulation_summary.txt      # Résumé statistique
+│   └── bassin_1_dashboard.html       # Dashboard Plotly interactif
+├── performance_report.txt            # Rapport textuel lisible
+├── ma_simulation_full.json           # Historique complet sérialisé
+└── ma_simulation_summary.txt         # Résumé statistique
 ```
 
-Les métriques calculées pour chaque nœud incluent notamment : DCO totale et soluble, taux d'épuration, NH4, NO3, PO4, biomasse active, MLSS, SRT, SVI, HRT, consommation énergétique (kWh et kWh/m³).
+Les métriques calculées pour chaque nœud incluent notamment : DCO totale et soluble, taux d'épuration soluble, NH4, NO3, PO4, biomasse active, MLSS, SRT, SVI, HRT, consommation énergétique (kWh et kWh/m³).
 
 Les logs sont disponibles dans `output/logs/simulation.log`.
+
+---
+
+## Tests
+
+```bash
+# Lancer tous les tests
+pytest
+
+# Avec rapport de couverture
+pytest --cov
+
+# Tests unitaires uniquement
+pytest tests/unit/
+
+# Tests d'intégration uniquement
+pytest tests/integration/
+```
+
+---
+
+## Limitations connues
+
+### Phosphore
+ASM1 et ASM3 ne modélisent pas le phosphore. La métrique `po4` dans les sorties sera toujours `0.0` avec ces modèles. Utiliser **ASM2d** pour un suivi du phosphore.
+
+### SRT dans un réacteur seul (sans décanteur)
+Dans un `ActivatedSludgeProcess` seul, le SRT effectif est égal au HRT — le paramètre `waste_ratio` retire une fraction du réacteur mais ne concentre pas les boues. Pour obtenir un SRT > HRT (nécessaire en pratique pour éviter le lessivage biologique), il faut coupler le bassin avec un `SecondarySettlerProcess` et une connexion de recyclage (`is_recycle: true`).
+
+En conséquence, le SRT affiché dans les métriques (calculé comme `V / (waste_ratio × Q)`) est informatif mais ne reflète le SRT réel que dans une configuration avec décanteur + recyclage.
 
 ---
 
@@ -397,7 +531,17 @@ Dans `models/empyrical/mon_modele/model.py`, hériter de la classe de base adapt
 
 #### 4. Fractionnement (si nécessaire)
 
-Si le modèle utilise des composants internes différents des paramètres mesurés standards, créer `models/empyrical/mon_modele/fraction.py` avec une méthode `fractionate(cod, tss, tkn, nh4, ...)` et l'enregistrer dans `core/registries/fractionation_registry.py`.
+Si le modèle utilise des composants internes différents des paramètres mesurés standards, créer `models/empyrical/mon_modele/fraction.py` avec une méthode de classe `fractionate(cod, tss, tkn, nh4, ...)`.
+
+Puis déclarer l'association dans `core/registries/fractionation/config/model_strategies.json` :
+
+```json
+{
+  "MonModele": "ASM1FractionationStrategy"
+}
+```
+
+Si le modèle nécessite une stratégie de fractionnement sur-mesure, créer un fichier dans `core/registries/fractionation/strategies/` en héritant de `FractionationStrategy`, l'exporter depuis `strategies/__init__.py`, et ajouter son constructeur dans `_STRATEGY_CONSTRUCTORS` de `registry.py`.
 
 ---
 
@@ -455,7 +599,7 @@ Dans `processes/mon_procede/mon_procede_process.py`, hériter de `ProcessNode` e
 - Le champ `type` dans le JSON doit correspondre **exactement** au nom de la classe Python.
 - Le champ `module` doit être un chemin Python valide (ex. `models.empyrical.asm1.model`).
 - La section `metrics` du JSON fait le lien entre métriques standard (`cod`, `nh4`…) et composants internes — une erreur ici produit des valeurs nulles sans message d'erreur explicite.
-- `ModelRegistry` et `ProcessRegistry` sont des **singletons** chargés au démarrage. Toute modification des fichiers JSON pendant l'exécution nécessite un redémarrage.
+- `ModelRegistry`, `ProcessRegistry`, `MetricsRegistry`, `FractionationRegistry` et `ExportRegistry` sont des **singletons** chargés au démarrage. Toute modification des fichiers JSON pendant l'exécution nécessite un redémarrage.
 
 ---
 

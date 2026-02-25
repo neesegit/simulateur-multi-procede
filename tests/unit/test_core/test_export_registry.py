@@ -7,8 +7,8 @@ from pathlib import Path
 from unittest.mock import Mock, MagicMock, patch, mock_open
 import pandas as pd
 
-from core.registries.export_registry import (
-    ExportRegistry,
+from core.registries.export.registry import ExportRegistry
+from core.registries.export.strategies import (
     ExportStrategy,
     CSVExportStrategy,
     JSONExportStrategy,
@@ -32,7 +32,7 @@ class TestCSVExportStrategy:
         strategy = CSVExportStrategy()
 
         assert strategy is not None
-        assert strategy.format_name == "CSV"
+        assert strategy.format_name == "csv"
         assert strategy.file_extension == ".csv"
 
     def test_supports_node(self):
@@ -123,7 +123,7 @@ class TestJSONExportStrategy:
         """Test : initialisation"""
         strategy = JSONExportStrategy()
 
-        assert strategy.format_name == 'JSON'
+        assert strategy.format_name == 'json'
         assert strategy.file_extension == '.json'
 
     def test_export_creates_json(self, tmp_path):

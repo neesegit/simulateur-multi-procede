@@ -9,7 +9,7 @@ class TestMetricsRegistry:
 
     def test_singleton_pattern(self):
         """Test: MetricsRegistry implémente le pattern Singleton"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         instance1 = MetricsRegistry.get_instance()
         instance2 = MetricsRegistry.get_instance()
@@ -19,7 +19,7 @@ class TestMetricsRegistry:
 
     def test_register_calculator(self):
         """Test: Enregistrement d'un novueau calculateur de métrique"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -34,7 +34,7 @@ class TestMetricsRegistry:
 
     def test_register_duplicate_raises_error(self):
         """Test: Enregistrer une métrique existante lève une erreur"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -48,7 +48,7 @@ class TestMetricsRegistry:
 
     def test_calculate_calls_correct_calculator(self):
         """Test: calculate appelle le bon calculateur"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -68,7 +68,7 @@ class TestMetricsRegistry:
 
     def test_calculate_unregistered_metric_raises_error(self):
         """Test: Calculer une métrique non enregistrée lève une erreur"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -77,7 +77,7 @@ class TestMetricsRegistry:
 
     def test_list_registered_metrics(self):
         """Test: Lister toutes les métriques enregistrées"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -95,7 +95,7 @@ class TestMetricsRegistry:
 
     def test_unregister_metric(self):
         """Test: désenregistrer une métrique"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -110,7 +110,7 @@ class TestMetricsRegistry:
 
     def test_calculate_with_exception_handling(self):
         """Test: Gestion des exceptions lors du calcul"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -124,7 +124,7 @@ class TestMetricsRegistry:
 
     def test_batch_calculate_multiple_metrics(self):
         """Test : Calculer plusieurs métriques en une fois"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -159,7 +159,7 @@ class TestMetricsCalculators:
 
     def test_hrt_calculator(self):
         """Test : Calculateur de HRT"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -180,7 +180,7 @@ class TestMetricsCalculators:
 
     def test_srt_calculator(self):
         """Test : Calculateur de SRT"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -204,7 +204,7 @@ class TestMetricsCalculators:
 
     def test_svi_calculator(self):
         """Test : Calculateur de SVI"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -224,7 +224,7 @@ class TestMetricsCalculators:
 
     def test_energy_calculator(self):
         """Test : Calculateur de consommation énergétique"""
-        from core.registries.metrics_registry import MetricsRegistry
+        from core.registries.metrics.registry import MetricsRegistry
 
         registry = MetricsRegistry.get_instance()
 
@@ -253,11 +253,8 @@ class TestCompositionCalculators:
 
     def test_composite_calculator_(self):
         """Test : Calculateur composite"""
-        from core.registries.metrics_registry import (
-            MetricsRegistry,
-            create_composite_calculator,
-            CompositeMetricCalculator
-        )
+        from core.registries.metrics.registry import MetricsRegistry, create_composite_calculator
+        from core.registries.metrics.calculators import CompositeMetricCalculator
 
         registry = MetricsRegistry.get_instance()
 

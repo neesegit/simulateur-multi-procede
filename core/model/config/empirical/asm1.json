@@ -46,7 +46,7 @@
     "metrics": {
         "cod": ["si", "ss", "xi", "xs", "xbh", "xba", "xp"],
         "tkn": ["snh", "snd", "xnd"],
-        "ss": ["xi", "xs", "xbh", "xba", "xp"],
+        "tss": ["xi", "xs", "xbh", "xba", "xp"],
         "biomass": ["xbh", "xba"],
         "nh4": "snh",
         "no3": "sno",

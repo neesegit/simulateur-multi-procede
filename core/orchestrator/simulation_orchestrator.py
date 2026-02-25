@@ -180,7 +180,10 @@ class SimulationOrchestrator:
             source_flow = self.databus.read_flow(source_id)
 
             if not source_flow:
-                self.logger.warning(f"Flux manquant pour {source_id}")
+                if connection.is_recycle:
+                    self.logger.debug(f"Flux de recyclage non disponible pour {source_id} (normal au 1er pas)")
+                else:
+                    self.logger.warning(f"Flux manquant pour {source_id}")
                 return {}
             
             fraction = connection.flow_fraction
@@ -206,7 +209,10 @@ class SimulationOrchestrator:
             source_flow = self.databus.read_flow(source_id)
 
             if not source_flow:
-                self.logger.warning(f"Flux manquant pour {source_id}")
+                if connection.is_recycle:
+                    self.logger.debug(f"Flux de recyclage non disponible pour {source_id} (normal au 1er pas)")
+                else:
+                    self.logger.warning(f"Flux manquant pour {source_id}")
                 continue
 
             if reference_flow is None:
@@ -218,6 +224,8 @@ class SimulationOrchestrator:
             weighted_temp += source_flow.temperature * fractional_flowrate
 
             for component, concentration in source_flow.components.items():
+                if not isinstance(concentration, (int, float)):
+                    continue
                 if component not in weighted_components:
                     weighted_components[component] = 0.0
                 weighted_components[component] += concentration * fractional_flowrate
@@ -261,16 +269,11 @@ class SimulationOrchestrator:
 
         flow.components = outputs.get('components', {}).copy()
 
-        metrics_to_store = [
-            'cod_soluble', 'cod_particulate', 'soluble_cod_removal',
-            'cod_removal_rate', 'hrt_hours', 'srt_days', 'svi',
-            'biomass_concentration', 'oxygen_consumed_kg',
-            'aeration_energy_kwh', 'energy_per_m3'
-        ]
-
-        for metric in metrics_to_store:
-            if metric in outputs:
-                flow.components[metric] = outputs[metric]
+        # Stocker toutes les métriques retournées par le procédé, sauf les clés structurelles
+        _structural_keys = {'components', 'underflow', 'flowrate', 'temperature', 'model_type'}
+        for key, value in outputs.items():
+            if key not in _structural_keys:
+                flow.components[key] = value
 
 
         for key in ['cod', 'tss', 'bod', 'tkn', 'nh4', 'no3', 'po4']:

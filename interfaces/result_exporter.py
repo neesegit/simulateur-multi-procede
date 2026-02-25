@@ -13,7 +13,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 import logging
 
-from core.registries.export_registry import ExportRegistry
+from core.registries.export.registry import ExportRegistry
 
 logger = logging.getLogger(__name__)
 

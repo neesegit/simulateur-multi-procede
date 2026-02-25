@@ -144,7 +144,7 @@ class AnalyticalCalibrator(BaseCalibrator):
         
         fractionated = ModelFraction.fractionate(
             cod=comp.get('cod', 500),
-            tss=comp.get('tss', 250),
+            tss=comp.get('tss', comp.get('ss', 250)),   # 'ss' est l'alias historique de 'tss' dans les configs
             tkn=comp.get('tkn', 40),
             nh4=comp.get('nh4', 28),
             no3=comp.get('no3', 0.5),

@@ -95,7 +95,7 @@ class ActivatedSludgeProcess(ProcessNode):
         c_out = self._simulate_reactor(inflow_components, q_in, dt)
 
         comp_out = self.model_adapter.vector_to_dict(c_out)
-        results = self.sludge_metrics.compute(comp_out, inflow_components, q_in, dt, self.volume, temperature)
+        results = self.sludge_metrics.compute(comp_out, inflow_components, q_in, dt, self.volume, temperature, self.waste_ratio)
 
         self.metrics = {
             'cod_removal': results['cod_removal_rate'],

@@ -18,6 +18,7 @@ class InfluentInitializer:
             source_node='influent'
         )
 
-        for attr in ('cod', 'tss', 'tkn', 'bod', 'nh4', 'no3', 'po4', 'alkalinity'):
+        for attr in ('cod', 'tkn', 'bod', 'nh4', 'no3', 'po4', 'alkalinity'):
             setattr(flow, attr, composition.get(attr, 0.0))
+        flow.tss = composition.get('tss', composition.get('ss', 0.0))
         return flow
