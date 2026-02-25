@@ -16,5 +16,4 @@ venv/
 # Output or temp files
 output/
 
-# Data
-/data/
+

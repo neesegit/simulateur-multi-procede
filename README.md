@@ -167,6 +167,7 @@ SimulationFlow (historique) ──► Résultats / Graphiques
 ├── models/
 │   ├── empyrical/       # ASM1, ASM2d, ASM3, Takacs
 │   └── ml/              # LinearModel, RandomForest
+├── models/trained/      # Modèles ML entraînés (fichiers .pkl)
 ├── processes/
 │   ├── sludge_process/  # UnifiedActivatedSludgeProcess
 │   └── settler_process/ # SecondarySettlerProcess
@@ -174,6 +175,12 @@ SimulationFlow (historique) ──► Résultats / Graphiques
 │   ├── cli/             # Interface interactive
 │   ├── config/          # Chargement et validation des configs
 │   └── visualisation/   # Dashboards Plotly par modèle
+├── data/
+│   ├── raw/             # Données brutes (non modifiées)
+│   └── processed/       # Données prêtes à l'entraînement (CSV générés)
+├── tools/
+│   ├── generate_training_data.py  # Génère un CSV via simulations ASM1
+│   └── train_ml_model.py          # Entraîne un modèle ML et sauvegarde le pickle
 ├── tests/               # Tests unitaires et d'intégration (pytest)
 ├── utils/
 ├── main.py
@@ -202,7 +209,35 @@ Ces modèles résolvent des EDO via un solveur RK4 à chaque pas de temps. L'inf
 | `linear` | `LinearModel` | Régression linéaire |
 | `randomforest` | `RandomForestModel` | Forêt aléatoire (scikit-learn) |
 
-> Les modèles ML nécessitent un entraînement préalable (`fit`) sur des données historiques. Fournir le chemin vers un modèle pré-entraîné via `model_path` dans la configuration.
+Ces modèles prédictent la qualité de l'effluent (DCO, NH4, MES…) à partir des conditions d'entrée (débit, température, qualité de l'influent, HRT, SRT). Ils constituent des **modèles de substitution** (surrogates) entraînés à reproduire le comportement des modèles mécanistes ou de données réelles.
+
+**Workflow d'entraînement :**
+
+```bash
+# 1. Générer des données d'entraînement via simulations ASM1
+python tools/generate_training_data.py --n 1000
+# → data/processed/asm1_training_data.csv
+
+# 2. Entraîner le modèle et sauvegarder le pickle
+python tools/train_ml_model.py --model LinearModel
+python tools/train_ml_model.py --model RandomForestModel
+# → models/trained/linear.pkl / randomforest.pkl
+
+# 3. Référencer le pickle dans la config de simulation
+```
+
+```json
+"config": {
+  "model": "LinearModel",
+  "model_path": "models/trained/linear.pkl"
+}
+```
+
+> Si `model_path` est absent, le modèle est automatiquement entraîné sur des données synthétiques au démarrage — comportement de secours, qualité réduite.
+
+> Les scripts `tools/` sont isolés du reste de la simulation. Ils deviennent inutiles dès que des données réelles sont disponibles : remplacer le CSV d'entrée de `train_ml_model.py` par les données réelles (mêmes colonnes), régénérer le pickle.
+
+**Visualisation :** les modèles ML affichent un dashboard de type *snapshot* (influent vs effluent, taux d'épuration, HRT/SRT) plutôt qu'une série temporelle, car le modèle prédit un état stationnaire à chaque pas.
 
 ---
 
