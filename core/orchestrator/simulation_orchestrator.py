@@ -269,17 +269,15 @@ class SimulationOrchestrator:
 
         flow.components = outputs.get('components', {}).copy()
 
-        # Stocker toutes les métriques retournées par le procédé, sauf les clés structurelles
+        # Séparer les métriques opérationnelles des composants chimiques :
+        # - flow.components  → variables d'état ASM (si, ss, xi, xs, xbh…)
+        # - flow.metrics     → métriques calculées (srt_days, svi, energy_kwh…)
         _structural_keys = {'components', 'underflow', 'flowrate', 'temperature', 'model_type'}
         for key, value in outputs.items():
-            if key not in _structural_keys:
-                flow.components[key] = value
-
+            if key not in _structural_keys and key not in flow.components:
+                flow.metrics[key] = value
 
         for key in ['cod', 'tss', 'bod', 'tkn', 'nh4', 'no3', 'po4']:
             if key in outputs:
-                value = outputs[key]
-                setattr(flow, key, value)
-                if key not in flow.components:
-                    flow.components[key] = value
+                setattr(flow, key, outputs[key])
         return flow

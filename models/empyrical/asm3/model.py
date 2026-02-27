@@ -34,11 +34,10 @@ class ASM3Model(ReactionModel):
             for i in range(len(model_definition.get_components_names()))
         }
 
+        self.params = self.DEFAULT_PARAMS.copy()
         if params:
             self.params.update(params)
-        else:
-            self.params = self.DEFAULT_PARAMS.copy()
-        
+
         self._S = None
 
     @property

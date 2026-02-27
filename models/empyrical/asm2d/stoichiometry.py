@@ -62,7 +62,7 @@ def build_stoichiometric_matrix(params: dict) -> np.ndarray:
     #7 Anoxic growth of XH on SA
     S[6,2] = -1/y_h
     S[6,4] = -((1-y_h)/(2.86*y_h))
-    S[6,8] = -((1-y_h)/(2.86*y_h))
+    S[6,8] = ((1-y_h)/(2.86*y_h))
     S[6,11] = 1
 
     #8 Fermentation

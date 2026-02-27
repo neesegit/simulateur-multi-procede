@@ -178,9 +178,8 @@ class SecondarySettlerProcess(ProcessNode):
             elif comp.startswith('x'):
                 components_overflow[comp] = value * fraction_overflow
                 components_underflow[comp] = value * fraction_underflow
-            else:
-                components_overflow[comp] = value
-                components_underflow[comp] = value
+            # Les métriques opérationnelles (énergie, HRT, SRT, SVI…) ne sont pas
+            # propagées : le décanteur gravitaire n'en hérite pas du bassin amont.
 
         # Métriques de qualité de l'effluent (overflow)
         input_flow = inputs.get('flow')

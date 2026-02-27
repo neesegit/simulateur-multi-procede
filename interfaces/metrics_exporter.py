@@ -172,6 +172,71 @@ class MetricsExporter:
         return exported_files
     
     @staticmethod
+    def _write_bioreactor_report(f, flows: List[dict]) -> None:
+        """Sections du rapport pour un bassin à boues activées."""
+        initial = flows[0]
+        final   = flows[-1]
+
+        f.write("1. Epuration de la DCO\n")
+        f.write(f"\tDCO soluble initiale : {safe_get(initial, 'cod_soluble', 0):>8.1f} mg/L\n")
+        f.write(f"\tDCO soluble finale   : {safe_get(final,   'cod_soluble', 0):>8.1f} mg/L\n")
+        f.write(f"\tTaux d'épuration     : {safe_get(final,   'soluble_cod_removal', 0):>8.1f} %\n\n")
+
+        f.write("2. Biomasse et boues\n")
+        f.write(f"\tBiomasse active : {safe_get(final, 'biomass_concentration', 0):>8.1f} mg/L\n")
+        f.write(f"\tMLSS            : {safe_get(final, 'tss', 0):>8.1f} mg/L\n")
+        f.write(f"\tSRT             : {safe_get(final, 'srt_days', 0):>8.1f} jours\n")
+        f.write(f"\tSVI             : {safe_get(final, 'svi', 0):>8.1f} mL/g\n\n")
+
+        f.write("3. Azote\n")
+        f.write(f"\tNH4+ finale : {safe_get(final, 'nh4', 0):>8.2f} mg/L\n")
+        f.write(f"\tNO3- finale : {safe_get(final, 'no3', 0):>8.2f} mg/L\n\n")
+
+        f.write("4. Phosphore\n")
+        f.write(f"\tPO4 3- finale : {safe_get(final, 'po4', 0):>8.2f} mg/L\n\n")
+
+        total_energy = sum(safe_get(step, 'aeration_energy_kwh', 0) for step in flows)
+        f.write("5. Consommation énergétique\n")
+        f.write(f"\tTotal          : {total_energy:>8.1f} kWh\n")
+        f.write(f"\tPar m3 traité  : {safe_get(final, 'energy_per_m3', 0):>8.3f} kWh/m3\n\n")
+
+    @staticmethod
+    def _write_settler_report(f, flows: List[dict]) -> None:
+        """Sections du rapport pour un décanteur secondaire (TakacsModel)."""
+        final = flows[-1]
+
+        x_overflow  = safe_get(final, 'X_overflow',  0) or safe_get(final, 'tss', 0)
+        x_underflow = safe_get(final, 'X_underflow',  0)
+        removal     = safe_get(final, 'removal_efficiency', 0)
+        surf_load   = safe_get(final, 'surface_loading', 0)
+        solids_load = safe_get(final, 'solids_loading', 0)
+        q_overflow  = safe_get(final, 'flowrate', 0)
+
+        f.write("1. Séparation des boues\n")
+        f.write(f"\tTaux d'élimination TSS : {removal:>8.1f} %\n")
+        f.write(f"\tTSS surnageant         : {x_overflow:>8.1f} mg/L\n")
+        f.write(f"\tTSS boues (underflow)  : {x_underflow:>8.1f} mg/L\n\n")
+
+        f.write("2. Charges hydrauliques\n")
+        f.write(f"\tCharge de surface      : {surf_load:>8.3f} m/h\n")
+        f.write(f"\tCharge en solides      : {solids_load:>8.3f} kg/(m²·h)\n")
+        f.write(f"\tDébit surnageant       : {q_overflow:>8.1f} m3/h\n\n")
+
+        # Voile de boues (info optionnelle)
+        sludge_blanket = final.get('sludge_blanket', {}) if isinstance(final, dict) else {}
+        if sludge_blanket and sludge_blanket.get('has_blanket'):
+            top_layer   = sludge_blanket.get('blanket_top_layer', '—')
+            thickness   = sludge_blanket.get('blanket_thickness_layers', '—')
+            max_conc    = sludge_blanket.get('max_concentration', 0)
+            f.write("3. Voile de boues\n")
+            f.write(f"\tCouche supérieure      : {top_layer}\n")
+            f.write(f"\tÉpaisseur (couches)    : {thickness}\n")
+            f.write(f"\tConcentration max      : {max_conc:.1f} mg/L\n\n")
+        else:
+            f.write("3. Voile de boues\n")
+            f.write("\tAucun voile détecté\n\n")
+
+    @staticmethod
     def create_performance_report(
         results: Dict[str, Any],
         output_path: str
@@ -208,31 +273,13 @@ class MetricsExporter:
                 f.write(f"Procédé : {node_id}\n")
                 f.write("-"*80 + "\n")
 
-                initial = flows[0]
                 final = flows[-1]
+                model_type = final.get('model_type', '') if isinstance(final, dict) else ''
 
-                f.write("1. Epuration de la DCO\n")
-                f.write(f"\tDCO soluble initiale : {safe_get(initial, 'cod_soluble', 0):>8.1f} mg/L\n")
-                f.write(f"\tDCO soluble finale : {safe_get(final, 'cod_soluble', 0):>8.1f} mg/L\n")
-                f.write(f"\tTaux d'épuration : {safe_get(final, 'soluble_cod_removal', 0):>8.1f} %\n\n")
-
-                f.write("2. Biomasse et boues\n")
-                f.write(f"\tBiomasse active : {safe_get(final, 'biomass_concentration', 0):>8.1f} mg/L\n")
-                f.write(f"\tMLSS : {safe_get(final, 'tss', 0):>8.1f} mg/L\n")
-                f.write(f"\tSRT : {safe_get(final, 'srt_days', 0):>8.1f} jours\n")
-                f.write(f"\tSVI : {safe_get(final, 'svi', 0):>8.1f} mL/g\n\n")
-
-                f.write("3. Azote\n")
-                f.write(f"\tNH4+ finale : {safe_get(final, 'nh4', 0):>8.2f} mg/L\n")
-                f.write(f"\tNO3- finale : {safe_get(final, 'no3', 0):>8.2f} mg/L\n\n")
-
-                f.write("4. Phosphore\n")
-                f.write(f"\tPO4 3- finale : {safe_get(final, 'po4', 0):>8.2f} mg/L\n\n")
-
-                total_energy = sum(safe_get(f, 'aeration_energy_kwh', 0) for f in flows)
-                f.write("5. Consommation énergétique\n")
-                f.write(f"\tTotal : {total_energy:>8.1f} kWh\n")
-                f.write(f"\tPar m3 traité : {safe_get(final, 'energy_per_m3', 0):>8.3f} kWh/m3\n\n")
+                if model_type == 'TakacsModel':
+                    MetricsExporter._write_settler_report(f, flows)
+                else:
+                    MetricsExporter._write_bioreactor_report(f, flows)
 
             f.write("="*80+"\n")
 

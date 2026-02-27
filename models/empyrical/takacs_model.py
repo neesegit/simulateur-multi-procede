@@ -150,6 +150,9 @@ class TakacsModel(TransportModel):
 
         v_bulk = np.zeros(n)
 
+        for i in range(feed_layer):
+            v_bulk[i] = Q_overflow / area
+
         for i in range(feed_layer + 1, n):
             v_bulk[i] = -Q_underflow / area
 

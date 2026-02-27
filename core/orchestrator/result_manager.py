@@ -169,12 +169,13 @@ class ResultManager:
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        filename = f"simulation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"simulation_{timestamp}.json"
         filepath = output_path/filename
         with open(filepath, 'w') as f:
             json.dump(self.results, f, indent=2, default=str)
 
-        summary_file = output_path / filename.replace('_full.json', '_summary.json')
+        summary_file = output_path / f"simulation_{timestamp}_summary.json"
         with open(summary_file, 'w') as f:
             summary_data = {
                 'metadata': self.results['metadata'],

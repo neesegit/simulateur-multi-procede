@@ -26,8 +26,12 @@ class FlowData:
     po4: float = 0.0
     alkalinity: float = 0.0
 
-    # Tous les autres paramètres sont stockés dans un dict flexible
+    # Composants du modèle (variables d'état ASM : si, ss, xi, xs, xbh…)
     components: Dict[str, float] = field(default_factory=dict)
+
+    # Métriques opérationnelles calculées (srt_days, svi, energy_kwh…)
+    # Séparées de components pour ne pas être propagées comme des composés chimiques.
+    metrics: Dict[str, Any] = field(default_factory=dict)
 
     # Métadonnées
     source_node: Optional[str] = None
@@ -84,13 +88,13 @@ class FlowData:
     
     def to_dict(self) -> Dict[str, Any]:
         """
-        Convertit en dictionnaire
-
-        Returns:
-            Dict[str, Any]
+        Convertit en dictionnaire.
+        Les métriques opérationnelles sont aplaties au niveau racine (rétrocompatibilité).
         """
         data = asdict(self)
         data['timestamp'] = self.timestamp.isoformat()
+        # Aplatir metrics au niveau racine et supprimer la clé imbriquée
+        data.update(data.pop('metrics', {}))
         return data
     
     def copy(self) -> 'FlowData':

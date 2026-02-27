@@ -1,6 +1,6 @@
 {
-  "ASM1Model":  ["cod", "tkn", "tss", "biomass", "hrt", "srt", "svi", "energy"],
-  "ASM2dModel": ["cod", "tkn", "tss", "biomass", "hrt", "srt", "svi", "energy"],
-  "ASM3Model":  ["cod", "tkn", "tss", "biomass", "hrt", "srt", "svi", "energy"],
+  "ASM1Model":  ["hrt", "srt", "svi", "energy"],
+  "ASM2dModel": ["hrt", "srt", "svi", "energy"],
+  "ASM3Model":  ["hrt", "srt", "svi", "energy"],
   "TakacsModel": ["removal_efficiency", "surface_loading", "solids_loading"]
 }

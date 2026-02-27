@@ -99,7 +99,7 @@ def calculate_process_rates(c: np.ndarray, p: dict) -> np.ndarray:
     #17 Lysis of XPHA
     rho[16] = b_pha*xpha*(salk/(k_alk+salk))
     #18 Aerobic growth of XAUT
-    rho[17] = mu_aut*(so2/(k_o2_aut+so2))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/(k_alk_aut*salk))*xaut
+    rho[17] = mu_aut*(so2/(k_o2_aut+so2))*(snh4/(k_nh4+snh4))*(spo4/(k_p+spo4))*(salk/(k_alk_aut+salk))*xaut
     #19 Lysis
     rho[18] = b_aut*xaut
     #20 Precipitation

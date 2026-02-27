@@ -146,7 +146,7 @@ class ASM2DFraction:
                 extra_cod_xi = (deficit_n * share_xi) / r['i_n_xi']
 
                 c['xs'] += extra_cod_xs
-                c['xs'] += extra_cod_xi
+                c['xi'] += extra_cod_xi
 
                 logger.debug(f"Ajustement N organique : ajouté à XS={extra_cod_xs:.2f} mgCOD/L, ajouté à XI={extra_cod_xi:.2f} mgCOD/L")
         else:

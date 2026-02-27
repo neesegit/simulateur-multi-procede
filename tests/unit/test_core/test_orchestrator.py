@@ -224,7 +224,7 @@ class TestProcessFactory:
                     'name': 'p1'
                 }
             ],
-            'conncetions': [
+            'connections': [
                 {
                     'source': 'influent',
                     'target': 'proc1',

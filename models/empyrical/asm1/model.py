@@ -43,10 +43,9 @@ class ASM1Model(ReactionModel):
         }
 
         # Utilise les paramètres par défaut et override avec ceux fournis
+        self.params = self.DEFAULT_PARAMS.copy()
         if params:
             self.params.update(params)
-        else:
-            self.params = self.DEFAULT_PARAMS.copy()
 
         # Construit la matrice stoechiométrique (8 processus x 13 composants)
         self._S = None
